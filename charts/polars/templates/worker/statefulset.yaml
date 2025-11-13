@@ -1,0 +1,259 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "polars.worker.fullname" . }}
+  labels:
+    {{ include "polars.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.statefulset.replicaCount }}
+  revisionHistoryLimit: {{ .Values.worker.statefulset.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+      {{ include "polars.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "polars.worker-headless.fullname" . }}
+  podManagementPolicy: {{ .Values.worker.statefulset.podManagementPolicy }}
+  updateStrategy:
+    {{ toYaml .Values.worker.statefulset.updateStrategy | nindent 4 }}
+  {{- with .Values.worker.statefulset.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  volumeClaimTemplates:
+  {{- if .Values.temporaryData.persistentVolumeClaim.enabled }}
+    - metadata:
+        name: temporary-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.temporaryData.persistentVolumeClaim.storageClassName }}
+        resources:
+          requests:
+            storage: {{ .Values.temporaryData.persistentVolumeClaim.size }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.worker.statefulset.podAnnotations }}
+      annotations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: worker
+        {{ include "polars.labels" . | nindent 8 }}
+        {{- with .Values.worker.statefulset.podLabels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.worker.statefulset.dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
+      {{- with .Values.worker.statefulset.dnsConfig }}
+      dnsConfig:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.statefulset.schedulerName }}
+      schedulerName: {{ . }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "polars.worker.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.worker.serviceAccount.automount }}
+      {{- with .Values.worker.statefulset.podSecurityContext }}
+      securityContext:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.statefulset.hostAliases }}
+      hostAliases:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if .Values.runtime.composed.enabled }}
+      initContainers:
+        - name: release
+        {{- with .Values.worker.statefulset.distContainer.securityContext }}
+          securityContext:
+          {{ toYaml . | nindent 12 }}
+        {{- end }}
+          image: "{{ .Values.runtime.composed.dist.repository }}:{{ .Values.runtime.composed.dist.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.runtime.composed.dist.pullPolicy }}
+          command:
+            - /bin/cp
+          args:
+            - -a
+            - /opt/.
+            - /emptydir
+        {{- with .Values.worker.statefulset.distContainer.resources }}
+          resources:
+          {{ toYaml . | nindent 12 }}
+        {{- end }}
+          volumeMounts:
+            - name: release-data
+              mountPath: /emptydir
+      {{- end }}
+      containers:
+        - name: worker
+          {{- with .Values.worker.statefulset.runtimeContainer.securityContext }}
+          securityContext:
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.runtime.composed.enabled }}
+          image: "{{ .Values.runtime.composed.runtime.repository }}:{{ .Values.runtime.composed.runtime.tag }}"
+          imagePullPolicy: {{ .Values.runtime.composed.runtime.pullPolicy }}
+          command:
+            - /emptydir/setup.sh
+          args:
+            - /emptydir/bin/pc-cublet
+            - service
+          {{- end }}
+          {{- if .Values.runtime.prebuilt.enabled }}
+          image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
+          imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
+          {{- end }}
+          ports:
+            - name: worker-flight
+              containerPort: 5052
+              protocol: TCP
+            - name: worker-service
+              containerPort: 5053
+              protocol: TCP
+          env:
+            - name: POLARS_EXTRAS
+              value: {{ .Values.runtime.composed.polarsExtras | default "" }}
+            - name: POLARS_WHL_DIR
+              value: /emptydir/whl
+            {{- if .Values.runtime.composed.requirements }}
+            - name: PYTHON_REQUIREMENTS
+              value: /requirements.txt
+            {{- end }}
+            - name: UV_PATH
+              value: "/emptydir/bin/uv"
+            {{- if .Values.telemetry.otlpEndpoint }}
+            - name: OTLP_ENDPOINT
+              value: {{ .Values.telemetry.otlpEndpoint | quote }}
+            {{- end }}
+            - name: OTEL_SERVICE_INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: POLARS_SKIP_DSL_HASH_VERIFICATION
+              value: "1"
+            {{- if .Values.license }}
+            - name: PC_CUBLET__license
+              value: "/license/license.json"
+            {{- end }}
+            - name: PC_CUBLET__static_leader__leader_key
+              value: "{{ include "polars.worker.fullname" . }}-0"
+            - name: PC_CUBLET__static_leader__public_leader_addr
+              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: PC_CUBLET__cluster_id
+              value: {{ include "polars.clusterId" . | quote }}
+            - name: PC_CUBLET__cublet_id
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: PC_CUBLET__observatory__enabled
+              value: "false"
+            - name: PC_CUBLET__worker__enabled
+              value: "true"
+            - name: PC_CUBLET__worker__worker_ip
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: PC_CUBLET__worker__flight_port
+              value: "5052"
+            - name: PC_CUBLET__worker__service_port
+              value: "5053"
+            - name: PC_CUBLET__worker__heartbeat_interval_secs
+              value: {{ .Values.workerHeartbeatIntervalSecs | quote }}
+            - name: PC_CUBLET__worker__shuffle_data_path
+              value: /app/temporary_data/shuffle-dir
+            - name: PLC_LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+            - name: RUST_BACKTRACE
+              value: "full"
+            - name: POLARS_TEMP_DIR
+              value: /app/temporary_data/temp-dir
+            {{- with .Values.worker.statefulset.runtimeContainer.env }}
+            {{ toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.worker.statefulset.runtimeContainer.lifecycleHooks }}
+          lifecycle:
+            {{ toYaml .Values.worker.statefulset.runtimeContainer.lifecycleHooks | nindent 12 }}
+          {{- end }}
+          # TODO: lifenessProbe
+          # TODO: readinessProbe:
+          {{- with .Values.worker.statefulset.runtimeContainer.resources }}
+          resources:
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- with .Values.license }}
+            - name: license
+              mountPath: /license/
+          {{- end }}
+          {{- if .Values.runtime.composed.enabled }}
+            - name: release-data
+              mountPath: /emptydir
+          {{- end }}
+            {{- if .Values.runtime.composed.requirements }}
+            - name: requirements-txt
+              mountPath: /requirements.txt
+              subPath: requirements.txt
+            {{- end }}
+            - name: temporary-data
+              mountPath: /app/temporary_data
+            {{- with .Values.worker.statefulset.runtimeContainer.volumeMounts }}
+            {{ toYaml . | nindent 12 }}
+            {{- end }}
+      {{- if .Values.worker.statefulset.priorityClassName }}
+      priorityClassName: {{ .Values.worker.statefulset.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.worker.statefulset.runtimeClassName }}
+      runtimeClassName: {{ .Values.worker.statefulset.runtimeClassName | quote }}
+      {{- end }}
+      volumes:
+        {{- with .Values.license }}
+        - name: license
+          secret:
+            secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
+            items:
+              - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
+                path: license.json
+        {{- end }}
+        {{- if .Values.runtime.composed.requirements }}
+        - name: requirements-txt
+          configMap:
+            name: {{ include "polars.worker.fullname" . }}-requirements-txt
+            items:
+              - key: requirementsTxt
+                path: requirements.txt
+        {{- end }}
+        {{- if .Values.runtime.composed.enabled }}
+        - name: release-data
+          emptyDir: {}
+        {{- end }}
+        {{- if not .Values.temporaryData.persistentVolumeClaim.enabled }}
+        - name: temporary-data
+          emptyDir: {}
+        {{- end }}
+        {{- with .Values.worker.statefulset.volumes }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.worker.statefulset.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.statefulset.affinity }}
+      affinity:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.statefulset.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.statefulset.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      hostNetwork: {{ .Values.worker.statefulset.hostNetwork }}

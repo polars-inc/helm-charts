@@ -1,0 +1,375 @@
+# -- Override the name of the chart
+nameOverride: ""
+# -- Override the full name of the chart
+fullnameOverride: ""
+
+# -- Common labels for all resources
+podLabels: {}
+# -- Common annotations for all resources
+podAnnotations: {}
+
+# -- (uuid) Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set.
+clusterId: ""
+
+license:
+  # -- the name containing your polars license key
+  secretName: ""
+  # -- the property on the secret containing your license key
+  secretProperty: ""
+
+# -- ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+imagePullSecrets: []
+# - name: secret-name
+
+runtime:
+  prebuilt:
+    enabled: false
+
+    runtime:
+      # -- Container image name. More info: https://kubernetes.io/docs/concepts/containers/images
+      repository: "your-prebuilt-image"
+      # -- Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images
+      tag: ""
+      # -- Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+      pullPolicy: ""
+
+  composed:
+    enabled: true
+
+    dist:
+      # -- Container image name. More info: https://kubernetes.io/docs/concepts/containers/images
+      repository: "polarscloud/polars-distributed"
+      # -- Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images
+      tag: ""
+      # -- Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+      pullPolicy: "IfNotPresent"
+
+    runtime:
+      # -- Container image name. More info: https://kubernetes.io/docs/concepts/containers/images
+      repository: "python"
+      # -- Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images
+      tag: "3.13.9-slim-bookworm"
+      # -- Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+      pullPolicy: ""
+
+    requirements: ""
+
+    polarsExtras: "async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone"
+
+telemetry:
+  # -- Endpoint to send OTLP traces and metrics to.
+  otlpEndpoint: ""
+
+# -- One of "info", "debug", "trace".
+logLevel: "info"
+
+# -- Heartbeat interval between polars workers and the scheduler in seconds.
+workerHeartbeatIntervalSecs: 5
+
+# -- Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results.
+anonymousResults:
+  s3:
+    # -- Write anonymous results to S3.
+    enabled: false
+    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials as environment variables in worker.env. Standard AWS environment variables are supported (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_REGION). Note that these credentials may also be used for other AWS SDK calls made by Polars (e.g. some user-supplied sinks in queries).
+    endpoint: "s3://my-bucket/path/to/dir"
+
+# -- Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage
+allowSharedDisk: true
+
+temporaryData:
+  persistentVolumeClaim:
+    # -- Ephemeral storage for temporary data used in polars (e.g. shuffle or polars streaming data). Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local
+    enabled: false
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: "hostpath"
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 125Gi
+
+worker:
+  serviceAccount:
+    # -- Whether to create a service account.
+    create: false
+    # -- The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set.
+    name: ""
+    # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
+    automount: true
+
+  statefulset:
+    # -- Number of polars worker replicas.
+    replicaCount: 2
+
+    # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the StatefulSet's revision history. The default value is 10.
+    revisionHistoryLimit: 10
+
+    # -- podManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down. One policy is OrderedReady, where pods are created in increasing order (pod-0, then pod-1, etc) and the controller will wait until each pod is ready before continuing. When scaling down, the pods are removed in the opposite order. The alternative policy is Parallel which will create pods in parallel to match the desired scale without waiting, and on scale down will delete all pods at once.
+    podManagementPolicy: Parallel
+
+    # -- updateStrategy indicates the StatefulSetUpdateStrategy that will be employed to update Pods in the StatefulSet when a revision is made to Template.
+    updateStrategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 1
+
+    # -- PVCs for temporary data may be deleted when bringing down the compute cluster, while anonymous results PVCs may want to be retained. Since Kubernetes Kubernetes v1.32, statefulsets support setting retention policies for this purpose. Take caution when using this feature, as it applies on all PVCs created by the statefulset. More info: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
+    persistentVolumeClaimRetentionPolicy: { }
+    #  whenDeleted: Retain
+    #  whenScaled: Retain
+
+    # -- Additional annotations to add to the scheduler pod.
+    podAnnotations: {}
+
+    # -- Additional labels to add to the scheduler pod.
+    podLabels: {}
+
+    # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+    dnsPolicy: ""
+
+    # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+    dnsConfig: {}
+
+    # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
+    schedulerName: ""
+
+    # -- AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
+    automountServiceAccountToken: true
+
+    # -- SecurityContext holds pod-level security attributes and common container settings.
+    podSecurityContext: { }
+    #  fsGroup: 2000
+    #  runAsUser: 1000
+    #  runAsNonRoot: true
+
+    # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+    hostAliases: []
+
+    distContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+    runtimeContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- List of environment variables to set in the container.
+      env: []
+      # - name: ENV_VAR_NAME
+      #   value: ENV_VAR_VALUE
+
+      # -- Actions that the management system should take in response to container lifecycle events.
+      lifecycleHooks: {}
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+      # -- Pod volumes to mount into the container's filesystem.
+      volumeMounts: []
+      # - name: volume-name
+      #   mountPath: /path/to/mount
+
+    # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+    priorityClassName: ""
+
+    # == RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    runtimeClassName: ""
+
+    # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
+    volumes: []
+    # - name: volume-name
+    #   emptyDir: {}
+
+    # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    nodeSelector: { }
+    #  kubernetes.io/e2e-az-name: e2e-az1
+
+    # -- If specified, the pod's scheduling constraints
+    affinity: { }
+    #  nodeAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      nodeSelectorTerms:
+    #      - matchExpressions:
+    #        - key: kubernetes.io/e2e-az-name
+    #          operator: In
+    #          values:
+    #          - e2e-az1
+
+    # -- If specified, the pod's tolerations.
+    tolerations: [ ]
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+
+    # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
+    topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: DoNotSchedule
+
+    # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
+    hostNetwork: false
+
+scheduler:
+  # Services
+  service:
+    # -- type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. "ExternalName" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+    type: ClusterIP
+    # -- Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.
+    annotations: {}
+
+  serviceAccount:
+    # -- Whether to create a service account for the scheduler.
+    create: false
+    # -- The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set.
+    name: ""
+    # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
+    automount: true
+
+  deployment:
+    # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10.
+    revisionHistoryLimit: 10
+
+    # -- Rollout strategy for the scheduler deployment. One of RollingUpdate or Recreate.
+    rollout:
+      strategy: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 1
+
+    # -- Additional annotations to add to the scheduler pod.
+    podAnnotations: {}
+
+    # -- Additional labels to add to the scheduler pod.
+    podLabels: {}
+
+    # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+    dnsPolicy: ""
+
+    # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+    dnsConfig: {}
+
+    # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
+    schedulerName: ""
+
+    # -- AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
+    automountServiceAccountToken: true
+
+    # -- SecurityContext holds pod-level security attributes and common container settings.
+    podSecurityContext: { }
+    #  fsGroup: 2000
+    #  runAsUser: 1000
+    #  runAsNonRoot: true
+
+    # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+    hostAliases: []
+
+    distContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+    runtimeContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- List of environment variables to set in the container.
+      env: []
+      # - name: ENV_VAR_NAME
+      #   value: ENV_VAR_VALUE
+
+      # -- Actions that the management system should take in response to container lifecycle events.
+      lifecycleHooks: {}
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+      # -- Pod volumes to mount into the container's filesystem.
+      volumeMounts: []
+      # - name: volume-name
+      #   mountPath: /path/to/mount
+
+    # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+    priorityClassName: ""
+
+    # == RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    runtimeClassName: ""
+
+    # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
+    volumes: []
+    # - name: volume-name
+    #   emptyDir: {}
+
+    # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    nodeSelector: { }
+    #  kubernetes.io/e2e-az-name: e2e-az1
+
+    # -- If specified, the pod's scheduling constraints
+    affinity: { }
+    #  nodeAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      nodeSelectorTerms:
+    #      - matchExpressions:
+    #        - key: kubernetes.io/e2e-az-name
+    #          operator: In
+    #          values:
+    #          - e2e-az1
+
+    # -- If specified, the pod's tolerations.
+    tolerations: [ ]
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+
+    # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
+    topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: DoNotSchedule
+
+    # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
+    hostNetwork: false

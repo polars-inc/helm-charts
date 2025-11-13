@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "polars.observatory.fullname" . }}
+  labels:
+    {{- include "polars.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.scheduler.service.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.scheduler.service.type }}
+  ports:
+    - port: 5051
+      targetPort: 5051
+      protocol: TCP
+      name: sched
+    - port: 5049
+      targetPort: 5049
+      protocol: TCP
+      name: obser-grpc
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+      name: obser-rest
+  selector:
+    {{- include "polars.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: scheduler

@@ -1,0 +1,10 @@
+{{- if .Values.runtime.composed.requirements }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "polars.worker.fullname" . }}-requirements-txt
+  labels:
+    {{- include "polars.labels" . | nindent 4 }}
+data:
+  requirementsTxt: {{ .Values.runtime.composed.requirements | quote }}
+{{- end }}

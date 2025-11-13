@@ -1,0 +1,242 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "polars.scheduler.fullname" . }}
+  labels:
+    {{ include "polars.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.scheduler.deployment.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: scheduler
+      {{ include "polars.selectorLabels" . | nindent 6 }}
+  strategy:
+    {{- if eq .Values.scheduler.deployment.rollout.strategy "RollingUpdate" }}
+    {{- with .Values.scheduler.deployment.rollout.rollingUpdate }}
+    rollingUpdate:
+      {{ toYaml . | nindent 6 }}
+    {{- end }}
+    {{- end }}
+    type: {{ .Values.scheduler.deployment.rollout.strategy }}
+  template:
+    metadata:
+      {{- with .Values.scheduler.deployment.podAnnotations }}
+      annotations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: scheduler
+        {{ include "polars.labels" . | nindent 8 }}
+        {{- with .Values.scheduler.deployment.podLabels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.scheduler.deployment.dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.dnsConfig }}
+      dnsConfig:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.schedulerName }}
+      schedulerName: {{ . }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "polars.scheduler.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.scheduler.deployment.automountServiceAccountToken }}
+      {{- with .Values.scheduler.deployment.podSecurityContext }}
+      securityContext:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.hostAliases }}
+      hostAliases:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if .Values.runtime.composed.enabled }}
+      initContainers:
+        - name: release
+        {{- with .Values.scheduler.deployment.distContainer.securityContext }}
+          securityContext:
+          {{ toYaml . | nindent 12 }}
+        {{- end }}
+          image: "{{ .Values.runtime.composed.dist.repository }}:{{ .Values.runtime.composed.dist.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.runtime.composed.dist.pullPolicy }}
+          command:
+            - /bin/cp
+          args:
+            - -a
+            - /opt/.
+            - /emptydir
+        {{- with .Values.scheduler.deployment.distContainer.resources }}
+          resources:
+          {{ toYaml . | nindent 12 }}
+        {{- end }}
+          volumeMounts:
+            - name: release-data
+              mountPath: /emptydir
+      {{- end }}
+      containers:
+        - name: scheduler
+          {{- with .Values.scheduler.deployment.runtimeContainer.securityContext }}
+          securityContext:
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.runtime.composed.enabled }}
+          image: "{{ .Values.runtime.composed.runtime.repository }}:{{ .Values.runtime.composed.runtime.tag }}"
+          imagePullPolicy: {{ .Values.runtime.composed.runtime.pullPolicy }}
+          command:
+            - /emptydir/setup.sh
+          args:
+            - /emptydir/bin/pc-cublet
+            - service
+          {{- end }}
+          {{- if .Values.runtime.prebuilt.enabled }}
+          image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
+          imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
+          {{- end }}
+          ports:
+            - name: sched
+              containerPort: 5051
+              protocol: TCP
+            - name: worker-sched
+              containerPort: 5050
+              protocol: TCP
+            - name: obser-grpc
+              containerPort: 5049
+              protocol: TCP
+            - name: obser-rest
+              containerPort: 3001
+              protocol: TCP
+          env:
+            - name: POLARS_EXTRAS
+              value: {{ .Values.runtime.composed.polarsExtras | default "" }}
+            - name: POLARS_WHL_DIR
+              value: /emptydir/whl
+            {{- if .Values.runtime.composed.requirements }}
+            - name: PYTHON_REQUIREMENTS
+              value: /requirements.txt
+            {{- end }}
+            - name: UV_PATH
+              value: "/emptydir/bin/uv"
+            {{- if .Values.telemetry.otlpEndpoint }}
+            - name: OTLP_ENDPOINT
+              value: {{ .Values.telemetry.otlpEndpoint | quote }}
+            {{- end }}
+            - name: OTEL_SERVICE_INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: POLARS_SKIP_DSL_HASH_VERIFICATION
+              value: "1"
+            {{- if .Values.license }}
+            - name: PC_CUBLET__license
+              value: "/license/license.json"
+            {{- end }}
+            - name: PC_CUBLET__static_leader__leader_key
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.uid
+            - name: PC_CUBLET__static_leader__public_leader_addr
+              value: "{{ include "polars.scheduler.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: PC_CUBLET__cluster_id
+              value: {{ include "polars.clusterId" . | quote }}
+            - name: PC_CUBLET__cublet_id
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: PC_CUBLET__observatory__enabled
+              value: "true"
+            - name: PC_CUBLET__observatory__rest_api__enabled
+              value: "true"
+            - name: PC_CUBLET__scheduler__enabled
+              value: "true"
+            - name: PC_CUBLET__scheduler__allow_shared_disk
+              value: {{ .Values.allowSharedDisk | quote }}
+            {{ if .Values.anonymousResults.s3.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_dst
+              value: {{ .Values.anonymousResults.s3.endpoint | quote }}
+            {{ end }}
+            - name: PC_CUBLET__scheduler__n_workers
+              value: {{ .Values.worker.statefulset.replicaCount | quote }}
+            - name: PC_CUBLET__service__auth
+              value: insecure
+            - name: PC_CUBLET__service__public_address
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: PC_CUBLET__service__connection
+              value: "insecure"
+            - name: PLC_LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+            - name: RUST_BACKTRACE
+              value: "full"
+            {{- with .Values.scheduler.deployment.runtimeContainer.env }}
+            {{ toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.scheduler.deployment.runtimeContainer.lifecycleHooks }}
+          lifecycle:
+            {{ toYaml .Values.scheduler.deployment.runtimeContainer.lifecycleHooks | nindent 12 }}
+          {{- end }}
+          # TODO: lifenessProbe
+          # TODO: readinessProbe:
+          {{- with .Values.scheduler.deployment.runtimeContainer.resources }}
+          resources:
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- with .Values.license }}
+            - name: license
+              mountPath: /license/
+          {{- end }}
+          {{- if .Values.runtime.composed.enabled }}
+            - name: release-data
+              mountPath: /emptydir
+          {{- end }}
+          {{- with .Values.scheduler.deployment.runtimeContainer.volumeMounts }}
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.scheduler.deployment.priorityClassName }}
+      priorityClassName: {{ .Values.scheduler.deployment.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.scheduler.deployment.runtimeClassName }}
+      runtimeClassName: {{ .Values.scheduler.deployment.runtimeClassName | quote }}
+      {{- end }}
+      volumes:
+      {{- with .Values.license }}
+        - name: license
+          secret:
+            secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
+            items:
+              - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
+                path: license.json
+      {{- end }}
+      {{- if .Values.runtime.composed.enabled }}
+        - name: release-data
+          emptyDir: {}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.volumes }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.affinity }}
+      affinity:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.deployment.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      hostNetwork: {{ .Values.scheduler.deployment.hostNetwork }}
