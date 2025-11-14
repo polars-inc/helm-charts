@@ -152,7 +152,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.uid
             - name: PC_CUBLET__observatory__enabled
-              value: "false"
+              value: "true"
             - name: PC_CUBLET__worker__enabled
               value: "true"
             - name: PC_CUBLET__worker__worker_ip
