@@ -1,6 +1,6 @@
 # Polars Distributed: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20251113](https://img.shields.io/badge/AppVersion-20251113-informational?style=flat-square)
+![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20251113](https://img.shields.io/badge/AppVersion-20251113-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -333,6 +333,10 @@ Polars Distributed uses OpenTelemetry as its telemetry framework. To receive OTL
 | worker.statefulset.distContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
 | worker.statefulset.distContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | worker.statefulset.runtimeContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
+| worker.statefulset.runtimeContainer.readinessProbe.tcpSocket.port | string | `"worker-service"` |  |
+| worker.statefulset.runtimeContainer.readinessProbe.initialDelaySeconds | int | `1` | Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes |
+| worker.statefulset.runtimeContainer.readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
+| worker.statefulset.runtimeContainer.readinessProbe.failureThreshold | int | `25` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
 | worker.statefulset.runtimeContainer.env | list | `[]` | List of environment variables to set in the container. |
 | worker.statefulset.runtimeContainer.lifecycleHooks | object | `{}` | Actions that the management system should take in response to container lifecycle events. |
 | worker.statefulset.runtimeContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
@@ -363,6 +367,10 @@ Polars Distributed uses OpenTelemetry as its telemetry framework. To receive OTL
 | scheduler.deployment.distContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
 | scheduler.deployment.distContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | scheduler.deployment.runtimeContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
+| scheduler.deployment.runtimeContainer.readinessProbe.tcpSocket.port | string | `"sched"` |  |
+| scheduler.deployment.runtimeContainer.readinessProbe.initialDelaySeconds | int | `1` | Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes |
+| scheduler.deployment.runtimeContainer.readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
+| scheduler.deployment.runtimeContainer.readinessProbe.failureThreshold | int | `25` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
 | scheduler.deployment.runtimeContainer.env | list | `[]` | List of environment variables to set in the container. |
 | scheduler.deployment.runtimeContainer.lifecycleHooks | object | `{}` | Actions that the management system should take in response to container lifecycle events. |
 | scheduler.deployment.runtimeContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |

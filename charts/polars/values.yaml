@@ -168,6 +168,16 @@ worker:
       #    - ALL
       #  readOnlyRootFilesystem: true
 
+      readinessProbe:
+        tcpSocket:
+          port: worker-service
+        # -- Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+        initialDelaySeconds: 1
+        # -- How often (in seconds) to perform the probe.
+        periodSeconds: 10
+        # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+        failureThreshold: 25
+
       # -- List of environment variables to set in the container.
       env: []
       # - name: ENV_VAR_NAME
@@ -309,6 +319,16 @@ scheduler:
       #    drop:
       #    - ALL
       #  readOnlyRootFilesystem: true
+
+      readinessProbe:
+        tcpSocket:
+          port: sched
+        # -- Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+        initialDelaySeconds: 1
+        # -- How often (in seconds) to perform the probe.
+        periodSeconds: 10
+        # -- Minimum consecutive failures for the probe to be considered failed after having succeeded.
+        failureThreshold: 25
 
       # -- List of environment variables to set in the container.
       env: []
