@@ -111,6 +111,10 @@ spec:
             - name: obser-rest
               containerPort: 3001
               protocol: TCP
+          {{- with .Values.scheduler.deployment.runtimeContainer.readinessProbe }}
+          readinessProbe:
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: POLARS_EXTRAS
               value: {{ .Values.runtime.composed.polarsExtras | default "" }}

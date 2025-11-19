@@ -116,6 +116,10 @@ spec:
             - name: worker-service
               containerPort: 5053
               protocol: TCP
+          {{- with .Values.worker.statefulset.runtimeContainer.readinessProbe }}
+          readinessProbe:
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: POLARS_EXTRAS
               value: {{ .Values.runtime.composed.polarsExtras | default "" }}
