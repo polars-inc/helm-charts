@@ -5,20 +5,16 @@ metadata:
   labels:
     {{- include "polars.labels" . | nindent 4 }}
   annotations:
-    {{- with .Values.scheduler.service.annotations }}
+    {{- with .Values.scheduler.services.scheduler.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  type: {{ .Values.scheduler.service.type }}
+  type: {{ .Values.scheduler.services.scheduler.type }}
   ports:
-    - port: 5051
-      targetPort: 5051
+    - port: 3001
+      targetPort: 3001
       protocol: TCP
       name: sched
-    - port: 5049
-      targetPort: 5049
-      protocol: TCP
-      name: observatory
   selector:
     {{- include "polars.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: scheduler
