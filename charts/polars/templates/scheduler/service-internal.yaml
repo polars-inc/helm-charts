@@ -5,11 +5,11 @@ metadata:
   labels:
     {{- include "polars.labels" . | nindent 4 }}
   annotations:
-    {{- with .Values.scheduler.service.annotations }}
+    {{- with .Values.scheduler.services.internal.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  type: {{ .Values.scheduler.service.type }}
+  type: {{ .Values.scheduler.services.internal.type }}
   ports:
     - port: 5050
       targetPort: 5050
@@ -18,7 +18,7 @@ spec:
     - port: 5049
       targetPort: 5049
       protocol: TCP
-      name: observatory
+      name: obser-grpc
   selector:
     {{- include "polars.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: scheduler

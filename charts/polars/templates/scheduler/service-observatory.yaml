@@ -5,20 +5,12 @@ metadata:
   labels:
     {{- include "polars.labels" . | nindent 4 }}
   annotations:
-    {{- with .Values.scheduler.service.annotations }}
+    {{- with .Values.scheduler.services.observatory.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  type: {{ .Values.scheduler.service.type }}
+  type: {{ .Values.scheduler.services.observatory.type }}
   ports:
-    - port: 5051
-      targetPort: 5051
-      protocol: TCP
-      name: sched
-    - port: 5049
-      targetPort: 5049
-      protocol: TCP
-      name: obser-grpc
     - port: 3001
       targetPort: 3001
       protocol: TCP
