@@ -288,6 +288,7 @@ Polars Distributed uses OpenTelemetry as its telemetry framework. To receive OTL
 | podLabels | object | `{}` | Common labels for all resources |
 | podAnnotations | object | `{}` | Common annotations for all resources |
 | clusterId | uuid | `""` | Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
+| acceptEula | bool | `false` | To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
 | license.secretName | string | `""` | the name containing your polars license key |
 | license.secretProperty | string | `""` | the property on the secret containing your license key |
 | imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |

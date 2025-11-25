@@ -1,0 +1,3 @@
+{{- if not .Values.acceptEula }}
+  {{ fail "EULA not accepted. Please refer to the EULA as forwarded by Polars together with your license." }}
+{{- end }}
