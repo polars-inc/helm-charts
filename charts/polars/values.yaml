@@ -11,6 +11,9 @@ podAnnotations: {}
 # -- (uuid) Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set.
 clusterId: ""
 
+# -- To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.
+acceptEula: false
+
 license:
   # -- the name containing your polars license key
   secretName: ""

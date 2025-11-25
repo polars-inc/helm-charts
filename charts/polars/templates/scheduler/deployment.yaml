@@ -180,6 +180,10 @@ spec:
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
               value: "full"
+            {{- if .Values.acceptEula }}
+            - name: POLARS_EULA_ACCEPTED
+              value: "yes"
+            {{- end }}
             {{- with .Values.scheduler.deployment.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
             {{- end }}

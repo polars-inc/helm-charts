@@ -178,6 +178,10 @@ spec:
               value: "full"
             - name: POLARS_TEMP_DIR
               value: /app/temporary_data/temp-dir
+            {{- if .Values.acceptEula }}
+            - name: POLARS_EULA_ACCEPTED
+              value: "yes"
+            {{- end }}
             {{- with .Values.worker.statefulset.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
             {{- end }}
