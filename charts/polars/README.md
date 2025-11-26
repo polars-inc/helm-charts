@@ -1,6 +1,6 @@
 # Polars Distributed: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 0.0.5](https://img.shields.io/badge/Version-0.0.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20251125](https://img.shields.io/badge/AppVersion-20251125-informational?style=flat-square)
+![Version: 0.0.6](https://img.shields.io/badge/Version-0.0.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20251125](https://img.shields.io/badge/AppVersion-20251125-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -67,7 +67,7 @@ runtime:
     enabled: true
 
     dist:
-      repository: "polarscloud/polars-distributed"
+      repository: "polarscloud/polars-on-premise"
       tag: ""
       pullPolicy: "IfNotPresent"
 
@@ -123,7 +123,7 @@ ENV POLARS_EXTRAS="async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pan
 SHELL ["/bin/bash", "-c"]
 RUN --mount=from=ghcr.io/astral-sh/uv:0.9.8,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
-    --mount=from=polarscloud/polars-distributed:v20251113,source=/opt/whl/polars-1.35.2-py3-none-any.whl,target=/opt/polars-1.35.2-py3-none-any.whl \
+    --mount=from=polarscloud/polars-on-premise:20251125,source=/opt/whl/polars-1.35.2-py3-none-any.whl,target=/opt/polars-1.35.2-py3-none-any.whl \
     --mount=type=bind,source=./requirements.txt,target=/opt/requirements.txt \
     # install polars with extras from wheel overriding to prevent installation of runtimes as those are already included in pc-cublet \
     echo -e "\
@@ -137,7 +137,7 @@ polars-runtime-compat; sys_platform == 'never'\n" | \
   --system \
   --overrides=-
 
-COPY --from=polarscloud/polars-distributed:v20251113 /opt/bin/pc-cublet /opt/bin/pc-cublet
+COPY --from=polarscloud/polars-on-premise:20251125 /opt/bin/pc-cublet /opt/bin/pc-cublet
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
@@ -297,7 +297,7 @@ Polars Distributed uses OpenTelemetry as its telemetry framework. To receive OTL
 | runtime.prebuilt.runtime.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.pullPolicy | string | `""` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | runtime.composed.enabled | bool | `true` |  |
-| runtime.composed.dist.repository | string | `"polarscloud/polars-distributed"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
+| runtime.composed.dist.repository | string | `"polarscloud/polars-on-premise"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.pullPolicy | string | `"IfNotPresent"` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | runtime.composed.runtime.repository | string | `"python"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
