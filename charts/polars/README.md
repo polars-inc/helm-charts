@@ -8,8 +8,8 @@ Distributed query execution engine for Polars
 
 ## Access to Polars Distributed
 
-First of all, make sure to obtain a license for Polars Distributed on-premise by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
-You will receive an access key for our private Docker registry as well as a license for running Polars Distributed on-premise.
+First of all, make sure to obtain a license for Polars Distributed on-premises by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
+You will receive an access key for our private Docker registry as well as a license for running Polars Distributed on-premises.
 Refer to the official Kubernetes documentation on [how to create a secret for pulling images from a private registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
 
 ## Quick Start
@@ -67,7 +67,7 @@ runtime:
     enabled: true
 
     dist:
-      repository: "polarscloud/polars-on-premise"
+      repository: "polarscloud/polars-on-premises"
       tag: ""
       pullPolicy: "IfNotPresent"
 
@@ -123,7 +123,7 @@ ENV POLARS_EXTRAS="async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pan
 SHELL ["/bin/bash", "-c"]
 RUN --mount=from=ghcr.io/astral-sh/uv:0.9.8,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
-    --mount=from=polarscloud/polars-on-premise:20251125,source=/opt/whl/polars-1.35.2-py3-none-any.whl,target=/opt/polars-1.35.2-py3-none-any.whl \
+    --mount=from=polarscloud/polars-on-premises:20251125,source=/opt/whl/polars-1.35.2-py3-none-any.whl,target=/opt/polars-1.35.2-py3-none-any.whl \
     --mount=type=bind,source=./requirements.txt,target=/opt/requirements.txt \
     # install polars with extras from wheel overriding to prevent installation of runtimes as those are already included in pc-cublet \
     echo -e "\
@@ -137,7 +137,7 @@ polars-runtime-compat; sys_platform == 'never'\n" | \
   --system \
   --overrides=-
 
-COPY --from=polarscloud/polars-on-premise:20251125 /opt/bin/pc-cublet /opt/bin/pc-cublet
+COPY --from=polarscloud/polars-on-premises:20251125 /opt/bin/pc-cublet /opt/bin/pc-cublet
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
@@ -297,7 +297,7 @@ Polars Distributed uses OpenTelemetry as its telemetry framework. To receive OTL
 | runtime.prebuilt.runtime.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.pullPolicy | string | `""` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | runtime.composed.enabled | bool | `true` |  |
-| runtime.composed.dist.repository | string | `"polarscloud/polars-on-premise"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
+| runtime.composed.dist.repository | string | `"polarscloud/polars-on-premises"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.pullPolicy | string | `"IfNotPresent"` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | runtime.composed.runtime.repository | string | `"python"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
