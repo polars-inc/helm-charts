@@ -8,7 +8,7 @@
 
 ![Release Charts](https://github.com/polars-inc/helm-charts/actions/workflows/release.yaml/badge.svg?branch=main) [![Releases downloads](https://img.shields.io/github/downloads/polars-inc/helm-charts/total.svg)](https://github.com/polars-inc/helm-charts/releases)
 
-Interested in running Polars on-premise? [Sign up here to apply](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
+Interested in running Polars on-premises? [Sign up here to apply](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
 
 ## Usage
 
