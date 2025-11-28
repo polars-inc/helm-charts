@@ -155,6 +155,8 @@ spec:
                   fieldPath: metadata.uid
             - name: PC_CUBLET__observatory__enabled
               value: "true"
+            - name: PC_CUBLET__observatory__max_metrics_bytes_total
+              value: {{ .Values.observatory.maxMetricsBytesTotal | quote }}
             - name: PC_CUBLET__observatory__rest_api__enabled
               value: "true"
             - name: PC_CUBLET__scheduler__enabled

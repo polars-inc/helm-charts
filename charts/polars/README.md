@@ -315,6 +315,7 @@ Polars Distributed uses OpenTelemetry as its telemetry framework. To receive OTL
 | temporaryData.persistentVolumeClaim.enabled | bool | `false` | Ephemeral storage for temporary data used in polars (e.g. shuffle or polars streaming data). Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local |
 | temporaryData.persistentVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | temporaryData.persistentVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| observatory.maxMetricsBytesTotal | int | `104857600` | Maximum number of bytes for host metrics storage |
 | worker.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | worker.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | worker.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
