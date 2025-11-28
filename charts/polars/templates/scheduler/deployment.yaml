@@ -146,7 +146,7 @@ spec:
                   apiVersion: v1
                   fieldPath: metadata.uid
             - name: PC_CUBLET__static_leader__public_leader_addr
-              value: "{{ include "polars.scheduler.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
             - name: PC_CUBLET__cluster_id
               value: {{ include "polars.clusterId" . | quote }}
             - name: PC_CUBLET__cublet_id
