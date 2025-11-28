@@ -89,6 +89,10 @@ temporaryData:
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 125Gi
 
+observatory:
+  # -- Maximum number of bytes for host metrics storage
+  maxMetricsBytesTotal: 104857600
+
 worker:
   serviceAccount:
     # -- Whether to create a service account.
