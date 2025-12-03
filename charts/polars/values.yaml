@@ -41,7 +41,7 @@ runtime:
 
     dist:
       # -- Container image name. More info: https://kubernetes.io/docs/concepts/containers/images
-      repository: "polarscloud/polars-on-premise"
+      repository: "polarscloud/polars-on-premises"
       # -- Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images
       tag: ""
       # -- Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
@@ -88,6 +88,10 @@ temporaryData:
     storageClassName: "hostpath"
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 125Gi
+
+observatory:
+  # -- Maximum number of bytes for host metrics storage
+  maxMetricsBytesTotal: 104857600
 
 worker:
   serviceAccount:
