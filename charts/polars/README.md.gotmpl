@@ -138,7 +138,7 @@ polars-runtime-compat; sys_platform == 'never'\n" | \
   --system \
   --overrides=-
 
-COPY --from=polarscloud/polars-on-premises:20251125 /opt/bin/pc-cublet /opt/bin/pc-cublet
+COPY --from=polarscloud/polars-on-premises:20251203 /opt/bin/pc-cublet /opt/bin/pc-cublet
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```

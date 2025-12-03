@@ -1,6 +1,6 @@
 # Polars Distributed: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 0.0.7](https://img.shields.io/badge/Version-0.0.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20251125](https://img.shields.io/badge/AppVersion-20251125-informational?style=flat-square)
+![Version: 0.0.8](https://img.shields.io/badge/Version-0.0.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20251203](https://img.shields.io/badge/AppVersion-20251203-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -137,7 +137,7 @@ polars-runtime-compat; sys_platform == 'never'\n" | \
   --system \
   --overrides=-
 
-COPY --from=polarscloud/polars-on-premises:20251125 /opt/bin/pc-cublet /opt/bin/pc-cublet
+COPY --from=polarscloud/polars-on-premises:20251203 /opt/bin/pc-cublet /opt/bin/pc-cublet
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
