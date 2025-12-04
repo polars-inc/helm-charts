@@ -168,7 +168,7 @@ spec:
               value: {{ .Values.anonymousResults.s3.endpoint | quote }}
             {{ end }}
             - name: PC_CUBLET__scheduler__n_workers
-              value: {{ .Values.worker.statefulset.replicaCount | quote }}
+              value: {{ .Values.worker.deployment.replicaCount | quote }}
             - name: PC_CUBLET__service__auth
               value: insecure
             - name: PC_CUBLET__service__public_address
