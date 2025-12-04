@@ -148,7 +148,7 @@ Polars requires large data storage for its operation. There are two main types o
 
 #### Temporary data
 
-High-performance storage for shuffle data and other Polars temporary data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose (e.g. AWS ebs). Since we're using a statefulset for the worker pods, a persistent volume claim is created for each pod.
+High-performance storage for shuffle data and other Polars temporary data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
 temporaryData:
@@ -180,7 +180,7 @@ scheduler:
   # etc.
 
 worker:
-  statefulset:
+  deployment:
     runtimeContainer:
       env:
       - name: AWS_ACCESS_KEY_ID
@@ -197,7 +197,7 @@ When using S3-compatible storage for anonymous results, it is recommended to con
 
 ```yaml
 worker:
-  statefulset:
+  deployment:
     persistentVolumeClaimRetentionPolicy:
       whenDeleted: Delete
       whenScaled: Delete
@@ -211,7 +211,7 @@ First, figure out the available resources on your nodes. This is usually lower t
 
 ```yaml
 worker:
-  statefulset:
+  deployment:
     replicaCount: 3
 
     runtimeContainer:
@@ -219,7 +219,7 @@ worker:
         requests:
           cpu: 3770m
           memory: 14.31GiB
-   
+
         limits:
           cpu: 3770m
           memory: 14.31GiB
@@ -229,16 +229,16 @@ If your cluster has other workloads running on it, we still recommend running Po
 
 ```yaml
 worker:
-  statefulset:
+  deployment:
     nodeSelector:
       kubernetes.io/e2e-az-name: e2e-az1
-   
+
     tolerations:
     - key: "key"
       operator: "Equal"
       value: "value"
       effect: "NoSchedule"
-   
+
     affinity:
      nodeAffinity:
        requiredDuringSchedulingIgnoredDuringExecution:
@@ -319,38 +319,35 @@ Polars on-premise uses OpenTelemetry as its telemetry framework. To receive OTLP
 | worker.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | worker.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | worker.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
-| worker.statefulset.replicaCount | int | `2` | Number of polars worker replicas. |
-| worker.statefulset.revisionHistoryLimit | int | `10` | revisionHistoryLimit is the maximum number of revisions that will be maintained in the StatefulSet's revision history. The default value is 10. |
-| worker.statefulset.podManagementPolicy | string | `"Parallel"` | podManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down. One policy is OrderedReady, where pods are created in increasing order (pod-0, then pod-1, etc) and the controller will wait until each pod is ready before continuing. When scaling down, the pods are removed in the opposite order. The alternative policy is Parallel which will create pods in parallel to match the desired scale without waiting, and on scale down will delete all pods at once. |
-| worker.statefulset.updateStrategy | object | `{"rollingUpdate":{"maxUnavailable":1},"type":"RollingUpdate"}` | updateStrategy indicates the StatefulSetUpdateStrategy that will be employed to update Pods in the StatefulSet when a revision is made to Template. |
-| worker.statefulset.persistentVolumeClaimRetentionPolicy | object | `{}` | PVCs for temporary data may be deleted when bringing down the compute cluster, while anonymous results PVCs may want to be retained. Since Kubernetes Kubernetes v1.32, statefulsets support setting retention policies for this purpose. Take caution when using this feature, as it applies on all PVCs created by the statefulset. More info: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention |
-| worker.statefulset.podAnnotations | object | `{}` | Additional annotations to add to the scheduler pod. |
-| worker.statefulset.podLabels | object | `{}` | Additional labels to add to the scheduler pod. |
-| worker.statefulset.dnsPolicy | string | `""` | Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
-| worker.statefulset.dnsConfig | object | `{}` | Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
-| worker.statefulset.schedulerName | string | `""` | If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler. |
-| worker.statefulset.automountServiceAccountToken | bool | `true` | AutomountServiceAccountToken indicates whether a service account token should be automatically mounted. |
-| worker.statefulset.podSecurityContext | object | `{}` | SecurityContext holds pod-level security attributes and common container settings. |
-| worker.statefulset.hostAliases | list | `[]` | List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ |
-| worker.statefulset.distContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
-| worker.statefulset.distContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| worker.statefulset.runtimeContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
-| worker.statefulset.runtimeContainer.readinessProbe.tcpSocket.port | string | `"worker-service"` |  |
-| worker.statefulset.runtimeContainer.readinessProbe.initialDelaySeconds | int | `1` | Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes |
-| worker.statefulset.runtimeContainer.readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
-| worker.statefulset.runtimeContainer.readinessProbe.failureThreshold | int | `25` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
-| worker.statefulset.runtimeContainer.env | list | `[]` | List of environment variables to set in the container. |
-| worker.statefulset.runtimeContainer.lifecycleHooks | object | `{}` | Actions that the management system should take in response to container lifecycle events. |
-| worker.statefulset.runtimeContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| worker.statefulset.runtimeContainer.volumeMounts | list | `[]` | Pod volumes to mount into the container's filesystem. |
-| worker.statefulset.priorityClassName | string | `""` | If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass |
-| worker.statefulset.runtimeClassName | string | `""` |  |
-| worker.statefulset.volumes | list | `[]` | List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes |
-| worker.statefulset.nodeSelector | object | `{}` | NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ |
-| worker.statefulset.affinity | object | `{}` | If specified, the pod's scheduling constraints |
-| worker.statefulset.tolerations | list | `[]` | If specified, the pod's tolerations. |
-| worker.statefulset.topologySpreadConstraints | list | `[]` | TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed. |
-| worker.statefulset.hostNetwork | bool | `false` | Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false. |
+| worker.deployment.replicaCount | int | `2` | Number of polars worker replicas. |
+| worker.deployment.revisionHistoryLimit | int | `10` | revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10. |
+| worker.deployment.podAnnotations | object | `{}` | Additional annotations to add to the scheduler pod. |
+| worker.deployment.podLabels | object | `{}` | Additional labels to add to the scheduler pod. |
+| worker.deployment.dnsPolicy | string | `""` | Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
+| worker.deployment.dnsConfig | object | `{}` | Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
+| worker.deployment.schedulerName | string | `""` | If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler. |
+| worker.deployment.automountServiceAccountToken | bool | `true` | AutomountServiceAccountToken indicates whether a service account token should be automatically mounted. |
+| worker.deployment.podSecurityContext | object | `{}` | SecurityContext holds pod-level security attributes and common container settings. |
+| worker.deployment.hostAliases | list | `[]` | List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ |
+| worker.deployment.distContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
+| worker.deployment.distContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| worker.deployment.runtimeContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
+| worker.deployment.runtimeContainer.readinessProbe.tcpSocket.port | string | `"worker-service"` |  |
+| worker.deployment.runtimeContainer.readinessProbe.initialDelaySeconds | int | `1` | Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes |
+| worker.deployment.runtimeContainer.readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the probe. |
+| worker.deployment.runtimeContainer.readinessProbe.failureThreshold | int | `25` | Minimum consecutive failures for the probe to be considered failed after having succeeded. |
+| worker.deployment.runtimeContainer.env | list | `[]` | List of environment variables to set in the container. |
+| worker.deployment.runtimeContainer.lifecycleHooks | object | `{}` | Actions that the management system should take in response to container lifecycle events. |
+| worker.deployment.runtimeContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| worker.deployment.runtimeContainer.volumeMounts | list | `[]` | Pod volumes to mount into the container's filesystem. |
+| worker.deployment.priorityClassName | string | `""` | If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass |
+| worker.deployment.runtimeClassName | string | `""` |  |
+| worker.deployment.volumes | list | `[]` | List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes |
+| worker.deployment.nodeSelector | object | `{}` | NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ |
+| worker.deployment.affinity | object | `{}` | If specified, the pod's scheduling constraints |
+| worker.deployment.tolerations | list | `[]` | If specified, the pod's tolerations. |
+| worker.deployment.topologySpreadConstraints | list | `[]` | TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed. |
+| worker.deployment.hostNetwork | bool | `false` | Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false. |
 | scheduler.services.internal.type | string | `"ClusterIP"` | type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. "ExternalName" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types |
 | scheduler.services.internal.annotations | object | `{}` | Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers. |
 | scheduler.services.scheduler.type | string | `"ClusterIP"` | type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. "ExternalName" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types |
