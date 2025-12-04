@@ -1,56 +1,39 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ include "polars.worker.fullname" . }}
   labels:
     {{ include "polars.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.worker.statefulset.replicaCount }}
-  revisionHistoryLimit: {{ .Values.worker.statefulset.revisionHistoryLimit }}
+  replicas: {{ .Values.worker.deployment.replicaCount }}
+  revisionHistoryLimit: {{ .Values.worker.deployment.revisionHistoryLimit }}
   selector:
     matchLabels:
       app.kubernetes.io/component: worker
       {{ include "polars.selectorLabels" . | nindent 6 }}
-  serviceName: {{ include "polars.worker-headless.fullname" . }}
-  podManagementPolicy: {{ .Values.worker.statefulset.podManagementPolicy }}
-  updateStrategy:
-    {{ toYaml .Values.worker.statefulset.updateStrategy | nindent 4 }}
-  {{- with .Values.worker.statefulset.persistentVolumeClaimRetentionPolicy }}
-  persistentVolumeClaimRetentionPolicy:
-    {{ toYaml . | nindent 4 }}
-  {{- end }}
-  volumeClaimTemplates:
-  {{- if .Values.temporaryData.persistentVolumeClaim.enabled }}
-    - metadata:
-        name: temporary-data
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: {{ .Values.temporaryData.persistentVolumeClaim.storageClassName }}
-        resources:
-          requests:
-            storage: {{ .Values.temporaryData.persistentVolumeClaim.size }}
-  {{- end }}
+  strategy:
+    type: "Recreate"
   template:
     metadata:
-      {{- with .Values.worker.statefulset.podAnnotations }}
+      {{- with .Values.worker.deployment.podAnnotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       labels:
         app.kubernetes.io/component: worker
         {{ include "polars.labels" . | nindent 8 }}
-        {{- with .Values.worker.statefulset.podLabels }}
+        {{- with .Values.worker.deployment.podLabels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.worker.statefulset.dnsPolicy }}
+      {{- with .Values.worker.deployment.dnsPolicy }}
       dnsPolicy: {{ . }}
       {{- end }}
-      {{- with .Values.worker.statefulset.dnsConfig }}
+      {{- with .Values.worker.deployment.dnsConfig }}
       dnsConfig:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.worker.statefulset.schedulerName }}
+      {{- with .Values.worker.deployment.schedulerName }}
       schedulerName: {{ . }}
       {{- end }}
       {{- with .Values.imagePullSecrets }}
@@ -59,18 +42,18 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "polars.worker.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.worker.serviceAccount.automount }}
-      {{- with .Values.worker.statefulset.podSecurityContext }}
+      {{- with .Values.worker.deployment.podSecurityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.worker.statefulset.hostAliases }}
+      {{- with .Values.worker.deployment.hostAliases }}
       hostAliases:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       {{ if .Values.runtime.composed.enabled }}
       initContainers:
         - name: release
-        {{- with .Values.worker.statefulset.distContainer.securityContext }}
+        {{- with .Values.worker.deployment.distContainer.securityContext }}
           securityContext:
           {{ toYaml . | nindent 12 }}
         {{- end }}
@@ -82,7 +65,7 @@ spec:
             - -a
             - /opt/.
             - /emptydir
-        {{- with .Values.worker.statefulset.distContainer.resources }}
+        {{- with .Values.worker.deployment.distContainer.resources }}
           resources:
           {{ toYaml . | nindent 12 }}
         {{- end }}
@@ -92,7 +75,7 @@ spec:
       {{- end }}
       containers:
         - name: worker
-          {{- with .Values.worker.statefulset.runtimeContainer.securityContext }}
+          {{- with .Values.worker.deployment.runtimeContainer.securityContext }}
           securityContext:
             {{ toYaml . | nindent 12 }}
           {{- end }}
@@ -116,7 +99,7 @@ spec:
             - name: worker-service
               containerPort: 5053
               protocol: TCP
-          {{- with .Values.worker.statefulset.runtimeContainer.readinessProbe }}
+          {{- with .Values.worker.deployment.runtimeContainer.readinessProbe }}
           readinessProbe:
             {{ toYaml . | nindent 12 }}
           {{- end }}
@@ -184,16 +167,16 @@ spec:
             - name: POLARS_EULA_ACCEPTED
               value: "yes"
             {{- end }}
-            {{- with .Values.worker.statefulset.runtimeContainer.env }}
+            {{- with .Values.worker.deployment.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
             {{- end }}
-          {{- if .Values.worker.statefulset.runtimeContainer.lifecycleHooks }}
+          {{- if .Values.worker.deployment.runtimeContainer.lifecycleHooks }}
           lifecycle:
-            {{ toYaml .Values.worker.statefulset.runtimeContainer.lifecycleHooks | nindent 12 }}
+            {{ toYaml .Values.worker.deployment.runtimeContainer.lifecycleHooks | nindent 12 }}
           {{- end }}
           # TODO: lifenessProbe
           # TODO: readinessProbe:
-          {{- with .Values.worker.statefulset.runtimeContainer.resources }}
+          {{- with .Values.worker.deployment.runtimeContainer.resources }}
           resources:
             {{ toYaml . | nindent 12 }}
           {{- end }}
@@ -213,16 +196,27 @@ spec:
             {{- end }}
             - name: temporary-data
               mountPath: /app/temporary_data
-            {{- with .Values.worker.statefulset.runtimeContainer.volumeMounts }}
+            {{- with .Values.worker.deployment.runtimeContainer.volumeMounts }}
             {{ toYaml . | nindent 12 }}
             {{- end }}
-      {{- if .Values.worker.statefulset.priorityClassName }}
-      priorityClassName: {{ .Values.worker.statefulset.priorityClassName | quote }}
+      {{- if .Values.worker.deployment.priorityClassName }}
+      priorityClassName: {{ .Values.worker.deployment.priorityClassName | quote }}
       {{- end }}
-      {{- if .Values.worker.statefulset.runtimeClassName }}
-      runtimeClassName: {{ .Values.worker.statefulset.runtimeClassName | quote }}
+      {{- if .Values.worker.deployment.runtimeClassName }}
+      runtimeClassName: {{ .Values.worker.deployment.runtimeClassName | quote }}
       {{- end }}
       volumes:
+        {{- if .Values.temporaryData.persistentVolumeClaim.enabled }}
+        - name: temporary-data
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes: [ "ReadWriteOnce" ]
+                storageClassName: {{ .Values.temporaryData.persistentVolumeClaim.storageClassName }}
+                resources:
+                  requests:
+                    storage: {{ .Values.temporaryData.persistentVolumeClaim.size }}
+        {{- end }}
         {{- with .Values.license }}
         - name: license
           secret:
@@ -247,23 +241,23 @@ spec:
         - name: temporary-data
           emptyDir: {}
         {{- end }}
-        {{- with .Values.worker.statefulset.volumes }}
+        {{- with .Values.worker.deployment.volumes }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.worker.statefulset.nodeSelector }}
+      {{- with .Values.worker.deployment.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.worker.statefulset.affinity }}
+      {{- with .Values.worker.deployment.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.worker.statefulset.tolerations }}
+      {{- with .Values.worker.deployment.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.worker.statefulset.topologySpreadConstraints }}
+      {{- with .Values.worker.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      hostNetwork: {{ .Values.worker.statefulset.hostNetwork }}
+      hostNetwork: {{ .Values.worker.deployment.hostNetwork }}

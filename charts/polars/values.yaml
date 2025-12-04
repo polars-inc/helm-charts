@@ -102,26 +102,12 @@ worker:
     # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
     automount: true
 
-  statefulset:
+  deployment:
     # -- Number of polars worker replicas.
     replicaCount: 2
 
-    # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the StatefulSet's revision history. The default value is 10.
+    # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10.
     revisionHistoryLimit: 10
-
-    # -- podManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down. One policy is OrderedReady, where pods are created in increasing order (pod-0, then pod-1, etc) and the controller will wait until each pod is ready before continuing. When scaling down, the pods are removed in the opposite order. The alternative policy is Parallel which will create pods in parallel to match the desired scale without waiting, and on scale down will delete all pods at once.
-    podManagementPolicy: Parallel
-
-    # -- updateStrategy indicates the StatefulSetUpdateStrategy that will be employed to update Pods in the StatefulSet when a revision is made to Template.
-    updateStrategy:
-      type: RollingUpdate
-      rollingUpdate:
-        maxUnavailable: 1
-
-    # -- PVCs for temporary data may be deleted when bringing down the compute cluster, while anonymous results PVCs may want to be retained. Since Kubernetes Kubernetes v1.32, statefulsets support setting retention policies for this purpose. Take caution when using this feature, as it applies on all PVCs created by the statefulset. More info: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
-    persistentVolumeClaimRetentionPolicy: { }
-    #  whenDeleted: Retain
-    #  whenScaled: Retain
 
     # -- Additional annotations to add to the scheduler pod.
     podAnnotations: {}
