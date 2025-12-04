@@ -126,13 +126,6 @@ Create observatory fullname
 {{- end }}
 
 {{/*
-Create worker headless service fullname
-*/}}
-{{- define "polars.worker-headless.fullname" -}}
-{{- printf "%s-worker-headless" (include "polars.fullname" .) }}
-{{- end }}
-
-{{/*
 Cluster ID
 */}}
 {{- define "polars.clusterId" -}}
