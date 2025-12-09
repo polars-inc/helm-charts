@@ -91,6 +91,20 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Create the name of the service account to use
+*/}}
+{{- define "polars.tests.serviceAccountName" -}}
+{{- default "default" .Values.tests.serviceAccount.name }}
+{{- end }}
+
+{{/*
+Create tests fullname
+*/}}
+{{- define "polars.tests.fullname" -}}
+{{- printf "%s-tests" (include "polars.fullname" .) }}
+{{- end }}
+
+{{/*
 Create opentelemetry-collector fullname
 */}}
 {{- define "polars.opentelemetry-collector.fullname" -}}
