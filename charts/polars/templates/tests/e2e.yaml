@@ -22,7 +22,7 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
-  restartPolicy: OnFailure
+  restartPolicy: Never
   {{- with $.Values.tests.pod.dnsPolicy }}
   dnsPolicy: {{ . }}
   {{- end }}
@@ -81,9 +81,7 @@ spec:
       {{- if eq $fail "" }}
       command:
         - /emptydir/setup.sh
-      args:
-        - /emptydir/bin/pc-cublet
-        - service
+      workingDir: /tmp
       {{- else }}
       command:
         - echo
@@ -92,7 +90,7 @@ spec:
         - {{ $fail | quote }}
       {{- end }}
       env:
-        - name: POLARS_CLOUD_WHL_DIR
+        - name: WHL_DIR
           value: "/emptydir/whl"
         - name: UV_PATH
           value: "/emptydir/bin/uv"
@@ -103,7 +101,7 @@ spec:
         - name: PC_E2E_SINK
           value: {{ $E2E_SINK | quote }}
         {{- if gt $.Values.worker.deployment.replicaCount 1 }}
-        - name: "PC_E2E_ISTRIBUTED"
+        - name: "PC_E2E_DISTRIBUTED"
           value: "1"
         {{- end }}
         {{- with $.Values.tests.pod.runtimeContainer.env }}
@@ -118,6 +116,8 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: tmp-data
+          mountPath: /tmp
         - name: release-data
           mountPath: /emptydir
         {{- with $.Values.tests.pod.runtimeContainer.volumeMounts }}
@@ -130,6 +130,8 @@ spec:
   runtimeClassName: {{ $.Values.tests.pod.runtimeClassName | quote }}
   {{- end }}
   volumes:
+    - name: tmp-data
+      emptyDir: {}
     - name: release-data
       emptyDir: {}
     {{- with $.Values.tests.pod.volumes }}
