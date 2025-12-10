@@ -47,7 +47,7 @@ spec:
   hostAliases:
     {{ toYaml . | nindent 4 }}
   {{- end }}
-    {{- if eq $fail "" }}
+  {{- if eq $fail "" }}
   initContainers:
     - name: release
     {{- with $.Values.tests.pod.distContainer.securityContext }}
@@ -72,23 +72,23 @@ spec:
   {{- end }}
   containers:
     - name: tester
-      {{- with $.Values.tests.pod.runtimeContainer.securityContext }}
+  {{- with $.Values.tests.pod.runtimeContainer.securityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
+  {{- end }}
       image: "{{ $.Values.runtime.composed.runtime.repository }}:{{ $.Values.runtime.composed.runtime.tag }}"
       imagePullPolicy: {{ $.Values.runtime.composed.runtime.pullPolicy }}
-      {{- if eq $fail "" }}
+  {{- if eq $fail "" }}
       command:
         - /emptydir/setup.sh
       workingDir: /tmp
-      {{- else }}
+  {{- else }}
       command:
         - echo
       args:
         - "skipping tests due to: "
         - {{ $fail | quote }}
-      {{- end }}
+  {{- end }}
       env:
         - name: WHL_DIR
           value: "/emptydir/whl"
@@ -100,29 +100,29 @@ spec:
           value: "{{ include "polars.scheduler.fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
         - name: PC_E2E_SINK
           value: {{ $E2E_SINK | quote }}
-        {{- if gt $.Values.worker.deployment.replicaCount 1 }}
+  {{- if gt $.Values.worker.deployment.replicaCount 1 }}
         - name: "PC_E2E_DISTRIBUTED"
           value: "1"
-        {{- end }}
-        {{- with $.Values.tests.pod.runtimeContainer.env }}
+  {{- end }}
+  {{- with $.Values.tests.pod.runtimeContainer.env }}
         {{ toYaml . | nindent 8 }}
-        {{- end }}
-      {{- if $.Values.tests.pod.runtimeContainer.lifecycleHooks }}
+  {{- end }}
+  {{- if $.Values.tests.pod.runtimeContainer.lifecycleHooks }}
       lifecycle:
         {{ toYaml $.Values.tests.pod.runtimeContainer.lifecycleHooks | nindent 8 }}
-      {{- end }}
-      {{- with $.Values.tests.pod.runtimeContainer.resources }}
+  {{- end }}
+  {{- with $.Values.tests.pod.runtimeContainer.resources }}
       resources:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
+  {{- end }}
       volumeMounts:
         - name: tmp-data
           mountPath: /tmp
         - name: release-data
           mountPath: /emptydir
-        {{- with $.Values.tests.pod.runtimeContainer.volumeMounts }}
+  {{- with $.Values.tests.pod.runtimeContainer.volumeMounts }}
         {{ toYaml . | nindent 8 }}
-        {{- end }}
+  {{- end }}
   {{- if $.Values.tests.pod.priorityClassName }}
   priorityClassName: {{ $.Values.tests.pod.priorityClassName | quote }}
   {{- end }}
@@ -134,9 +134,9 @@ spec:
       emptyDir: {}
     - name: release-data
       emptyDir: {}
-    {{- with $.Values.tests.pod.volumes }}
+  {{- with $.Values.tests.pod.volumes }}
     {{ toYaml . | nindent 4 }}
-    {{- end }}
+  {{- end }}
   {{- with $.Values.tests.pod.nodeSelector }}
   nodeSelector:
     {{ toYaml . | nindent 4 }}
