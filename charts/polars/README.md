@@ -219,7 +219,7 @@ worker:
         requests:
           cpu: 3770m
           memory: 14.31GiB
-
+   
         limits:
           cpu: 3770m
           memory: 14.31GiB
@@ -232,7 +232,6 @@ worker:
   deployment:
     nodeSelector:
       kubernetes.io/e2e-az-name: e2e-az1
-
     tolerations:
     - key: "key"
       operator: "Equal"
@@ -386,3 +385,28 @@ Polars on-premise uses OpenTelemetry as its telemetry framework. To receive OTLP
 | scheduler.deployment.tolerations | list | `[]` | If specified, the pod's tolerations. |
 | scheduler.deployment.topologySpreadConstraints | list | `[]` | TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed. |
 | scheduler.deployment.hostNetwork | bool | `false` | Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false. |
+| tests.images | list | `[]` |  |
+| tests.serviceAccount.create | bool | `false` | Whether to create a service account. |
+| tests.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
+| tests.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
+| tests.pod.dnsPolicy | string | `""` | Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
+| tests.pod.dnsConfig | object | `{}` | Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
+| tests.pod.schedulerName | string | `""` | If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler. |
+| tests.pod.automountServiceAccountToken | bool | `true` | AutomountServiceAccountToken indicates whether a service account token should be automatically mounted. |
+| tests.pod.podSecurityContext | object | `{}` | SecurityContext holds pod-level security attributes and common container settings. |
+| tests.pod.hostAliases | list | `[]` | List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ |
+| tests.pod.distContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
+| tests.pod.distContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| tests.pod.runtimeContainer.securityContext | object | `{}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
+| tests.pod.runtimeContainer.env | list | `[]` | List of environment variables to set in the container. |
+| tests.pod.runtimeContainer.lifecycleHooks | object | `{}` | Actions that the management system should take in response to container lifecycle events. |
+| tests.pod.runtimeContainer.resources | object | `{}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| tests.pod.runtimeContainer.volumeMounts | list | `[]` | Pod volumes to mount into the container's filesystem. |
+| tests.pod.priorityClassName | string | `""` | If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass |
+| tests.pod.runtimeClassName | string | `""` |  |
+| tests.pod.volumes | list | `[]` | List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes |
+| tests.pod.nodeSelector | object | `{}` | NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ |
+| tests.pod.affinity | object | `{}` | If specified, the pod's scheduling constraints |
+| tests.pod.tolerations | list | `[]` | If specified, the pod's tolerations. |
+| tests.pod.topologySpreadConstraints | list | `[]` | TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed. |
+| tests.pod.hostNetwork | bool | `false` | Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false. |
