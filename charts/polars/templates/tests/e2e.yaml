@@ -1,7 +1,4 @@
 {{ $fail := "" }}
-{{- if not $.Values.runtime.composed.enabled }}
-{{ $fail = "helm tests currently only supported when .Values.runtime.composed.enabled" }}
-{{- end }}
 
 {{ $E2E_SINK := "" }}
 {{- if .Values.anonymousResults.s3.enabled }}
@@ -100,7 +97,7 @@ spec:
           value: "{{ include "polars.scheduler.fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
         - name: PC_E2E_SINK
           value: {{ $E2E_SINK | quote }}
-  {{- if gt $.Values.worker.deployment.replicaCount 1 }}
+  {{- if gt (int $.Values.worker.deployment.replicaCount) 1 }}
         - name: "PC_E2E_DISTRIBUTED"
           value: "1"
   {{- end }}
