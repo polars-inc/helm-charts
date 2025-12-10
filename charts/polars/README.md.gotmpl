@@ -45,6 +45,10 @@ query = (
 print(query.await_result())
 ```
 
+### Helm Tests
+
+You can instead also run the provided helm tests by running `helm test polars`. The chart contains a default list of images in `.Values.tests.images` that correspond to the supported polars-cloud client versions. The tests currently always run using the runtime image specified in `.Values.runtime.composed.runtime` since the client and compute cluster need to run the same version.
+
 ## Configuration
 
 Running Polars on-premise in a production environment requires some configuration. The most important aspects are described below.
@@ -142,6 +146,8 @@ COPY --from=polarscloud/polars-on-premises:20251203 /opt/bin/pc-cublet /opt/bin/
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
+
+Note that the helm tests will still use the runtime defined in `.Values.runtime.composed.runtime`, so ensure that this image contains the same Python version as your prebuilt image. All the Python dependencies required for the tests are already included in the image used in the helm test, and the test does not require internet access, so a prebuilt image for the tests has no direct advantage.
 
 ### Storage
 

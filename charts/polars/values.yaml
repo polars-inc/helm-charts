@@ -196,7 +196,7 @@ worker:
     # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
-    # == RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
     runtimeClassName: ""
 
     # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
@@ -359,7 +359,129 @@ scheduler:
     # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
-    # == RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    runtimeClassName: ""
+
+    # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
+    volumes: []
+    # - name: volume-name
+    #   emptyDir: {}
+
+    # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    nodeSelector: { }
+    #  kubernetes.io/e2e-az-name: e2e-az1
+
+    # -- If specified, the pod's scheduling constraints
+    affinity: { }
+    #  nodeAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      nodeSelectorTerms:
+    #      - matchExpressions:
+    #        - key: kubernetes.io/e2e-az-name
+    #          operator: In
+    #          values:
+    #          - e2e-az1
+
+    # -- If specified, the pod's tolerations.
+    tolerations: [ ]
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+
+    # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
+    topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: DoNotSchedule
+
+    # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
+    hostNetwork: false
+
+tests:
+  images: []
+
+  serviceAccount:
+    # -- Whether to create a service account.
+    create: false
+    # -- The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set.
+    name: ""
+    # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
+    automount: true
+
+  pod:
+    # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+    dnsPolicy: ""
+
+    # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+    dnsConfig: {}
+
+    # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
+    schedulerName: ""
+
+    # -- AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
+    automountServiceAccountToken: true
+
+    # -- SecurityContext holds pod-level security attributes and common container settings.
+    podSecurityContext: { }
+    #  fsGroup: 2000
+    #  runAsUser: 1000
+    #  runAsNonRoot: true
+
+    # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+    hostAliases: []
+
+    distContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+    runtimeContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- List of environment variables to set in the container.
+      env: []
+      # - name: ENV_VAR_NAME
+      #   value: ENV_VAR_VALUE
+
+      # -- Actions that the management system should take in response to container lifecycle events.
+      lifecycleHooks: {}
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+      # -- Pod volumes to mount into the container's filesystem.
+      volumeMounts: []
+      # - name: volume-name
+      #   mountPath: /path/to/mount
+
+    # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+    priorityClassName: ""
+
+    # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
     runtimeClassName: ""
 
     # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
