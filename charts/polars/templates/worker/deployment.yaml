@@ -15,48 +15,48 @@ spec:
     type: "Recreate"
   template:
     metadata:
-      {{- with .Values.worker.deployment.podAnnotations }}
+{{- with .Values.worker.deployment.podAnnotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
+{{- end }}
       labels:
         app.kubernetes.io/component: worker
         {{ include "polars.labels" . | nindent 8 }}
-        {{- with .Values.worker.deployment.podLabels }}
+{{- with .Values.worker.deployment.podLabels }}
         {{ toYaml . | nindent 8 }}
-        {{- end }}
+{{- end }}
     spec:
-      {{- with .Values.worker.deployment.dnsPolicy }}
+{{- with .Values.worker.deployment.dnsPolicy }}
       dnsPolicy: {{ . }}
-      {{- end }}
-      {{- with .Values.worker.deployment.dnsConfig }}
+{{- end }}
+{{- with .Values.worker.deployment.dnsConfig }}
       dnsConfig:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.deployment.schedulerName }}
+{{- end }}
+{{- with .Values.worker.deployment.schedulerName }}
       schedulerName: {{ . }}
-      {{- end }}
-      {{- with .Values.imagePullSecrets }}
+{{- end }}
+{{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
+{{- end }}
       serviceAccountName: {{ include "polars.worker.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.worker.serviceAccount.automount }}
-      {{- with .Values.worker.deployment.podSecurityContext }}
+{{- with .Values.worker.deployment.podSecurityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.deployment.hostAliases }}
+{{- end }}
+{{- with .Values.worker.deployment.hostAliases }}
       hostAliases:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{ if .Values.runtime.composed.enabled }}
+{{- end }}
+{{ if .Values.runtime.composed.enabled }}
       initContainers:
         - name: release
-        {{- with .Values.worker.deployment.distContainer.securityContext }}
+  {{- with .Values.worker.deployment.distContainer.securityContext }}
           securityContext:
           {{ toYaml . | nindent 12 }}
-        {{- end }}
+  {{- end }}
           image: "{{ .Values.runtime.composed.dist.repository }}:{{ .Values.runtime.composed.dist.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.runtime.composed.dist.pullPolicy }}
           command:
@@ -65,21 +65,21 @@ spec:
             - -a
             - /opt/.
             - /emptydir
-        {{- with .Values.worker.deployment.distContainer.resources }}
+  {{- with .Values.worker.deployment.distContainer.resources }}
           resources:
           {{ toYaml . | nindent 12 }}
-        {{- end }}
+  {{- end }}
           volumeMounts:
             - name: release-data
               mountPath: /emptydir
-      {{- end }}
+{{- end }}
       containers:
         - name: worker
-          {{- with .Values.worker.deployment.runtimeContainer.securityContext }}
+{{- with .Values.worker.deployment.runtimeContainer.securityContext }}
           securityContext:
             {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- if .Values.runtime.composed.enabled }}
+{{- end }}
+{{- if .Values.runtime.composed.enabled }}
           image: "{{ .Values.runtime.composed.runtime.repository }}:{{ .Values.runtime.composed.runtime.tag }}"
           imagePullPolicy: {{ .Values.runtime.composed.runtime.pullPolicy }}
           command:
@@ -87,11 +87,11 @@ spec:
           args:
             - /emptydir/bin/pc-cublet
             - service
-          {{- end }}
-          {{- if .Values.runtime.prebuilt.enabled }}
+{{- end }}
+{{- if .Values.runtime.prebuilt.enabled }}
           image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
           imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
-          {{- end }}
+{{- end }}
           ports:
             - name: worker-flight
               containerPort: 5052
@@ -99,35 +99,35 @@ spec:
             - name: worker-service
               containerPort: 5053
               protocol: TCP
-          {{- with .Values.worker.deployment.runtimeContainer.readinessProbe }}
+{{- with .Values.worker.deployment.runtimeContainer.readinessProbe }}
           readinessProbe:
             {{ toYaml . | nindent 12 }}
-          {{- end }}
+{{- end }}
           env:
             - name: POLARS_EXTRAS
               value: {{ .Values.runtime.composed.polarsExtras | default "" }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
-            {{- if .Values.runtime.composed.requirements }}
+{{- if .Values.runtime.composed.requirements }}
             - name: PYTHON_REQUIREMENTS
               value: /requirements.txt
-            {{- end }}
+{{- end }}
             - name: UV_PATH
               value: "/emptydir/bin/uv"
-            {{- if .Values.telemetry.otlpEndpoint }}
+{{- if .Values.telemetry.otlpEndpoint }}
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
-            {{- end }}
+{{- end }}
             - name: OTEL_SERVICE_INSTANCE_ID
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
             - name: POLARS_SKIP_DSL_HASH_VERIFICATION
               value: "1"
-            {{- if .Values.license }}
+{{- if .Values.license }}
             - name: PC_CUBLET__license
               value: "/license/license.json"
-            {{- end }}
+{{- end }}
             - name: PC_CUBLET__static_leader__leader_key
               value: "{{ include "polars.worker.fullname" . }}-0"
             - name: PC_CUBLET__static_leader__public_leader_addr
@@ -163,50 +163,50 @@ spec:
               value: "full"
             - name: POLARS_TEMP_DIR
               value: /app/temporary_data/temp-dir
-            {{- if .Values.acceptEula }}
+{{- if .Values.acceptEula }}
             - name: POLARS_EULA_ACCEPTED
               value: "yes"
-            {{- end }}
-            {{- with .Values.worker.deployment.runtimeContainer.env }}
+{{- end }}
+{{- with .Values.worker.deployment.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
-            {{- end }}
-          {{- if .Values.worker.deployment.runtimeContainer.lifecycleHooks }}
+{{- end }}
+{{- if .Values.worker.deployment.runtimeContainer.lifecycleHooks }}
           lifecycle:
             {{ toYaml .Values.worker.deployment.runtimeContainer.lifecycleHooks | nindent 12 }}
-          {{- end }}
+{{- end }}
           # TODO: lifenessProbe
           # TODO: readinessProbe:
-          {{- with .Values.worker.deployment.runtimeContainer.resources }}
+{{- with .Values.worker.deployment.runtimeContainer.resources }}
           resources:
             {{ toYaml . | nindent 12 }}
-          {{- end }}
+{{- end }}
           volumeMounts:
-          {{- with .Values.license }}
+{{- with .Values.license }}
             - name: license
               mountPath: /license/
-          {{- end }}
-          {{- if .Values.runtime.composed.enabled }}
+{{- end }}
+{{- if .Values.runtime.composed.enabled }}
             - name: release-data
               mountPath: /emptydir
-          {{- end }}
-            {{- if .Values.runtime.composed.requirements }}
+{{- end }}
+{{- if .Values.runtime.composed.requirements }}
             - name: requirements-txt
               mountPath: /requirements.txt
               subPath: requirements.txt
-            {{- end }}
+{{- end }}
             - name: temporary-data
               mountPath: /app/temporary_data
-            {{- with .Values.worker.deployment.runtimeContainer.volumeMounts }}
+{{- with .Values.worker.deployment.runtimeContainer.volumeMounts }}
             {{ toYaml . | nindent 12 }}
-            {{- end }}
-      {{- if .Values.worker.deployment.priorityClassName }}
+{{- end }}
+{{- if .Values.worker.deployment.priorityClassName }}
       priorityClassName: {{ .Values.worker.deployment.priorityClassName | quote }}
-      {{- end }}
-      {{- if .Values.worker.deployment.runtimeClassName }}
+{{- end }}
+{{- if .Values.worker.deployment.runtimeClassName }}
       runtimeClassName: {{ .Values.worker.deployment.runtimeClassName | quote }}
-      {{- end }}
+{{- end }}
       volumes:
-        {{- if .Values.temporaryData.persistentVolumeClaim.enabled }}
+{{- if .Values.temporaryData.persistentVolumeClaim.enabled }}
         - name: temporary-data
           ephemeral:
             volumeClaimTemplate:
@@ -216,48 +216,48 @@ spec:
                 resources:
                   requests:
                     storage: {{ .Values.temporaryData.persistentVolumeClaim.size }}
-        {{- end }}
-        {{- with .Values.license }}
+{{- end }}
+{{- with .Values.license }}
         - name: license
           secret:
             secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
             items:
               - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
                 path: license.json
-        {{- end }}
-        {{- if .Values.runtime.composed.requirements }}
+{{- end }}
+{{- if .Values.runtime.composed.requirements }}
         - name: requirements-txt
           configMap:
             name: {{ include "polars.worker.fullname" . }}-requirements-txt
             items:
               - key: requirementsTxt
                 path: requirements.txt
-        {{- end }}
-        {{- if .Values.runtime.composed.enabled }}
+{{- end }}
+{{- if .Values.runtime.composed.enabled }}
         - name: release-data
           emptyDir: {}
-        {{- end }}
-        {{- if not .Values.temporaryData.persistentVolumeClaim.enabled }}
+{{- end }}
+{{- if not .Values.temporaryData.persistentVolumeClaim.enabled }}
         - name: temporary-data
           emptyDir: {}
-        {{- end }}
-        {{- with .Values.worker.deployment.volumes }}
+{{- end }}
+{{- with .Values.worker.deployment.volumes }}
         {{ toYaml . | nindent 8 }}
-        {{- end }}
-      {{- with .Values.worker.deployment.nodeSelector }}
+{{- end }}
+{{- with .Values.worker.deployment.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.deployment.affinity }}
+{{- end }}
+{{- with .Values.worker.deployment.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.deployment.tolerations }}
+{{- end }}
+{{- with .Values.worker.deployment.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.deployment.topologySpreadConstraints }}
+{{- end }}
+{{- with .Values.worker.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
+{{- end }}
       hostNetwork: {{ .Values.worker.deployment.hostNetwork }}
