@@ -5,9 +5,9 @@ metadata:
   labels:
     {{- include "polars.labels" . | nindent 4 }}
   annotations:
-    {{- with .Values.scheduler.services.internal.annotations }}
+{{- with .Values.scheduler.services.internal.annotations }}
     {{ toYaml . | nindent 4 }}
-    {{- end }}
+{{- end }}
 spec:
   type: {{ .Values.scheduler.services.internal.type }}
   ports:
