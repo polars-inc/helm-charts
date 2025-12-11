@@ -120,9 +120,11 @@ spec:
               value: {{ .Values.runtime.composed.polarsExtras | default "" }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
-{{- if .Values.runtime.composed.requirements }}
+{{- if .Values.runtime.composed.enabled }}
+  {{- if .Values.runtime.composed.requirements }}
             - name: PYTHON_REQUIREMENTS
               value: /requirements.txt
+  {{- end }}
 {{- end }}
             - name: UV_PATH
               value: "/emptydir/bin/uv"
@@ -205,6 +207,11 @@ spec:
               mountPath: /license/
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
+  {{- if .Values.runtime.composed.requirements }}
+            - name: requirements-txt
+              mountPath: /requirements.txt
+              subPath: requirements.txt
+  {{- end }}
             - name: release-data
               mountPath: /emptydir
 {{- end }}
@@ -227,6 +234,14 @@ spec:
                 path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
+  {{- if .Values.runtime.composed.requirements }}
+        - name: requirements-txt
+          configMap:
+            name: {{ include "polars.fullname" . }}-requirements-txt
+            items:
+              - key: requirementsTxt
+                path: requirements.txt
+  {{- end }}
         - name: release-data
           emptyDir: {}
 {{- end }}
