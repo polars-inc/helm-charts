@@ -174,14 +174,14 @@ spec:
   {{- end }}
 {{- else }}
             - name: PC_CUBLET__worker__shuffle_data_path
-              value: /app/shuffle_data/
+              value: /app/shuffle_data/shuffle_data
 {{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
               value: "full"
             - name: POLARS_TEMP_DIR
-              value: /app/temporary_data/temp-dir
+              value: /app/temporary_data/temporary_data
 {{- if .Values.acceptEula }}
             - name: POLARS_EULA_ACCEPTED
               value: "yes"
