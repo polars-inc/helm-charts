@@ -153,16 +153,34 @@ Note that the helm tests will still use the runtime defined in `.Values.runtime.
 
 Polars requires large data storage for its operation. There are two main types of storage that need to be configured:
 
-#### Temporary data
+#### Shuffle data
 
 High-performance storage for shuffle data and other Polars temporary data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
-temporaryData:
-  persistentVolumeClaim:
+shuffleData:
+  ephemeralVolumeClaim:
     enabled: true
     storageClassName: "hostpath" # As configured in your k8s cluster
     size: 125Gi
+```
+
+You can also configure to shuffle to S3 instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+
+```yaml
+shuffleData:
+  s3:
+    enabled: true
+    endpoint: "s3://my-bucket/path/to/dir"
+    options:
+      - name: aws_access_key_id
+        valueFrom:
+          secretKeyRef:
+            name: my-s3-secret
+            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
+  # etc.
 ```
 
 #### Anonymous results data
@@ -185,16 +203,16 @@ anonymousResults:
   # etc.
 ```
 
-#### Volume retention
+#### Temporary data
 
-When using S3-compatible storage for anonymous results, it is recommended to configure the retention policy of the temporary data volume to `Delete`, so that temporary data is automatically cleaned up when the pod is deleted. Don't enable this if you store anonymous results on a persistent volume claim, as this would delete all anonymous results when the pod is deleted.
+Polars itself uses some temporary storage location in the streaming engine and in some cases when downloading remote files. For most queries this is a relatively small volume and is not performance sensitive. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
-worker:
-  deployment:
-    persistentVolumeClaimRetentionPolicy:
-      whenDeleted: Delete
-      whenScaled: Delete
+temporaryData:
+  ephemeralVolumeClaim:
+    enabled: true
+    storageClassName: "hostpath" # As configured in your k8s cluster
+    size: 125Gi
 ```
 
 ### Resource allocation and node selectors
