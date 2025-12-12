@@ -152,61 +152,66 @@ Note that the helm tests will still use the runtime defined in `.Values.runtime.
 
 Polars requires large data storage for its operation. There are two main types of storage that need to be configured:
 
-#### Temporary data
+#### Shuffle data
 
-High-performance storage for shuffle data and other Polars temporary data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
+High-performance storage for shuffle data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
-temporaryData:
-  persistentVolumeClaim:
+shuffleData:
+  ephemeralVolumeClaim:
     enabled: true
     storageClassName: "hostpath" # As configured in your k8s cluster
     size: 125Gi
 ```
 
+You can also configure to shuffle to S3 instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+
+```yaml
+shuffleData:
+  s3:
+    enabled: true
+    endpoint: "s3://my-bucket/path/to/dir"
+    options:
+      - name: aws_access_key_id
+        valueFrom:
+          secretKeyRef:
+            name: my-s3-secret
+            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
+  # etc.
+```
+
 #### Anonymous results data
 
-For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. Polars accepts credentials for S3-compatible storage through standard AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, `AWS_REGION`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces. Finally, Note that these credentials may also be used for other AWS SDK calls made by Polars (e.g. some user-supplied sinks in queries).
+For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 anonymousResults:
   s3:
     enabled: true
     endpoint: "s3://my-bucket/path/to/dir"
-
-scheduler:
-  deployment:
-    runtimeContainer:
-      env:
-      - name: AWS_ACCESS_KEY_ID
+    options:
+      - name: aws_access_key_id
         valueFrom:
           secretKeyRef:
             name: my-s3-secret
             key: accessKeyId
-  # etc.
-
-worker:
-  deployment:
-    runtimeContainer:
-      env:
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: my-s3-secret
-            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
   # etc.
 ```
 
-#### Volume retention
+#### Temporary data
 
-When using S3-compatible storage for anonymous results, it is recommended to configure the retention policy of the temporary data volume to `Delete`, so that temporary data is automatically cleaned up when the pod is deleted. Don't enable this if you store anonymous results on a persistent volume claim, as this would delete all anonymous results when the pod is deleted.
+Polars itself uses some temporary storage location in the streaming engine and in some cases when downloading remote files. For most queries this is a relatively small volume and is not performance sensitive. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
-worker:
-  deployment:
-    persistentVolumeClaimRetentionPolicy:
-      whenDeleted: Delete
-      whenScaled: Delete
+temporaryData:
+  ephemeralVolumeClaim:
+    enabled: true
+    storageClassName: "hostpath" # As configured in your k8s cluster
+    size: 125Gi
 ```
 
 ### Resource allocation and node selectors
@@ -313,13 +318,20 @@ Polars on-premise uses OpenTelemetry as its telemetry framework. To receive OTLP
 | telemetry.otlpEndpoint | string | `""` | Endpoint to send OTLP traces and metrics to. |
 | logLevel | string | `"info"` | One of "info", "debug", "trace". |
 | workerHeartbeatIntervalSecs | int | `5` | Heartbeat interval between polars workers and the scheduler in seconds. |
-| anonymousResults | object | `{"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir"}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
+| anonymousResults | object | `{"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
 | anonymousResults.s3.enabled | bool | `false` | Write anonymous results to S3. |
-| anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials as environment variables in worker.env. Standard AWS environment variables are supported (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_REGION). Note that these credentials may also be used for other AWS SDK calls made by Polars (e.g. some user-supplied sinks in queries). |
+| anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
+| anonymousResults.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
 | allowSharedDisk | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
-| temporaryData.persistentVolumeClaim.enabled | bool | `false` | Ephemeral storage for temporary data used in polars (e.g. shuffle or polars streaming data). Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local |
-| temporaryData.persistentVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
-| temporaryData.persistentVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Write shuffle data to volume claimEphemeral storage for temporary data used in shuffles. Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local |
+| shuffleData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| shuffleData.ephemeralVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| shuffleData.s3.enabled | bool | `false` | Write shuffle data to S3. |
+| shuffleData.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
+| shuffleData.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
+| temporaryData.ephemeralVolumeClaim.enabled | bool | `false` | Ephemeral storage for temporary data used in polars (e.g. polars streaming data). More info: https://kubernetes.io/docs/concepts/storage/volumes/#local |
+| temporaryData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| temporaryData.ephemeralVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
 | observatory.maxMetricsBytesTotal | int | `104857600` | Maximum number of bytes for host metrics storage |
 | worker.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | worker.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
