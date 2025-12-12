@@ -1,4 +1,4 @@
-# Polars on-premise: Extremely fast distributed Query Engine for DataFrames
+# Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 {{ template "chart.deprecationWarning" . }}
 
 {{ template "chart.badgesSection" . }}
@@ -45,13 +45,17 @@ query = (
 print(query.await_result())
 ```
 
+### Helm Tests
+
+You can instead also run the provided helm tests by running `helm test polars`. The chart contains a default list of images in `.Values.tests.images` that correspond to the supported polars-cloud client versions. The tests currently always run using the runtime image specified in `.Values.runtime.composed.runtime` since the client and compute cluster need to run the same version.
+
 ## Configuration
 
-Running Polars on-premise in a production environment requires some configuration. The most important aspects are described below.
+Running Polars on-premises in a production environment requires some configuration. The most important aspects are described below.
 
 ### Runtime
 
-Polars on-premise consists of a single scheduler and multiple workers. Both components are contained in a single binary. While the scheduler can run without any system-level dependencies, the worker node needs the following:
+Polars on-premises consists of a single scheduler and multiple workers. Both components are contained in a single binary. While the scheduler can run without any system-level dependencies, the worker node needs the following:
 
 * Python runtime (e.g. any version)
 * Polars (i.e. pip wheel)
@@ -84,7 +88,7 @@ runtime:
     polarsExtras: "async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone"
 ```
 
-Behind the scenes, this mechanism copies the Polars on-premise binary, wheel, uv, and a setup script from an init-container to the pod's main container. On startup of the main container, the setup script uses uv to install the polars wheel with the additional specified packages before starting the worker.
+Behind the scenes, this mechanism copies the Polars on-premises binary, wheel, uv, and a setup script from an init-container to the pod's main container. On startup of the main container, the setup script uses uv to install the polars wheel with the additional specified packages before starting the worker.
 
 If you prefer self-building a Docker image, you can instead configure the chart to use your image:
 
@@ -143,76 +147,83 @@ COPY --from=polarscloud/polars-on-premises:20251203 /opt/bin/pc-cublet /opt/bin/
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
 
+Note that the helm tests will still use the runtime defined in `.Values.runtime.composed.runtime`, so ensure that this image contains the same Python version as your prebuilt image. All the Python dependencies required for the tests are already included in the image used in the helm test, and the test does not require internet access, so a prebuilt image for the tests has no direct advantage.
+
 ### Storage
 
 Polars requires large data storage for its operation. There are two main types of storage that need to be configured:
 
-#### Temporary data
+#### Shuffle data
 
-High-performance storage for shuffle data and other Polars temporary data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose (e.g. AWS ebs). Since we're using a statefulset for the worker pods, a persistent volume claim is created for each pod.
+High-performance storage for shuffle data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
-temporaryData:
-  persistentVolumeClaim:
+shuffleData:
+  ephemeralVolumeClaim:
     enabled: true
     storageClassName: "hostpath" # As configured in your k8s cluster
     size: 125Gi
 ```
 
+You can also configure to shuffle to S3 instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+
+```yaml
+shuffleData:
+  s3:
+    enabled: true
+    endpoint: "s3://my-bucket/path/to/dir"
+    options:
+      - name: aws_access_key_id
+        valueFrom:
+          secretKeyRef:
+            name: my-s3-secret
+            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
+  # etc.
+```
+
 #### Anonymous results data
 
-For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. Polars accepts credentials for S3-compatible storage through standard AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, `AWS_REGION`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces. Finally, Note that these credentials may also be used for other AWS SDK calls made by Polars (e.g. some user-supplied sinks in queries).
+For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 anonymousResults:
   s3:
     enabled: true
     endpoint: "s3://my-bucket/path/to/dir"
-
-scheduler:
-  deployment:
-    runtimeContainer:
-      env:
-      - name: AWS_ACCESS_KEY_ID
+    options:
+      - name: aws_access_key_id
         valueFrom:
           secretKeyRef:
             name: my-s3-secret
             key: accessKeyId
-  # etc.
-
-worker:
-  statefulset:
-    runtimeContainer:
-      env:
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: my-s3-secret
-            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
   # etc.
 ```
 
-#### Volume retention
+#### Temporary data
 
-When using S3-compatible storage for anonymous results, it is recommended to configure the retention policy of the temporary data volume to `Delete`, so that temporary data is automatically cleaned up when the pod is deleted. Don't enable this if you store anonymous results on a persistent volume claim, as this would delete all anonymous results when the pod is deleted.
+Polars itself uses some temporary storage location in the streaming engine and in some cases when downloading remote files. For most queries this is a relatively small volume and is not performance sensitive. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
-worker:
-  statefulset:
-    persistentVolumeClaimRetentionPolicy:
-      whenDeleted: Delete
-      whenScaled: Delete
+temporaryData:
+  ephemeralVolumeClaim:
+    enabled: true
+    storageClassName: "hostpath" # As configured in your k8s cluster
+    size: 125Gi
 ```
 
 ### Resource allocation and node selectors
 
-Most of the time, it is a good idea to run Polars on-premise on dedicated nodes, with only one worker pod per node.
+Most of the time, it is a good idea to run Polars on-premises on dedicated nodes, with only one worker pod per node.
 
 First, figure out the available resources on your nodes. This is usually lower than the actual node resources, as Kubernetes reserves some resources for system daemons. For example, if you have a cluster of 3 `m4.xlarge` nodes (4 vCPUs, 16GiB memory), you may have 3770m CPU and 14.31GiB memory available.
 
 ```yaml
 worker:
-  statefulset:
+  deployment:
     replicaCount: 3
 
     runtimeContainer:
@@ -226,20 +237,19 @@ worker:
           memory: 14.31GiB
 ```
 
-If your cluster has other workloads running on it, we still recommend running Polars on-premise on dedicated nodes, and using node selectors and taints/tolerations to ensure that only Polars on-premise pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
+If your cluster has other workloads running on it, we still recommend running Polars on-premises on dedicated nodes, and using node selectors and taints/tolerations to ensure that only Polars on-premises pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
 
 ```yaml
 worker:
-  statefulset:
+  deployment:
     nodeSelector:
       kubernetes.io/e2e-az-name: e2e-az1
-    
     tolerations:
     - key: "key"
       operator: "Equal"
       value: "value"
       effect: "NoSchedule"
-    
+
     affinity:
      nodeAffinity:
        requiredDuringSchedulingIgnoredDuringExecution:
@@ -255,7 +265,7 @@ A compute cluster can be fully occupied running a query, preventing new queries 
 
 ### Exposing Polars on-premise
 
-To use Polars on-premise from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, you must set `insecure=True` in the `ClusterContext`.
+To use Polars on-premises from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, you must set `insecure=True` in the `ClusterContext`.
 
 When the python client can't reach the scheduler, it will fail with a connection timeout like this:
 
@@ -267,7 +277,7 @@ Hint: you may need to restart the query if this error persists
 
 ## Telemetry
 
-Polars on-premise uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
+Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
 
 {{ template "chart.maintainersSection" . }}
 

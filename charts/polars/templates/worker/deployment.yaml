@@ -1,79 +1,62 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ include "polars.worker.fullname" . }}
   labels:
     {{ include "polars.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.worker.statefulset.replicaCount }}
-  revisionHistoryLimit: {{ .Values.worker.statefulset.revisionHistoryLimit }}
+  replicas: {{ .Values.worker.deployment.replicaCount }}
+  revisionHistoryLimit: {{ .Values.worker.deployment.revisionHistoryLimit }}
   selector:
     matchLabels:
       app.kubernetes.io/component: worker
       {{ include "polars.selectorLabels" . | nindent 6 }}
-  serviceName: {{ include "polars.worker-headless.fullname" . }}
-  podManagementPolicy: {{ .Values.worker.statefulset.podManagementPolicy }}
-  updateStrategy:
-    {{ toYaml .Values.worker.statefulset.updateStrategy | nindent 4 }}
-  {{- with .Values.worker.statefulset.persistentVolumeClaimRetentionPolicy }}
-  persistentVolumeClaimRetentionPolicy:
-    {{ toYaml . | nindent 4 }}
-  {{- end }}
-  volumeClaimTemplates:
-  {{- if .Values.temporaryData.persistentVolumeClaim.enabled }}
-    - metadata:
-        name: temporary-data
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: {{ .Values.temporaryData.persistentVolumeClaim.storageClassName }}
-        resources:
-          requests:
-            storage: {{ .Values.temporaryData.persistentVolumeClaim.size }}
-  {{- end }}
+  strategy:
+    type: "Recreate"
   template:
     metadata:
-      {{- with .Values.worker.statefulset.podAnnotations }}
+{{- with .Values.worker.deployment.podAnnotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
+{{- end }}
       labels:
         app.kubernetes.io/component: worker
         {{ include "polars.labels" . | nindent 8 }}
-        {{- with .Values.worker.statefulset.podLabels }}
+{{- with .Values.worker.deployment.podLabels }}
         {{ toYaml . | nindent 8 }}
-        {{- end }}
+{{- end }}
     spec:
-      {{- with .Values.worker.statefulset.dnsPolicy }}
+{{- with .Values.worker.deployment.dnsPolicy }}
       dnsPolicy: {{ . }}
-      {{- end }}
-      {{- with .Values.worker.statefulset.dnsConfig }}
+{{- end }}
+{{- with .Values.worker.deployment.dnsConfig }}
       dnsConfig:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.statefulset.schedulerName }}
+{{- end }}
+{{- with .Values.worker.deployment.schedulerName }}
       schedulerName: {{ . }}
-      {{- end }}
-      {{- with .Values.imagePullSecrets }}
+{{- end }}
+{{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
+{{- end }}
       serviceAccountName: {{ include "polars.worker.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.worker.serviceAccount.automount }}
-      {{- with .Values.worker.statefulset.podSecurityContext }}
+{{- with .Values.worker.deployment.podSecurityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.statefulset.hostAliases }}
+{{- end }}
+{{- with .Values.worker.deployment.hostAliases }}
       hostAliases:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{ if .Values.runtime.composed.enabled }}
+{{- end }}
+{{ if .Values.runtime.composed.enabled }}
       initContainers:
         - name: release
-        {{- with .Values.worker.statefulset.distContainer.securityContext }}
+  {{- with .Values.worker.deployment.distContainer.securityContext }}
           securityContext:
           {{ toYaml . | nindent 12 }}
-        {{- end }}
+  {{- end }}
           image: "{{ .Values.runtime.composed.dist.repository }}:{{ .Values.runtime.composed.dist.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.runtime.composed.dist.pullPolicy }}
           command:
@@ -82,21 +65,21 @@ spec:
             - -a
             - /opt/.
             - /emptydir
-        {{- with .Values.worker.statefulset.distContainer.resources }}
+  {{- with .Values.worker.deployment.distContainer.resources }}
           resources:
           {{ toYaml . | nindent 12 }}
-        {{- end }}
+  {{- end }}
           volumeMounts:
             - name: release-data
               mountPath: /emptydir
-      {{- end }}
+{{- end }}
       containers:
         - name: worker
-          {{- with .Values.worker.statefulset.runtimeContainer.securityContext }}
+{{- with .Values.worker.deployment.runtimeContainer.securityContext }}
           securityContext:
             {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- if .Values.runtime.composed.enabled }}
+{{- end }}
+{{- if .Values.runtime.composed.enabled }}
           image: "{{ .Values.runtime.composed.runtime.repository }}:{{ .Values.runtime.composed.runtime.tag }}"
           imagePullPolicy: {{ .Values.runtime.composed.runtime.pullPolicy }}
           command:
@@ -104,11 +87,11 @@ spec:
           args:
             - /emptydir/bin/pc-cublet
             - service
-          {{- end }}
-          {{- if .Values.runtime.prebuilt.enabled }}
+{{- end }}
+{{- if .Values.runtime.prebuilt.enabled }}
           image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
           imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
-          {{- end }}
+{{- end }}
           ports:
             - name: worker-flight
               containerPort: 5052
@@ -116,35 +99,37 @@ spec:
             - name: worker-service
               containerPort: 5053
               protocol: TCP
-          {{- with .Values.worker.statefulset.runtimeContainer.readinessProbe }}
+{{- with .Values.worker.deployment.runtimeContainer.readinessProbe }}
           readinessProbe:
             {{ toYaml . | nindent 12 }}
-          {{- end }}
+{{- end }}
           env:
             - name: POLARS_EXTRAS
               value: {{ .Values.runtime.composed.polarsExtras | default "" }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
-            {{- if .Values.runtime.composed.requirements }}
+{{- if .Values.runtime.composed.enabled }}
+  {{- if .Values.runtime.composed.requirements }}
             - name: PYTHON_REQUIREMENTS
               value: /requirements.txt
-            {{- end }}
+  {{- end }}
+{{- end }}
             - name: UV_PATH
               value: "/emptydir/bin/uv"
-            {{- if .Values.telemetry.otlpEndpoint }}
+{{- if .Values.telemetry.otlpEndpoint }}
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
-            {{- end }}
+{{- end }}
             - name: OTEL_SERVICE_INSTANCE_ID
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
             - name: POLARS_SKIP_DSL_HASH_VERIFICATION
               value: "1"
-            {{- if .Values.license }}
+{{- if .Values.license }}
             - name: PC_CUBLET__license
               value: "/license/license.json"
-            {{- end }}
+{{- end }}
             - name: PC_CUBLET__static_leader__leader_key
               value: "{{ include "polars.worker.fullname" . }}-0"
             - name: PC_CUBLET__static_leader__public_leader_addr
@@ -172,98 +157,143 @@ spec:
               value: "5053"
             - name: PC_CUBLET__worker__heartbeat_interval_secs
               value: {{ .Values.workerHeartbeatIntervalSecs | quote }}
+{{- if .Values.shuffleData.s3.enabled }}
+            - name: PC_CUBLET__worker__shuffle_location__s3__url
+              value: {{ .Values.shuffleData.s3.endpoint | quote }}
+  {{- range .Values.shuffleData.s3.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.shuffleData.s3.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__worker__shuffle_location__s3__{{ .name | required "missing .Values.shuffleData.s3.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{- else }}
             - name: PC_CUBLET__worker__shuffle_data_path
-              value: /app/temporary_data/shuffle-dir
+              value: /app/shuffle_data/shuffle_data
+{{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
               value: "full"
             - name: POLARS_TEMP_DIR
-              value: /app/temporary_data/temp-dir
-            {{- if .Values.acceptEula }}
+              value: /app/temporary_data/temporary_data
+{{- if .Values.acceptEula }}
             - name: POLARS_EULA_ACCEPTED
               value: "yes"
-            {{- end }}
-            {{- with .Values.worker.statefulset.runtimeContainer.env }}
+{{- end }}
+{{- with .Values.worker.deployment.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
-            {{- end }}
-          {{- if .Values.worker.statefulset.runtimeContainer.lifecycleHooks }}
+{{- end }}
+{{- if .Values.worker.deployment.runtimeContainer.lifecycleHooks }}
           lifecycle:
-            {{ toYaml .Values.worker.statefulset.runtimeContainer.lifecycleHooks | nindent 12 }}
-          {{- end }}
+            {{ toYaml .Values.worker.deployment.runtimeContainer.lifecycleHooks | nindent 12 }}
+{{- end }}
           # TODO: lifenessProbe
           # TODO: readinessProbe:
-          {{- with .Values.worker.statefulset.runtimeContainer.resources }}
+{{- with .Values.worker.deployment.runtimeContainer.resources }}
           resources:
             {{ toYaml . | nindent 12 }}
-          {{- end }}
+{{- end }}
           volumeMounts:
-          {{- with .Values.license }}
+{{- with .Values.license }}
             - name: license
               mountPath: /license/
-          {{- end }}
-          {{- if .Values.runtime.composed.enabled }}
-            - name: release-data
-              mountPath: /emptydir
-          {{- end }}
-            {{- if .Values.runtime.composed.requirements }}
+{{- end }}
+{{- if .Values.runtime.composed.enabled }}
+  {{- if .Values.runtime.composed.requirements }}
             - name: requirements-txt
               mountPath: /requirements.txt
               subPath: requirements.txt
-            {{- end }}
+  {{- end }}
+            - name: release-data
+              mountPath: /emptydir
+{{- end }}
             - name: temporary-data
               mountPath: /app/temporary_data
-            {{- with .Values.worker.statefulset.runtimeContainer.volumeMounts }}
+{{- if not .Values.shuffleData.s3.enabled }}
+            - name: shuffle-data
+              mountPath: /app/shuffle_data
+{{- end }}
+{{- with .Values.worker.deployment.runtimeContainer.volumeMounts }}
             {{ toYaml . | nindent 12 }}
-            {{- end }}
-      {{- if .Values.worker.statefulset.priorityClassName }}
-      priorityClassName: {{ .Values.worker.statefulset.priorityClassName | quote }}
-      {{- end }}
-      {{- if .Values.worker.statefulset.runtimeClassName }}
-      runtimeClassName: {{ .Values.worker.statefulset.runtimeClassName | quote }}
-      {{- end }}
+{{- end }}
+{{- if .Values.worker.deployment.priorityClassName }}
+      priorityClassName: {{ .Values.worker.deployment.priorityClassName | quote }}
+{{- end }}
+{{- if .Values.worker.deployment.runtimeClassName }}
+      runtimeClassName: {{ .Values.worker.deployment.runtimeClassName | quote }}
+{{- end }}
       volumes:
-        {{- with .Values.license }}
+        - name: temporary-data
+{{- if .Values.temporaryData.ephemeralVolumeClaim.enabled }}
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes: [ "ReadWriteOnce" ]
+                storageClassName: {{ .Values.temporaryData.ephemeralVolumeClaim.storageClassName }}
+                resources:
+                  requests:
+                    storage: {{ .Values.temporaryData.ephemeralVolumeClaim.size }}
+{{- else }}
+          emptyDir: {}
+{{- end }}
+{{- if not .Values.shuffleData.s3.enabled }}
+        - name: shuffle-data
+  {{- if .Values.shuffleData.ephemeralVolumeClaim.enabled }}
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes: [ "ReadWriteOnce" ]
+                storageClassName: {{ .Values.shuffleData.ephemeralVolumeClaim.storageClassName }}
+                resources:
+                  requests:
+                    storage: {{ .Values.shuffleData.ephemeralVolumeClaim.size }}
+  {{- else }}
+          emptyDir: {}
+  {{- end }}
+{{- end }}
+{{- with .Values.license }}
         - name: license
           secret:
             secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
             items:
               - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
                 path: license.json
-        {{- end }}
-        {{- if .Values.runtime.composed.requirements }}
+{{- end }}
+{{- if .Values.runtime.composed.enabled }}
+  {{- if .Values.runtime.composed.requirements }}
         - name: requirements-txt
           configMap:
-            name: {{ include "polars.worker.fullname" . }}-requirements-txt
+            name: {{ include "polars.fullname" . }}-requirements-txt
             items:
               - key: requirementsTxt
                 path: requirements.txt
-        {{- end }}
-        {{- if .Values.runtime.composed.enabled }}
+  {{- end }}
         - name: release-data
           emptyDir: {}
-        {{- end }}
-        {{- if not .Values.temporaryData.persistentVolumeClaim.enabled }}
-        - name: temporary-data
-          emptyDir: {}
-        {{- end }}
-        {{- with .Values.worker.statefulset.volumes }}
+{{- end }}
+{{- with .Values.worker.deployment.volumes }}
         {{ toYaml . | nindent 8 }}
-        {{- end }}
-      {{- with .Values.worker.statefulset.nodeSelector }}
+{{- end }}
+{{- with .Values.worker.deployment.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.statefulset.affinity }}
+{{- end }}
+{{- with .Values.worker.deployment.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.statefulset.tolerations }}
+{{- end }}
+{{- with .Values.worker.deployment.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.worker.statefulset.topologySpreadConstraints }}
+{{- end }}
+{{- with .Values.worker.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      hostNetwork: {{ .Values.worker.statefulset.hostNetwork }}
+{{- end }}
+      hostNetwork: {{ .Values.worker.deployment.hostNetwork }}

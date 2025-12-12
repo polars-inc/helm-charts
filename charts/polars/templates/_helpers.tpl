@@ -11,23 +11,23 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "polars.fullname" -}}
-{{- if .Values.fullnameOverride }}
+  {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if contains $name .Release.Name }}
+  {{- else }}
+    {{- $name := default .Chart.Name .Values.nameOverride }}
+    {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
+    {{- else }}
+      {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "polars.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+  {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -36,9 +36,9 @@ Common labels
 {{- define "polars.labels" -}}
 helm.sh/chart: {{ include "polars.chart" . }}
 {{ include "polars.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
+  {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
+  {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
@@ -61,11 +61,11 @@ app.kubernetes.io/name={{ include "polars.name" . }},app.kubernetes.io/instance=
 Create the name of the service account to use
 */}}
 {{- define "polars.serviceAccountName" -}}
-{{- if .Values.worker.serviceAccount.create }}
+  {{- if .Values.worker.serviceAccount.create }}
 {{- default (include "polars.fullname" .) .Values.worker.serviceAccount.name }}
-{{- else }}
+  {{- else }}
 {{- default "default" .Values.worker.serviceAccount.name }}
-{{- end }}
+  {{- end }}
 {{- end }}
 
 {{/*
@@ -80,7 +80,7 @@ Create the name of the service account to use
 Create worker fullname
 */}}
 {{- define "polars.worker.fullname" -}}
-{{- printf "%s-worker" (include "polars.fullname" .) }}
+  {{- printf "%s-worker" (include "polars.fullname" .) }}
 {{- end }}
 
 {{/*
@@ -91,10 +91,24 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Create the name of the service account to use
+*/}}
+{{- define "polars.tests.serviceAccountName" -}}
+{{- default "default" .Values.tests.serviceAccount.name }}
+{{- end }}
+
+{{/*
+Create tests fullname
+*/}}
+{{- define "polars.tests.fullname" -}}
+  {{- printf "%s-tests" (include "polars.fullname" .) }}
+{{- end }}
+
+{{/*
 Create opentelemetry-collector fullname
 */}}
 {{- define "polars.opentelemetry-collector.fullname" -}}
-{{- printf "%s-opentelemetry-collector" (include "polars.fullname" .) }}
+  {{- printf "%s-opentelemetry-collector" (include "polars.fullname" .) }}
 {{- end }}
 
 {{/*
@@ -108,37 +122,30 @@ Create the name of the service account to use
 Create scheduler internal fullname
 */}}
 {{- define "polars.scheduler-internal.fullname" -}}
-{{- printf "%s-scheduler-internal" (include "polars.fullname" .) }}
+  {{- printf "%s-scheduler-internal" (include "polars.fullname" .) }}
 {{- end }}
 
 {{/*
 Create scheduler fullname
 */}}
 {{- define "polars.scheduler.fullname" -}}
-{{- printf "%s-scheduler" (include "polars.fullname" .) }}
+  {{- printf "%s-scheduler" (include "polars.fullname" .) }}
 {{- end }}
 
 {{/*
 Create observatory fullname
 */}}
 {{- define "polars.observatory.fullname" -}}
-{{- printf "%s-observatory" (include "polars.fullname" .) }}
-{{- end }}
-
-{{/*
-Create worker headless service fullname
-*/}}
-{{- define "polars.worker-headless.fullname" -}}
-{{- printf "%s-worker-headless" (include "polars.fullname" .) }}
+  {{- printf "%s-observatory" (include "polars.fullname" .) }}
 {{- end }}
 
 {{/*
 Cluster ID
 */}}
 {{- define "polars.clusterId" -}}
-{{- if .Values.clusterId }}
+  {{- if .Values.clusterId }}
 {{- .Values.clusterId | quote }}
-{{- else }}
-{{- printf "%s/%s" .Release.Namespace .Release.Name | quote }}
-{{- end }}
+  {{- else }}
+    {{- printf "%s/%s" .Release.Namespace .Release.Name | quote }}
+  {{- end }}
 {{- end }}

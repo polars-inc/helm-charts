@@ -74,15 +74,44 @@ anonymousResults:
   s3:
     # -- Write anonymous results to S3.
     enabled: false
-    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials as environment variables in worker.env. Standard AWS environment variables are supported (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_REGION). Note that these credentials may also be used for other AWS SDK calls made by Polars (e.g. some user-supplied sinks in queries).
+    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.
     endpoint: "s3://my-bucket/path/to/dir"
+    # -- Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html
+    options: []
+#      - name: aws_access_key_id
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-s3-secret
+#            key: accessKeyId
 
 # -- Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage
 allowSharedDisk: true
 
+shuffleData:
+  ephemeralVolumeClaim:
+    # -- Write shuffle data to volume claimEphemeral storage for temporary data used in shuffles. Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local
+    enabled: false
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: "hostpath"
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 125Gi
+
+  s3:
+    # -- Write shuffle data to S3.
+    enabled: false
+    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "s3://my-bucket/path/to/dir"
+    # -- Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html
+    options: []
+#      - name: aws_access_key_id
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-s3-secret
+#            key: accessKeyId
+
 temporaryData:
-  persistentVolumeClaim:
-    # -- Ephemeral storage for temporary data used in polars (e.g. shuffle or polars streaming data). Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local
+  ephemeralVolumeClaim:
+    # -- Ephemeral storage for temporary data used in polars (e.g. polars streaming data). More info: https://kubernetes.io/docs/concepts/storage/volumes/#local
     enabled: false
     # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
     storageClassName: "hostpath"
@@ -102,26 +131,12 @@ worker:
     # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
     automount: true
 
-  statefulset:
+  deployment:
     # -- Number of polars worker replicas.
     replicaCount: 2
 
-    # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the StatefulSet's revision history. The default value is 10.
+    # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10.
     revisionHistoryLimit: 10
-
-    # -- podManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down. One policy is OrderedReady, where pods are created in increasing order (pod-0, then pod-1, etc) and the controller will wait until each pod is ready before continuing. When scaling down, the pods are removed in the opposite order. The alternative policy is Parallel which will create pods in parallel to match the desired scale without waiting, and on scale down will delete all pods at once.
-    podManagementPolicy: Parallel
-
-    # -- updateStrategy indicates the StatefulSetUpdateStrategy that will be employed to update Pods in the StatefulSet when a revision is made to Template.
-    updateStrategy:
-      type: RollingUpdate
-      rollingUpdate:
-        maxUnavailable: 1
-
-    # -- PVCs for temporary data may be deleted when bringing down the compute cluster, while anonymous results PVCs may want to be retained. Since Kubernetes Kubernetes v1.32, statefulsets support setting retention policies for this purpose. Take caution when using this feature, as it applies on all PVCs created by the statefulset. More info: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
-    persistentVolumeClaimRetentionPolicy: { }
-    #  whenDeleted: Retain
-    #  whenScaled: Retain
 
     # -- Additional annotations to add to the scheduler pod.
     podAnnotations: {}
@@ -210,7 +225,7 @@ worker:
     # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
-    # == RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
     runtimeClassName: ""
 
     # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
@@ -373,7 +388,132 @@ scheduler:
     # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
-    # == RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    runtimeClassName: ""
+
+    # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
+    volumes: []
+    # - name: volume-name
+    #   emptyDir: {}
+
+    # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    nodeSelector: { }
+    #  kubernetes.io/e2e-az-name: e2e-az1
+
+    # -- If specified, the pod's scheduling constraints
+    affinity: { }
+    #  nodeAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      nodeSelectorTerms:
+    #      - matchExpressions:
+    #        - key: kubernetes.io/e2e-az-name
+    #          operator: In
+    #          values:
+    #          - e2e-az1
+
+    # -- If specified, the pod's tolerations.
+    tolerations: [ ]
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+
+    # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
+    topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: DoNotSchedule
+
+    # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
+    hostNetwork: false
+
+tests:
+  images:
+    - repository: "polarscloud/polars-on-premises-tests"
+      tag: "0.4.2"
+      pullPolicy: IfNotPresent
+
+  serviceAccount:
+    # -- Whether to create a service account.
+    create: false
+    # -- The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set.
+    name: ""
+    # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
+    automount: true
+
+  pod:
+    # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+    dnsPolicy: ""
+
+    # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+    dnsConfig: {}
+
+    # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
+    schedulerName: ""
+
+    # -- AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
+    automountServiceAccountToken: true
+
+    # -- SecurityContext holds pod-level security attributes and common container settings.
+    podSecurityContext: { }
+    #  fsGroup: 2000
+    #  runAsUser: 1000
+    #  runAsNonRoot: true
+
+    # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+    hostAliases: []
+
+    distContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+    runtimeContainer:
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: { }
+      #  capabilities:
+      #    drop:
+      #    - ALL
+      #  readOnlyRootFilesystem: true
+
+      # -- List of environment variables to set in the container.
+      env: []
+      # - name: ENV_VAR_NAME
+      #   value: ENV_VAR_VALUE
+
+      # -- Actions that the management system should take in response to container lifecycle events.
+      lifecycleHooks: {}
+
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 500m
+      #    memory: 512Mi
+      #  limits:
+      #    cpu: 1000m
+      #    memory: 1Gi
+
+      # -- Pod volumes to mount into the container's filesystem.
+      volumeMounts: []
+      # - name: volume-name
+      #   mountPath: /path/to/mount
+
+    # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+    priorityClassName: ""
+
+    # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
     runtimeClassName: ""
 
     # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes

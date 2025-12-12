@@ -1,0 +1,154 @@
+{{ $fail := "" }}
+
+{{ $E2E_SINK := "" }}
+{{- if .Values.anonymousResults.s3.enabled }}
+{{ $E2E_SINK = "anonymous" -}}
+{{- else if .Values.allowSharedDisk }}
+{{ $E2E_SINK = "/tmp/helm-tests" }}
+{{- else }}
+{{ $fail = "helm test requires either .Values.s3.enabled or .Values.allowSharedDisk" }}
+{{- end }}
+
+{{- range .Values.tests.images }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "polars.tests.fullname" $ }}-e2e-{{ .tag }}
+  labels:
+    {{ include "polars.labels" $ | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  {{- with $.Values.tests.pod.dnsPolicy }}
+  dnsPolicy: {{ . }}
+  {{- end }}
+  {{- with $.Values.tests.pod.dnsConfig }}
+  dnsConfig:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.tests.pod.schedulerName }}
+  schedulerName: {{ . }}
+  {{- end }}
+  {{- with $.Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  serviceAccountName: {{ include "polars.tests.serviceAccountName" $ }}
+  automountServiceAccountToken: {{ $.Values.tests.serviceAccount.automount }}
+  {{- with $.Values.tests.pod.podSecurityContext }}
+  securityContext:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.tests.pod.hostAliases }}
+  hostAliases:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if eq $fail "" }}
+  initContainers:
+    - name: release
+    {{- with $.Values.tests.pod.distContainer.securityContext }}
+      securityContext:
+      {{ toYaml . | nindent 8 }}
+    {{- end }}
+      image: "{{ .repository }}:{{ .tag }}"
+      imagePullPolicy: {{ .pullPolicy }}
+      command:
+        - /bin/cp
+      args:
+        - -a
+        - /opt/.
+        - /emptydir
+    {{- with $.Values.tests.pod.distContainer.resources }}
+      resources:
+      {{ toYaml . | nindent 8 }}
+    {{- end }}
+      volumeMounts:
+        - name: release-data
+          mountPath: /emptydir
+  {{- end }}
+  containers:
+    - name: tester
+  {{- with $.Values.tests.pod.runtimeContainer.securityContext }}
+      securityContext:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+      image: "{{ $.Values.runtime.composed.runtime.repository }}:{{ $.Values.runtime.composed.runtime.tag }}"
+      imagePullPolicy: {{ $.Values.runtime.composed.runtime.pullPolicy }}
+  {{- if eq $fail "" }}
+      command:
+        - /emptydir/setup.sh
+      workingDir: /tmp
+  {{- else }}
+      command:
+        - echo
+      args:
+        - "skipping tests due to: "
+        - {{ $fail | quote }}
+  {{- end }}
+      env:
+        - name: WHL_DIR
+          value: "/emptydir/whl"
+        - name: UV_PATH
+          value: "/emptydir/bin/uv"
+        - name: POLARS_COMPUTE_PLANE_TESTS_DIR
+          value: "/emptydir/tests"
+        - name: SCHEDULER_ADDRESS
+          value: "{{ include "polars.scheduler.fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
+        - name: PC_E2E_SINK
+          value: {{ $E2E_SINK | quote }}
+  {{- if gt (int $.Values.worker.deployment.replicaCount) 1 }}
+        - name: "PC_E2E_DISTRIBUTED"
+          value: "1"
+  {{- end }}
+  {{- with $.Values.tests.pod.runtimeContainer.env }}
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+  {{- if $.Values.tests.pod.runtimeContainer.lifecycleHooks }}
+      lifecycle:
+        {{ toYaml $.Values.tests.pod.runtimeContainer.lifecycleHooks | nindent 8 }}
+  {{- end }}
+  {{- with $.Values.tests.pod.runtimeContainer.resources }}
+      resources:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+      volumeMounts:
+        - name: tmp-data
+          mountPath: /tmp
+        - name: release-data
+          mountPath: /emptydir
+  {{- with $.Values.tests.pod.runtimeContainer.volumeMounts }}
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+  {{- if $.Values.tests.pod.priorityClassName }}
+  priorityClassName: {{ $.Values.tests.pod.priorityClassName | quote }}
+  {{- end }}
+  {{- if $.Values.tests.pod.runtimeClassName }}
+  runtimeClassName: {{ $.Values.tests.pod.runtimeClassName | quote }}
+  {{- end }}
+  volumes:
+    - name: tmp-data
+      emptyDir: {}
+    - name: release-data
+      emptyDir: {}
+  {{- with $.Values.tests.pod.volumes }}
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.tests.pod.nodeSelector }}
+  nodeSelector:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.tests.pod.affinity }}
+  affinity:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.tests.pod.tolerations }}
+  tolerations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.tests.pod.topologySpreadConstraints }}
+  topologySpreadConstraints:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ $.Values.tests.pod.hostNetwork }}
+{{- end }}

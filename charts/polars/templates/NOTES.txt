@@ -12,7 +12,7 @@
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.scheduler.fullname" . }} 5051:5051
 {{- end }}
 
-2. Use Polars on-premise with Python:
+2. Use Polars on-premises with Python:
   ```python
   import os
   import polars as pl

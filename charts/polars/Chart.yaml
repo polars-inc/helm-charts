@@ -4,8 +4,8 @@ description: Distributed query execution engine for Polars
 
 type: application
 
-version: 0.0.8
-appVersion: "20251203"
+version: 1.0.0
+appVersion: "20251212"
 deprecated: false
 
 dependencies: []
