@@ -170,7 +170,7 @@ spec:
               value: {{ .Values.anonymousResults.s3.endpoint | quote }}
   {{- range .Values.anonymousResults.s3.options }}
     {{- if eq .name "url" }}
-      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.anonymousResults.s3.url instead" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.anonymousResults.s3.endpoint instead" }}
     {{- end }}
             - name: PC_CUBLET__scheduler__anonymous_result_dst__s3__{{ .name | required "missing .Values.anonymousResults.s3.options[x].name" }}
     {{- if .value }}

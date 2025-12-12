@@ -162,7 +162,7 @@ spec:
               value: {{ .Values.shuffleData.s3.endpoint | quote }}
   {{- range .Values.shuffleData.s3.options }}
     {{- if eq .name "url" }}
-      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.shuffleData.s3.url instead" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.shuffleData.s3.endpoint instead" }}
     {{- end }}
             - name: PC_CUBLET__worker__shuffle_location__s3__{{ .name | required "missing .Values.shuffleData.s3.options[x].name" }}
     {{- if .value }}
