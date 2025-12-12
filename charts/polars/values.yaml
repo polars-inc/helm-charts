@@ -428,7 +428,10 @@ scheduler:
     hostNetwork: false
 
 tests:
-  images: []
+  images:
+    - repository: "polarscloud/polars-on-premises-tests"
+      tag: "0.4.2"
+      pullPolicy: IfNotPresent
 
   serviceAccount:
     # -- Whether to create a service account.
