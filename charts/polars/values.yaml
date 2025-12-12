@@ -74,15 +74,44 @@ anonymousResults:
   s3:
     # -- Write anonymous results to S3.
     enabled: false
-    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials as environment variables in worker.env. Standard AWS environment variables are supported (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_REGION). Note that these credentials may also be used for other AWS SDK calls made by Polars (e.g. some user-supplied sinks in queries).
+    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.
     endpoint: "s3://my-bucket/path/to/dir"
+    # -- Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html
+    options: []
+#      - name: aws_access_key_id
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-s3-secret
+#            key: accessKeyId
 
 # -- Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage
 allowSharedDisk: true
 
+shuffleData:
+  ephemeralVolumeClaim:
+    # -- Write shuffle data to volume claimEphemeral storage for temporary data used in shuffles. Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local
+    enabled: false
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: "hostpath"
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 125Gi
+
+  s3:
+    # -- Write shuffle data to S3.
+    enabled: false
+    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "s3://my-bucket/path/to/dir"
+    # -- Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html
+    options: []
+#      - name: aws_access_key_id
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-s3-secret
+#            key: accessKeyId
+
 temporaryData:
-  persistentVolumeClaim:
-    # -- Ephemeral storage for temporary data used in polars (e.g. shuffle or polars streaming data). Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local
+  ephemeralVolumeClaim:
+    # -- Ephemeral storage for temporary data used in polars (e.g. polars streaming data). More info: https://kubernetes.io/docs/concepts/storage/volumes/#local
     enabled: false
     # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
     storageClassName: "hostpath"

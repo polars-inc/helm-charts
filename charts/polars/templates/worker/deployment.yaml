@@ -157,8 +157,25 @@ spec:
               value: "5053"
             - name: PC_CUBLET__worker__heartbeat_interval_secs
               value: {{ .Values.workerHeartbeatIntervalSecs | quote }}
+{{- if .Values.shuffleData.s3.enabled }}
+            - name: PC_CUBLET__worker__shuffle_location__s3__url
+              value: {{ .Values.shuffleData.s3.endpoint | quote }}
+  {{- range .Values.shuffleData.s3.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.shuffleData.s3.url instead" }}
+    {{- end }}
+            - name: PC_CUBLET__worker__shuffle_location__s3__{{ .name | required "missing .Values.shuffleData.s3.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{- else }}
             - name: PC_CUBLET__worker__shuffle_data_path
-              value: /app/temporary_data/shuffle-dir
+              value: /app/shuffle_data/
+{{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
@@ -198,6 +215,10 @@ spec:
 {{- end }}
             - name: temporary-data
               mountPath: /app/temporary_data
+{{- if not .Values.shuffleData.s3.enabled }}
+            - name: shuffle-data
+              mountPath: /app/shuffle_data
+{{- end }}
 {{- with .Values.worker.deployment.runtimeContainer.volumeMounts }}
             {{ toYaml . | nindent 12 }}
 {{- end }}
@@ -208,16 +229,33 @@ spec:
       runtimeClassName: {{ .Values.worker.deployment.runtimeClassName | quote }}
 {{- end }}
       volumes:
-{{- if .Values.temporaryData.persistentVolumeClaim.enabled }}
         - name: temporary-data
+{{- if .Values.temporaryData.ephemeralVolumeClaim.enabled }}
           ephemeral:
             volumeClaimTemplate:
               spec:
                 accessModes: [ "ReadWriteOnce" ]
-                storageClassName: {{ .Values.temporaryData.persistentVolumeClaim.storageClassName }}
+                storageClassName: {{ .Values.temporaryData.ephemeralVolumeClaim.storageClassName }}
                 resources:
                   requests:
-                    storage: {{ .Values.temporaryData.persistentVolumeClaim.size }}
+                    storage: {{ .Values.temporaryData.ephemeralVolumeClaim.size }}
+{{- else }}
+          emptyDir: {}
+{{- end }}
+{{- if not .Values.shuffleData.s3.enabled }}
+        - name: shuffle-data
+  {{- if .Values.shuffleData.ephemeralVolumeClaim.enabled }}
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes: [ "ReadWriteOnce" ]
+                storageClassName: {{ .Values.shuffleData.ephemeralVolumeClaim.storageClassName }}
+                resources:
+                  requests:
+                    storage: {{ .Values.shuffleData.ephemeralVolumeClaim.size }}
+  {{- else }}
+          emptyDir: {}
+  {{- end }}
 {{- end }}
 {{- with .Values.license }}
         - name: license
@@ -237,10 +275,6 @@ spec:
                 path: requirements.txt
   {{- end }}
         - name: release-data
-          emptyDir: {}
-{{- end }}
-{{- if not .Values.temporaryData.persistentVolumeClaim.enabled }}
-        - name: temporary-data
           emptyDir: {}
 {{- end }}
 {{- with .Values.worker.deployment.volumes }}

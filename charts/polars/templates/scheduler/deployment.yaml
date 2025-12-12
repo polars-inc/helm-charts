@@ -166,8 +166,20 @@ spec:
             - name: PC_CUBLET__scheduler__allow_shared_disk
               value: {{ .Values.allowSharedDisk | quote }}
 {{ if .Values.anonymousResults.s3.enabled }}
-            - name: PC_CUBLET__scheduler__anonymous_result_dst
+            - name: PC_CUBLET__scheduler__anonymous_result_dst__s3__url
               value: {{ .Values.anonymousResults.s3.endpoint | quote }}
+  {{- range .Values.anonymousResults.s3.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.anonymousResults.s3.url instead" }}
+    {{- end }}
+            - name: PC_CUBLET__scheduler__anonymous_result_dst__s3__{{ .name | required "missing .Values.anonymousResults.s3.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
 {{ end }}
             - name: PC_CUBLET__scheduler__n_workers
               value: {{ .Values.worker.deployment.replicaCount | quote }}

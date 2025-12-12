@@ -167,34 +167,21 @@ temporaryData:
 
 #### Anonymous results data
 
-For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. Polars accepts credentials for S3-compatible storage through standard AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, `AWS_REGION`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces. Finally, Note that these credentials may also be used for other AWS SDK calls made by Polars (e.g. some user-supplied sinks in queries).
+For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 anonymousResults:
   s3:
     enabled: true
     endpoint: "s3://my-bucket/path/to/dir"
-
-scheduler:
-  deployment:
-    runtimeContainer:
-      env:
-      - name: AWS_ACCESS_KEY_ID
+    options:
+      - name: aws_access_key_id
         valueFrom:
           secretKeyRef:
             name: my-s3-secret
             key: accessKeyId
-  # etc.
-
-worker:
-  deployment:
-    runtimeContainer:
-      env:
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: my-s3-secret
-            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
   # etc.
 ```
 
