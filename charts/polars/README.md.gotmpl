@@ -155,7 +155,7 @@ Polars requires large data storage for its operation. There are two main types o
 
 #### Shuffle data
 
-High-performance storage for shuffle data and other Polars temporary data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
+High-performance storage for shuffle data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
 shuffleData:
