@@ -1,0 +1,25 @@
+name: Verify Helm formatting
+
+on:
+  - pull_request
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install helmfmt
+        uses: jaxxstorm/action-install-gh-release@v2.1.0
+        with:
+          repo: digitalstudium/helmfmt
+
+      - name: Run helmfmt
+        run: |
+          helmfmt charts/polars --disable-indent=tpl
+        shell: bash
+
+      - name: Files changed
+        run: |
+          git diff --exit-code
+        shell: bash
