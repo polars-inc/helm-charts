@@ -19,7 +19,7 @@ for CHART in charts/*; do
 
   jq '. + input' _definitions.json $CHART/values.schema.json | sponge $CHART/values.schema.json
 
-  sed -i '' "s|\"../../_definitions.json#|\"|g" $CHART/values.schema.json
+  sed -i "s|../../_definitions.json#||g" $CHART/values.schema.json
 
 done
 
