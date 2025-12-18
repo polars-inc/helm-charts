@@ -22668,10 +22668,11 @@
       "properties": {
         "s3": {
           "additionalProperties": false,
+          "description": "Configure S3 storage for anonymous results.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Write anonymous results to S3.",
+              "description": "Enable S3 storage for anonymous results.",
               "required": [],
               "title": "enabled"
             },
@@ -22692,8 +22693,7 @@
             }
           },
           "required": [],
-          "title": "s3",
-          "type": "object"
+          "title": "s3"
         }
       },
       "required": [],
@@ -23226,13 +23226,15 @@
     },
     "shuffleData": {
       "additionalProperties": false,
+      "description": "Ephemeral storage for shuffle data.",
       "properties": {
         "ephemeralVolumeClaim": {
           "additionalProperties": false,
+          "description": "Configure ephemeral storage for shuffle data.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Write shuffle data to volume claimEphemeral storage for temporary data used in shuffles. Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local",
+              "description": "Enable ephemeral volume claim for shuffle data.",
               "required": [],
               "title": "enabled"
             },
@@ -23250,15 +23252,15 @@
             }
           },
           "required": [],
-          "title": "ephemeralVolumeClaim",
-          "type": "object"
+          "title": "ephemeralVolumeClaim"
         },
         "s3": {
           "additionalProperties": false,
+          "description": "Configure S3 storage as shuffle data location.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Write shuffle data to S3.",
+              "description": "Enable S3 storage for shuffle data.",
               "required": [],
               "title": "enabled"
             },
@@ -23271,6 +23273,7 @@
             "options": {
               "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
               "items": {
+                "$ref": "/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
               },
               "required": [],
@@ -23278,13 +23281,11 @@
             }
           },
           "required": [],
-          "title": "s3",
-          "type": "object"
+          "title": "s3"
         }
       },
       "required": [],
-      "title": "shuffleData",
-      "type": "object"
+      "title": "shuffleData"
     },
     "telemetry": {
       "additionalProperties": false,
@@ -23302,13 +23303,15 @@
     },
     "temporaryData": {
       "additionalProperties": false,
+      "description": "Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance.",
       "properties": {
         "ephemeralVolumeClaim": {
           "additionalProperties": false,
+          "description": "Configure ephemeral storage for temporary data.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Ephemeral storage for temporary data used in polars (e.g. polars streaming data). More info: https://kubernetes.io/docs/concepts/storage/volumes/#local",
+              "description": "Enable ephemeral volume claim for temporary data.",
               "required": [],
               "title": "enabled"
             },
@@ -23326,13 +23329,11 @@
             }
           },
           "required": [],
-          "title": "ephemeralVolumeClaim",
-          "type": "object"
+          "title": "ephemeralVolumeClaim"
         }
       },
       "required": [],
-      "title": "temporaryData",
-      "type": "object"
+      "title": "temporaryData"
     },
     "tests": {
       "additionalProperties": false,

@@ -315,17 +315,23 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | logLevel | string | `"info"` | One of "info", "debug", "trace". |
 | workerHeartbeatIntervalSecs | int | `5` | Heartbeat interval between polars workers and the scheduler in seconds. |
 | anonymousResults | object | `{"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
-| anonymousResults.s3.enabled | bool | `false` | Write anonymous results to S3. |
+| anonymousResults.s3 | object | `{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}` | Configure S3 storage for anonymous results. |
+| anonymousResults.s3.enabled | bool | `false` | Enable S3 storage for anonymous results. |
 | anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
 | anonymousResults.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
 | allowSharedDisk | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
-| shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Write shuffle data to volume claimEphemeral storage for temporary data used in shuffles. Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local |
+| shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}}` | Ephemeral storage for shuffle data. |
+| shuffleData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for shuffle data. |
+| shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | shuffleData.ephemeralVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
-| shuffleData.s3.enabled | bool | `false` | Write shuffle data to S3. |
+| shuffleData.s3 | object | `{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}` | Configure S3 storage as shuffle data location. |
+| shuffleData.s3.enabled | bool | `false` | Enable S3 storage for shuffle data. |
 | shuffleData.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
 | shuffleData.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
-| temporaryData.ephemeralVolumeClaim.enabled | bool | `false` | Ephemeral storage for temporary data used in polars (e.g. polars streaming data). More info: https://kubernetes.io/docs/concepts/storage/volumes/#local |
+| temporaryData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}}` | Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance. |
+| temporaryData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for temporary data. |
+| temporaryData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for temporary data. |
 | temporaryData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | temporaryData.ephemeralVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
 | observatory.maxMetricsBytesTotal | int | `104857600` | Maximum number of bytes for host metrics storage |
