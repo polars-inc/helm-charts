@@ -93,6 +93,7 @@ spec:
           args:
             - /emptydir/bin/pc-cublet
             - service
+          workingDir: /tmp
 {{- end }}
 {{- if .Values.runtime.prebuilt.enabled }}
           image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
@@ -224,6 +225,8 @@ spec:
               mountPath: /requirements.txt
               subPath: requirements.txt
   {{- end }}
+            - name: tmp-data
+              mountPath: /tmp
             - name: release-data
               mountPath: /emptydir
 {{- end }}
@@ -254,6 +257,8 @@ spec:
               - key: requirementsTxt
                 path: requirements.txt
   {{- end }}
+        - name: tmp-data
+          emptyDir: {}
         - name: release-data
           emptyDir: {}
 {{- end }}
