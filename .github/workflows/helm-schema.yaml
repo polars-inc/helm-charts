@@ -1,0 +1,27 @@
+name: Verify Helm schemas
+
+on:
+  - pull_request
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: azure/setup-helm@v4.3.1
+
+      - name: Install helm-schema
+        run: |
+          helm plugin install https://github.com/dadav/helm-schema
+        shell: bash
+
+      - name: Run generate-schema.sh
+        run: |
+          ./generate-schema.sh
+        shell: bash
+
+      - name: Files changed
+        run: |
+          git diff --exit-code
+        shell: bash

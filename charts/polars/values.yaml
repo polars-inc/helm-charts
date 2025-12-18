@@ -88,6 +88,10 @@ anonymousResults:
     enabled: false
     # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.
     endpoint: "s3://my-bucket/path/to/dir"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
     # -- Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html
     options: []
 #      - name: aws_access_key_id
@@ -150,6 +154,7 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.apps.v1.DeploymentSpec/properties/revisionHistoryLimit
     # @schema
+    # @ignore
     # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10.
     revisionHistoryLimit: 10
 
@@ -162,30 +167,35 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsPolicy
     # @schema
+    # @ignore
     # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
     dnsPolicy: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsConfig
     # @schema
+    # @ignore
     # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
     dnsConfig: {}
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/schedulerName
     # @schema
+    # @ignore
     # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
     schedulerName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/automountServiceAccountToken
     # @schema
+    # @ignore
     # -- AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
     automountServiceAccountToken: true
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext
     # @schema
+    # @ignore
     # -- SecurityContext holds pod-level security attributes and common container settings.
     podSecurityContext: { }
     #  fsGroup: 2000
@@ -195,6 +205,7 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostAliases
     # @schema
+    # @ignore
     # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
     hostAliases: []
 
@@ -202,6 +213,7 @@ worker:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
       # @schema
+      # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
       securityContext: { }
       #  capabilities:
@@ -212,6 +224,7 @@ worker:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
       # @schema
+      # @ignore
       # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
       resources: {}
       #  requests:
@@ -225,6 +238,7 @@ worker:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
       # @schema
+      # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
       securityContext: { }
       #  capabilities:
@@ -235,6 +249,7 @@ worker:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/readinessProbe
       # @schema
+      # @ignore
       readinessProbe:
         tcpSocket:
           port: worker-service
@@ -248,6 +263,7 @@ worker:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/env
       # @schema
+      # @ignore
       # -- List of environment variables to set in the container.
       env: []
       # - name: ENV_VAR_NAME
@@ -256,12 +272,14 @@ worker:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/lifecycle
       # @schema
+      # @ignore
       # -- Actions that the management system should take in response to container lifecycle events.
       lifecycleHooks: {}
 
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
       # @schema
+      # @ignore
       # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
       resources: {}
       #  requests:
@@ -274,6 +292,7 @@ worker:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/volumeMounts
       # @schema
+      # @ignore
       # -- Pod volumes to mount into the container's filesystem.
       volumeMounts: []
       # - name: volume-name
@@ -282,18 +301,21 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/priorityClassName
     # @schema
+    # @ignore
     # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/runtimeClassName
     # @schema
+    # @ignore
     # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
     runtimeClassName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/volumes
     # @schema
+    # @ignore
     # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
     volumes: []
     # - name: volume-name
@@ -302,6 +324,7 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector
     # @schema
+    # @ignore
     # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
     nodeSelector: { }
     #  kubernetes.io/e2e-az-name: e2e-az1
@@ -309,6 +332,7 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/affinity
     # @schema
+    # @ignore
     # -- If specified, the pod's scheduling constraints
     affinity: { }
     #  nodeAffinity:
@@ -323,6 +347,7 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/tolerations
     # @schema
+    # @ignore
     # -- If specified, the pod's tolerations.
     tolerations: [ ]
     # - key: "key"
@@ -333,6 +358,7 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/topologySpreadConstraints
     # @schema
+    # @ignore
     # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
     topologySpreadConstraints: []
     # - maxSkew: 1
@@ -342,6 +368,7 @@ worker:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostNetwork
     # @schema
+    # @ignore
     # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
     hostNetwork: false
 
@@ -385,12 +412,14 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.apps.v1.DeploymentSpec/properties/revisionHistoryLimit
     # @schema
+    # @ignore
     # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10.
     revisionHistoryLimit: 10
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.apps.v1.DeploymentSpec/properties/strategy
     # @schema
+    # @ignore
     # -- Rollout strategy for the scheduler deployment. One of RollingUpdate or Recreate.
     rollout:
       strategy: RollingUpdate
@@ -406,30 +435,35 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsPolicy
     # @schema
+    # @ignore
     # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
     dnsPolicy: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsConfig
     # @schema
+    # @ignore
     # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
     dnsConfig: {}
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/schedulerName
     # @schema
+    # @ignore
     # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
     schedulerName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/automountServiceAccountToken
     # @schema
+    # @ignore
     # -- AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
     automountServiceAccountToken: true
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext
     # @schema
+    # @ignore
     # -- SecurityContext holds pod-level security attributes and common container settings.
     podSecurityContext: { }
     #  fsGroup: 2000
@@ -439,13 +473,16 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostAliases
     # @schema
+    # @ignore
     # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
     hostAliases: []
 
+    # @ignore
     distContainer:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
       # @schema
+      # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
       securityContext: { }
       #  capabilities:
@@ -456,6 +493,7 @@ scheduler:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
       # @schema
+      # @ignore
       # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
       resources: {}
       #  requests:
@@ -469,6 +507,7 @@ scheduler:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
       # @schema
+      # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
       securityContext: { }
       #  capabilities:
@@ -479,6 +518,7 @@ scheduler:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/readinessProbe
       # @schema
+      # @ignore
       readinessProbe:
         tcpSocket:
           port: sched
@@ -492,6 +532,7 @@ scheduler:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/env
       # @schema
+      # @ignore
       # -- List of environment variables to set in the container.
       env: []
       # - name: ENV_VAR_NAME
@@ -500,12 +541,14 @@ scheduler:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/lifecycle
       # @schema
+      # @ignore
       # -- Actions that the management system should take in response to container lifecycle events.
       lifecycleHooks: {}
 
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
       # @schema
+      # @ignore
       # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
       resources: {}
       #  requests:
@@ -518,6 +561,7 @@ scheduler:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/volumeMounts
       # @schema
+      # @ignore
       # -- Pod volumes to mount into the container's filesystem.
       volumeMounts: []
       # - name: volume-name
@@ -526,18 +570,21 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/priorityClassName
     # @schema
+    # @ignore
     # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/runtimeClassName
     # @schema
+    # @ignore
     # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
     runtimeClassName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/volumes
     # @schema
+    # @ignore
     # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
     volumes: []
     # - name: volume-name
@@ -546,6 +593,7 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector
     # @schema
+    # @ignore
     # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
     nodeSelector: { }
     #  kubernetes.io/e2e-az-name: e2e-az1
@@ -553,6 +601,7 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/affinity
     # @schema
+    # @ignore
     # -- If specified, the pod's scheduling constraints
     affinity: { }
     #  nodeAffinity:
@@ -567,6 +616,7 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/tolerations
     # @schema
+    # @ignore
     # -- If specified, the pod's tolerations.
     tolerations: [ ]
     # - key: "key"
@@ -577,6 +627,7 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/topologySpreadConstraints
     # @schema
+    # @ignore
     # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
     topologySpreadConstraints: []
     # - maxSkew: 1
@@ -586,6 +637,7 @@ scheduler:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostNetwork
     # @schema
+    # @ignore
     # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
     hostNetwork: false
 
@@ -607,30 +659,35 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsPolicy
     # @schema
+    # @skip
     # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
     dnsPolicy: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsConfig
     # @schema
+    # @ignore
     # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
     dnsConfig: {}
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/schedulerName
     # @schema
+    # @ignore
     # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
     schedulerName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/automountServiceAccountToken
     # @schema
+    # @ignore
     # -- AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
     automountServiceAccountToken: true
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext
     # @schema
+    # @ignore
     # -- SecurityContext holds pod-level security attributes and common container settings.
     podSecurityContext: { }
     #  fsGroup: 2000
@@ -640,6 +697,7 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostAliases
     # @schema
+    # @ignore
     # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
     hostAliases: []
 
@@ -647,6 +705,7 @@ tests:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
       # @schema
+      # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
       securityContext: { }
       #  capabilities:
@@ -657,6 +716,7 @@ tests:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
       # @schema
+      # @ignore
       # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
       resources: {}
       #  requests:
@@ -670,6 +730,7 @@ tests:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
       # @schema
+      # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
       securityContext: { }
       #  capabilities:
@@ -680,6 +741,7 @@ tests:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/env
       # @schema
+      # @ignore
       # -- List of environment variables to set in the container.
       env: []
       # - name: ENV_VAR_NAME
@@ -688,12 +750,14 @@ tests:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/lifecycle
       # @schema
+      # @ignore
       # -- Actions that the management system should take in response to container lifecycle events.
       lifecycleHooks: {}
 
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
       # @schema
+      # @ignore
       # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
       resources: {}
       #  requests:
@@ -706,6 +770,7 @@ tests:
       # @schema
       # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/volumeMounts
       # @schema
+      # @ignore
       # -- Pod volumes to mount into the container's filesystem.
       volumeMounts: []
       # - name: volume-name
@@ -714,18 +779,21 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/priorityClassName
     # @schema
+    # @ignore
     # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
     priorityClassName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/runtimeClassName
     # @schema
+    # @ignore
     # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
     runtimeClassName: ""
 
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/volumes
     # @schema
+    # @ignore
     # -- List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes
     volumes: []
     # - name: volume-name
@@ -734,6 +802,7 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector
     # @schema
+    # @ignore
     # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
     nodeSelector: { }
     #  kubernetes.io/e2e-az-name: e2e-az1
@@ -741,6 +810,7 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/affinity
     # @schema
+    # @ignore
     # -- If specified, the pod's scheduling constraints
     affinity: { }
     #  nodeAffinity:
@@ -755,6 +825,7 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/tolerations
     # @schema
+    # @ignore
     # -- If specified, the pod's tolerations.
     tolerations: [ ]
     # - key: "key"
@@ -765,6 +836,7 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/topologySpreadConstraints
     # @schema
+    # @ignore
     # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
     topologySpreadConstraints: []
     # - maxSkew: 1
@@ -774,5 +846,6 @@ tests:
     # @schema
     # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostNetwork
     # @schema
+    # @ignore
     # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
     hostNetwork: false

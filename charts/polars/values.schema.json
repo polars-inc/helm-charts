@@ -22651,18 +22651,16 @@
   "additionalProperties": false,
   "properties": {
     "acceptEula": {
-      "default": false,
+      "default": "false",
       "description": "To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.",
       "required": [],
-      "title": "acceptEula",
-      "type": "boolean"
+      "title": "acceptEula"
     },
     "allowSharedDisk": {
-      "default": true,
+      "default": "true",
       "description": "Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage",
       "required": [],
-      "title": "allowSharedDisk",
-      "type": "boolean"
+      "title": "allowSharedDisk"
     },
     "anonymousResults": {
       "additionalProperties": false,
@@ -22672,57 +22670,46 @@
           "additionalProperties": false,
           "properties": {
             "enabled": {
-              "default": false,
+              "default": "false",
               "description": "Write anonymous results to S3.",
               "required": [],
-              "title": "enabled",
-              "type": "boolean"
+              "title": "enabled"
             },
             "endpoint": {
               "default": "s3://my-bucket/path/to/dir",
               "description": "The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.",
               "required": [],
-              "title": "endpoint",
-              "type": "string"
+              "title": "endpoint"
             },
             "options": {
               "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
               "items": {
+                "$ref": "/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
               },
               "required": [],
-              "title": "options",
-              "type": "array"
+              "title": "options"
             }
           },
-          "required": [
-            "enabled",
-            "endpoint",
-            "options"
-          ],
+          "required": [],
           "title": "s3",
           "type": "object"
         }
       },
-      "required": [
-        "s3"
-      ],
-      "title": "anonymousResults",
-      "type": "object"
+      "required": [],
+      "title": "anonymousResults"
     },
     "clusterId": {
       "default": "",
-      "description": "(uuid) Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to \"helm namespace/helm release name\" if not set.",
+      "description": "Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to \"helm namespace/helm release name\" if not set.",
       "required": [],
-      "title": "clusterId",
-      "type": "string"
+      "title": "clusterId"
     },
     "fullnameOverride": {
       "default": "",
       "description": "Override the full name of the chart",
       "required": [],
-      "title": "fullnameOverride",
-      "type": "string"
+      "title": "fullnameOverride"
     },
     "global": {
       "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
@@ -22747,21 +22734,16 @@
           "default": "",
           "description": "the name containing your polars license key",
           "required": [],
-          "title": "secretName",
-          "type": "string"
+          "title": "secretName"
         },
         "secretProperty": {
           "default": "",
           "description": "the property on the secret containing your license key",
           "required": [],
-          "title": "secretProperty",
-          "type": "string"
+          "title": "secretProperty"
         }
       },
-      "required": [
-        "secretName",
-        "secretProperty"
-      ],
+      "required": [],
       "title": "license",
       "type": "object"
     },
@@ -22769,30 +22751,25 @@
       "default": "info",
       "description": "One of \"info\", \"debug\", \"trace\".",
       "required": [],
-      "title": "logLevel",
-      "type": "string"
+      "title": "logLevel"
     },
     "nameOverride": {
       "default": "",
       "description": "Override the name of the chart",
       "required": [],
-      "title": "nameOverride",
-      "type": "string"
+      "title": "nameOverride"
     },
     "observatory": {
       "additionalProperties": false,
       "properties": {
         "maxMetricsBytesTotal": {
-          "default": 104857600,
+          "default": "104857600",
           "description": "Maximum number of bytes for host metrics storage",
           "required": [],
-          "title": "maxMetricsBytesTotal",
-          "type": "integer"
+          "title": "maxMetricsBytesTotal"
         }
       },
-      "required": [
-        "maxMetricsBytesTotal"
-      ],
+      "required": [],
       "title": "observatory",
       "type": "object"
     },
@@ -22800,15 +22777,13 @@
       "additionalProperties": false,
       "description": "Common annotations for all resources",
       "required": [],
-      "title": "podAnnotations",
-      "type": "object"
+      "title": "podAnnotations"
     },
     "podLabels": {
       "additionalProperties": false,
       "description": "Common labels for all resources",
       "required": [],
-      "title": "podLabels",
-      "type": "object"
+      "title": "podLabels"
     },
     "runtime": {
       "additionalProperties": false,
@@ -22830,21 +22805,16 @@
                   "default": "polarscloud/polars-on-premises",
                   "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
                   "required": [],
-                  "title": "repository",
-                  "type": "string"
+                  "title": "repository"
                 },
                 "tag": {
                   "default": "",
                   "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
                   "required": [],
-                  "title": "tag",
-                  "type": "string"
+                  "title": "tag"
                 }
               },
-              "required": [
-                "repository",
-                "tag"
-              ],
+              "required": [],
               "title": "dist",
               "type": "object"
             },
@@ -22880,32 +22850,21 @@
                   "default": "python",
                   "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
                   "required": [],
-                  "title": "repository",
-                  "type": "string"
+                  "title": "repository"
                 },
                 "tag": {
                   "default": "3.13.9-slim-bookworm",
                   "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
                   "required": [],
-                  "title": "tag",
-                  "type": "string"
+                  "title": "tag"
                 }
               },
-              "required": [
-                "repository",
-                "tag"
-              ],
+              "required": [],
               "title": "runtime",
               "type": "object"
             }
           },
-          "required": [
-            "enabled",
-            "dist",
-            "runtime",
-            "requirements",
-            "polarsExtras"
-          ],
+          "required": [],
           "title": "composed",
           "type": "object"
         },
@@ -22922,7 +22881,7 @@
               "additionalProperties": false,
               "properties": {
                 "pullPolicy": {
-                  "default": "I",
+                  "default": "",
                   "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
                   "required": [],
                   "title": "pullPolicy",
@@ -22932,37 +22891,26 @@
                   "default": "your-prebuilt-image",
                   "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
                   "required": [],
-                  "title": "repository",
-                  "type": "string"
+                  "title": "repository"
                 },
                 "tag": {
                   "default": "",
                   "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
                   "required": [],
-                  "title": "tag",
-                  "type": "string"
+                  "title": "tag"
                 }
               },
-              "required": [
-                "repository",
-                "tag"
-              ],
+              "required": [],
               "title": "runtime",
               "type": "object"
             }
           },
-          "required": [
-            "enabled",
-            "runtime"
-          ],
+          "required": [],
           "title": "prebuilt",
           "type": "object"
         }
       },
-      "required": [
-        "prebuilt",
-        "composed"
-      ],
+      "required": [],
       "title": "runtime",
       "type": "object"
     },
@@ -23044,15 +22992,13 @@
               "additionalProperties": false,
               "description": "Additional annotations to add to the scheduler pod.",
               "required": [],
-              "title": "podAnnotations",
-              "type": "object"
+              "title": "podAnnotations"
             },
             "podLabels": {
               "additionalProperties": false,
               "description": "Additional labels to add to the scheduler pod.",
               "required": [],
-              "title": "podLabels",
-              "type": "object"
+              "title": "podLabels"
             },
             "podSecurityContext": {
               "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
@@ -23171,12 +23117,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "podAnnotations",
-            "podLabels",
-            "distContainer",
-            "runtimeContainer"
-          ],
+          "required": [],
           "title": "deployment",
           "type": "object"
         },
@@ -23184,32 +23125,25 @@
           "additionalProperties": false,
           "properties": {
             "automount": {
-              "default": true,
+              "default": "true",
               "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
               "required": [],
-              "title": "automount",
-              "type": "boolean"
+              "title": "automount"
             },
             "create": {
-              "default": false,
+              "default": "false",
               "description": "Whether to create a service account for the scheduler.",
               "required": [],
-              "title": "create",
-              "type": "boolean"
+              "title": "create"
             },
             "name": {
               "default": "",
               "description": "The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to \"default\" if not set.",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             }
           },
-          "required": [
-            "create",
-            "name",
-            "automount"
-          ],
+          "required": [],
           "title": "serviceAccount",
           "type": "object"
         },
@@ -23224,8 +23158,7 @@
                   "additionalProperties": false,
                   "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
                   "required": [],
-                  "title": "annotations",
-                  "type": "object"
+                  "title": "annotations"
                 },
                 "type": {
                   "default": "ClusterIP",
@@ -23235,9 +23168,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "annotations"
-              ],
+              "required": [],
               "title": "internal",
               "type": "object"
             },
@@ -23248,8 +23179,7 @@
                   "additionalProperties": false,
                   "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
                   "required": [],
-                  "title": "annotations",
-                  "type": "object"
+                  "title": "annotations"
                 },
                 "type": {
                   "default": "ClusterIP",
@@ -23259,9 +23189,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "annotations"
-              ],
+              "required": [],
               "title": "observatory",
               "type": "object"
             },
@@ -23272,8 +23200,7 @@
                   "additionalProperties": false,
                   "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
                   "required": [],
-                  "title": "annotations",
-                  "type": "object"
+                  "title": "annotations"
                 },
                 "type": {
                   "default": "ClusterIP",
@@ -23283,27 +23210,17 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "annotations"
-              ],
+              "required": [],
               "title": "scheduler",
               "type": "object"
             }
           },
-          "required": [
-            "internal",
-            "scheduler",
-            "observatory"
-          ],
+          "required": [],
           "title": "services",
           "type": "object"
         }
       },
-      "required": [
-        "services",
-        "serviceAccount",
-        "deployment"
-      ],
+      "required": [],
       "title": "scheduler",
       "type": "object"
     },
@@ -23314,32 +23231,25 @@
           "additionalProperties": false,
           "properties": {
             "enabled": {
-              "default": false,
+              "default": "false",
               "description": "Write shuffle data to volume claimEphemeral storage for temporary data used in shuffles. Recommended to use some host local SSD storage for better performance. More info: https://kubernetes.io/docs/concepts/storage/volumes/#local",
               "required": [],
-              "title": "enabled",
-              "type": "boolean"
+              "title": "enabled"
             },
             "size": {
               "default": "125Gi",
               "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
               "required": [],
-              "title": "size",
-              "type": "string"
+              "title": "size"
             },
             "storageClassName": {
               "default": "hostpath",
               "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
               "required": [],
-              "title": "storageClassName",
-              "type": "string"
+              "title": "storageClassName"
             }
           },
-          "required": [
-            "enabled",
-            "storageClassName",
-            "size"
-          ],
+          "required": [],
           "title": "ephemeralVolumeClaim",
           "type": "object"
         },
@@ -23347,18 +23257,16 @@
           "additionalProperties": false,
           "properties": {
             "enabled": {
-              "default": false,
+              "default": "false",
               "description": "Write shuffle data to S3.",
               "required": [],
-              "title": "enabled",
-              "type": "boolean"
+              "title": "enabled"
             },
             "endpoint": {
               "default": "s3://my-bucket/path/to/dir",
               "description": "The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.",
               "required": [],
-              "title": "endpoint",
-              "type": "string"
+              "title": "endpoint"
             },
             "options": {
               "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
@@ -23366,23 +23274,15 @@
                 "required": []
               },
               "required": [],
-              "title": "options",
-              "type": "array"
+              "title": "options"
             }
           },
-          "required": [
-            "enabled",
-            "endpoint",
-            "options"
-          ],
+          "required": [],
           "title": "s3",
           "type": "object"
         }
       },
-      "required": [
-        "ephemeralVolumeClaim",
-        "s3"
-      ],
+      "required": [],
       "title": "shuffleData",
       "type": "object"
     },
@@ -23393,13 +23293,10 @@
           "default": "",
           "description": "Endpoint to send OTLP traces and metrics to.",
           "required": [],
-          "title": "otlpEndpoint",
-          "type": "string"
+          "title": "otlpEndpoint"
         }
       },
-      "required": [
-        "otlpEndpoint"
-      ],
+      "required": [],
       "title": "telemetry",
       "type": "object"
     },
@@ -23410,39 +23307,30 @@
           "additionalProperties": false,
           "properties": {
             "enabled": {
-              "default": false,
+              "default": "false",
               "description": "Ephemeral storage for temporary data used in polars (e.g. polars streaming data). More info: https://kubernetes.io/docs/concepts/storage/volumes/#local",
               "required": [],
-              "title": "enabled",
-              "type": "boolean"
+              "title": "enabled"
             },
             "size": {
               "default": "125Gi",
               "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
               "required": [],
-              "title": "size",
-              "type": "string"
+              "title": "size"
             },
             "storageClassName": {
               "default": "hostpath",
               "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
               "required": [],
-              "title": "storageClassName",
-              "type": "string"
+              "title": "storageClassName"
             }
           },
-          "required": [
-            "enabled",
-            "storageClassName",
-            "size"
-          ],
+          "required": [],
           "title": "ephemeralVolumeClaim",
           "type": "object"
         }
       },
-      "required": [
-        "ephemeralVolumeClaim"
-      ],
+      "required": [],
       "title": "temporaryData",
       "type": "object"
     },
@@ -23474,11 +23362,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "repository",
-                  "tag",
-                  "pullPolicy"
-                ],
+                "required": [],
                 "type": "object"
               }
             ],
@@ -23659,10 +23543,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "distContainer",
-            "runtimeContainer"
-          ],
+          "required": [],
           "title": "pod",
           "type": "object"
         },
@@ -23670,41 +23551,30 @@
           "additionalProperties": false,
           "properties": {
             "automount": {
-              "default": true,
+              "default": "true",
               "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
               "required": [],
-              "title": "automount",
-              "type": "boolean"
+              "title": "automount"
             },
             "create": {
-              "default": false,
+              "default": "false",
               "description": "Whether to create a service account.",
               "required": [],
-              "title": "create",
-              "type": "boolean"
+              "title": "create"
             },
             "name": {
               "default": "",
               "description": "The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to \"default\" if not set.",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             }
           },
-          "required": [
-            "create",
-            "name",
-            "automount"
-          ],
+          "required": [],
           "title": "serviceAccount",
           "type": "object"
         }
       },
-      "required": [
-        "images",
-        "serviceAccount",
-        "pod"
-      ],
+      "required": [],
       "title": "tests",
       "type": "object"
     },
@@ -23786,15 +23656,13 @@
               "additionalProperties": false,
               "description": "Additional annotations to add to the scheduler pod.",
               "required": [],
-              "title": "podAnnotations",
-              "type": "object"
+              "title": "podAnnotations"
             },
             "podLabels": {
               "additionalProperties": false,
               "description": "Additional labels to add to the scheduler pod.",
               "required": [],
-              "title": "podLabels",
-              "type": "object"
+              "title": "podLabels"
             },
             "podSecurityContext": {
               "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
@@ -23809,11 +23677,10 @@
               "type": "string"
             },
             "replicaCount": {
-              "default": 2,
+              "default": "2",
               "description": "Number of polars worker replicas.",
               "required": [],
-              "title": "replicaCount",
-              "type": "integer"
+              "title": "replicaCount"
             },
             "revisionHistoryLimit": {
               "default": 10,
@@ -23915,13 +23782,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "replicaCount",
-            "podAnnotations",
-            "podLabels",
-            "distContainer",
-            "runtimeContainer"
-          ],
+          "required": [],
           "title": "deployment",
           "type": "object"
         },
@@ -23929,71 +23790,40 @@
           "additionalProperties": false,
           "properties": {
             "automount": {
-              "default": true,
+              "default": "true",
               "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
               "required": [],
-              "title": "automount",
-              "type": "boolean"
+              "title": "automount"
             },
             "create": {
-              "default": false,
+              "default": "false",
               "description": "Whether to create a service account.",
               "required": [],
-              "title": "create",
-              "type": "boolean"
+              "title": "create"
             },
             "name": {
               "default": "",
               "description": "The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to \"default\" if not set.",
               "required": [],
-              "title": "name",
-              "type": "string"
+              "title": "name"
             }
           },
-          "required": [
-            "create",
-            "name",
-            "automount"
-          ],
+          "required": [],
           "title": "serviceAccount",
           "type": "object"
         }
       },
-      "required": [
-        "serviceAccount",
-        "deployment"
-      ],
+      "required": [],
       "title": "worker",
       "type": "object"
     },
     "workerHeartbeatIntervalSecs": {
-      "default": 5,
+      "default": "5",
       "description": "Heartbeat interval between polars workers and the scheduler in seconds.",
       "required": [],
-      "title": "workerHeartbeatIntervalSecs",
-      "type": "integer"
+      "title": "workerHeartbeatIntervalSecs"
     }
   },
-  "required": [
-    "nameOverride",
-    "fullnameOverride",
-    "podLabels",
-    "podAnnotations",
-    "clusterId",
-    "acceptEula",
-    "license",
-    "runtime",
-    "telemetry",
-    "logLevel",
-    "workerHeartbeatIntervalSecs",
-    "anonymousResults",
-    "allowSharedDisk",
-    "shuffleData",
-    "temporaryData",
-    "observatory",
-    "worker",
-    "scheduler",
-    "tests"
-  ],
+  "required": [],
   "type": "object"
 }
