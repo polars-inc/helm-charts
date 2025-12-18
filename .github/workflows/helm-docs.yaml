@@ -9,9 +9,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@v1
+      - uses: azure/setup-helm@v4.3.1
+
+      - name: Install helm-docs
+        uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:
-          chart-search-root: charts
-          sort-values-order: file
-          fail-on-diff: true
+          repo: norwoodj/helm-docs
+
+      - name: Run generate-helm-docs.sh
+        run: |
+          ./generate-helm-docs.sh
+        shell: bash
+
+      - name: Files changed
+        run: |
+          git diff --exit-code
+        shell: bash
