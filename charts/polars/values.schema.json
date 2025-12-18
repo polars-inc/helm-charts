@@ -23825,6 +23825,8 @@
       "title": "workerHeartbeatIntervalSecs"
     }
   },
-  "required": [],
+  "required": [
+    "acceptEula"
+  ],
   "type": "object"
 }
