@@ -22,9 +22,9 @@ jobs:
           packages: jq moreutils
           version: "1.0"
 
-      - name: Run generate-schema.sh
+      - name: Run make schema
         run: |
-          ./generate-schema.sh
+          make schema
         shell: bash
 
       - name: Files changed

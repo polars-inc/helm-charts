@@ -16,9 +16,9 @@ jobs:
         with:
           repo: norwoodj/helm-docs
 
-      - name: Run generate-helm-docs.sh
+      - name: Run make docs
         run: |
-          ./generate-helm-docs.sh
+          make docs
         shell: bash
 
       - name: Files changed
