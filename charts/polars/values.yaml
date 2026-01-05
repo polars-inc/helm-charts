@@ -14,6 +14,12 @@ clusterId: ""
 # -- To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.
 acceptEula: false
 
+# -- Set to true to ignore resource validation failures. When false, the chart will fail if resources are not defined or if memory limits don't equal requests for worker and scheduler runtime containers.
+acknowledgeResourceRecommendations: false
+
+# -- Set to true to ignore topology validation failures. When false, the chart will fail if node selectors, tolerations, affinity, or topologySpreadConstraints are not defined.
+acknowledgeTopologyRecommendations: false
+
 license:
   # -- the name containing your polars license key
   secretName: ""

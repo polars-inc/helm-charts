@@ -216,7 +216,7 @@ temporaryData:
 
 ### Resource allocation and node selectors
 
-Most of the time, it is a good idea to run Polars on-premises on dedicated nodes, with only one worker pod per node.
+We strongly recommend running Polars on-premises with the resource requests and limits to be set, with the memory limits equal to the requests. This ensures that Polars on-premises can properly handle out-of-memory situations without losing data or query progress.
 
 First, figure out the available resources on your nodes. This is usually lower than the actual node resources, as Kubernetes reserves some resources for system daemons. For example, if you have a cluster of 3 `m4.xlarge` nodes (4 vCPUs, 16GiB memory), you may have 3770m CPU and 14.31GiB memory available.
 
@@ -236,7 +236,7 @@ worker:
           memory: 14.31GiB
 ```
 
-If your cluster has other workloads running on it, we still recommend running Polars on-premises on dedicated nodes, and using node selectors and taints/tolerations to ensure that only Polars on-premises pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
+We strongly recommend running Polars on-premises on dedicated nodes, with only one worker pod per node. For the best performance, polars-on-premises prefers a single large worker pod per node rather than multiple smaller pods. We also recommend running Polars on-premises on dedicated nodes, using node selectors and taints/tolerations to ensure that only Polars on-premises pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
 
 ```yaml
 worker:
@@ -299,6 +299,8 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | podAnnotations | object | `{}` | Common annotations for all resources |
 | clusterId | uuid | `""` | Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
 | acceptEula | bool | `false` | To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
+| acknowledgeResourceRecommendations | bool | `false` | Set to true to ignore resource validation failures. When false, the chart will fail if resources are not defined or if memory limits don't equal requests for worker and scheduler runtime containers. |
+| acknowledgeTopologyRecommendations | bool | `false` | Set to true to ignore topology validation failures. When false, the chart will fail if node selectors, tolerations, affinity, or topologySpreadConstraints are not defined. |
 | license.secretName | string | `""` | the name containing your polars license key |
 | license.secretProperty | string | `""` | the property on the secret containing your license key |
 | imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |
