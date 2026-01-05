@@ -1,0 +1,33 @@
+name: Verify Helm schemas
+
+on:
+  - pull_request
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: azure/setup-helm@v4.3.1
+
+      - name: Install helm-schema
+        run: |
+          helm plugin install https://github.com/dadav/helm-schema --verify=false
+        shell: bash
+
+      - name: Cache APT Packages
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: jq moreutils
+          version: "1.0"
+
+      - name: Run make schema
+        run: |
+          make schema
+        shell: bash
+
+      - name: Files changed
+        run: |
+          git diff --exit-code
+        shell: bash
