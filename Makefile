@@ -30,7 +30,7 @@ schema:
 	for chart in "$(CHARTS_DIR)"/*; do \
 		echo "Updating $$chart"; \
 		jq '. + input' "$(DEFINITIONS_LINK)" "$$chart/values.schema.json" | sponge "$$chart/values.schema.json"; \
-		sed -i 's|../../_definitions.json#||g' "$$chart/values.schema.json"; \
+		sed -i 's|../../_definitions.json||g' "$$chart/values.schema.json"; \
 	done
 
 docs:

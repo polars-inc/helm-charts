@@ -22685,7 +22685,7 @@
             "options": {
               "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
               "items": {
-                "$ref": "/definitions/io.k8s.api.core.v1.EnvVar",
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
               },
               "required": [],
@@ -23273,7 +23273,7 @@
             "options": {
               "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
               "items": {
-                "$ref": "/definitions/io.k8s.api.core.v1.EnvVar",
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
               },
               "required": [],
