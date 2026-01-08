@@ -131,33 +131,38 @@ spec:
             - name: PC_CUBLET__license
               value: "/license/license.json"
 {{- end }}
-            - name: PC_CUBLET__static_leader__leader_key
+            - name: PC_CUBLET__static_leader__leader_instance_id
               value: "{{ include "polars.worker.fullname" . }}-0"
-            - name: PC_CUBLET__static_leader__public_leader_addr
+            - name: PC_CUBLET__static_leader__scheduler_service__public_addr__hostname
               value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: PC_CUBLET__static_leader__scheduler_service__public_addr__port
+              value: "5050"
+            - name: PC_CUBLET__static_leader__observatory_service__public_addr__hostname
+              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: PC_CUBLET__static_leader__observatory_service__public_addr__port
+              value: "5049"
             - name: PC_CUBLET__cluster_id
               value: {{ include "polars.clusterId" . | quote }}
-            - name: PC_CUBLET__cublet_id
+            - name: PC_CUBLET__instance_id
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
-            - name: PC_CUBLET__observatory__enabled
+            - name: PC_CUBLET__monitoring__enabled
               value: "true"
-            - name: PC_CUBLET__observatory__max_metrics_bytes_total
-              value: {{ .Values.observatory.maxMetricsBytesTotal | quote }}
             - name: PC_CUBLET__worker__enabled
               value: "true"
-            - name: PC_CUBLET__worker__worker_ip
+            - name: PC_CUBLET__worker__task_service__public_addr__ip
               valueFrom:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
-            - name: PC_CUBLET__worker__flight_port
-              value: "5052"
-            - name: PC_CUBLET__worker__service_port
-              value: "5053"
-            - name: PC_CUBLET__worker__heartbeat_interval_secs
-              value: {{ .Values.workerHeartbeatIntervalSecs | quote }}
+            - name: PC_CUBLET__worker__shuffle_service__public_addr__ip
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: PC_CUBLET__worker__heartbeat_period
+              value: "{{ .Values.workerHeartbeatIntervalSecs }}s"
 {{- if .Values.shuffleData.s3.enabled }}
             - name: PC_CUBLET__worker__shuffle_location__s3__url
               value: {{ .Values.shuffleData.s3.endpoint | quote }}
@@ -174,7 +179,7 @@ spec:
     {{- end }}
   {{- end }}
 {{- else }}
-            - name: PC_CUBLET__worker__shuffle_data_path
+            - name: PC_CUBLET__worker__shuffle_location__local__path
               value: /app/shuffle_data/shuffle_data
 {{- end }}
             - name: PLC_LOG_LEVEL
