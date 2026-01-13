@@ -22723,7 +22723,6 @@
         "$ref": "#/definitions/io.k8s.api.core.v1.LocalObjectReference",
         "required": []
       },
-      "required": [],
       "title": "imagePullSecrets",
       "type": "array"
     },
@@ -22797,7 +22796,6 @@
                 "pullPolicy": {
                   "default": "IfNotPresent",
                   "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
-                  "required": [],
                   "title": "pullPolicy",
                   "type": "string"
                 },
@@ -22820,19 +22818,16 @@
             },
             "enabled": {
               "default": true,
-              "required": [],
               "title": "enabled",
               "type": "boolean"
             },
             "polarsExtras": {
               "default": "async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone",
-              "required": [],
               "title": "polarsExtras",
               "type": "string"
             },
             "requirements": {
               "default": "",
-              "required": [],
               "title": "requirements",
               "type": "string"
             },
@@ -22842,7 +22837,6 @@
                 "pullPolicy": {
                   "default": "",
                   "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
-                  "required": [],
                   "title": "pullPolicy",
                   "type": "string"
                 },
@@ -22873,7 +22867,6 @@
           "properties": {
             "enabled": {
               "default": false,
-              "required": [],
               "title": "enabled",
               "type": "boolean"
             },
@@ -22883,7 +22876,6 @@
                 "pullPolicy": {
                   "default": "",
                   "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
-                  "required": [],
                   "title": "pullPolicy",
                   "type": "string"
                 },
@@ -22928,7 +22920,6 @@
             "automountServiceAccountToken": {
               "default": true,
               "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.",
-              "required": [],
               "title": "automountServiceAccountToken",
               "type": "boolean"
             },
@@ -22958,7 +22949,6 @@
             "dnsPolicy": {
               "default": "",
               "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
-              "required": [],
               "title": "dnsPolicy",
               "type": "string"
             },
@@ -22968,14 +22958,12 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
                 "required": []
               },
-              "required": [],
               "title": "hostAliases",
               "type": "array"
             },
             "hostNetwork": {
               "default": false,
               "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
-              "required": [],
               "title": "hostNetwork",
               "type": "boolean"
             },
@@ -23008,14 +22996,12 @@
             "priorityClassName": {
               "default": "",
               "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
-              "required": [],
               "title": "priorityClassName",
               "type": "string"
             },
             "revisionHistoryLimit": {
               "default": 10,
               "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 10.",
-              "required": [],
               "title": "revisionHistoryLimit",
               "type": "integer"
             },
@@ -23027,7 +23013,6 @@
             "runtimeClassName": {
               "default": "",
               "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
-              "required": [],
               "title": "runtimeClassName",
               "type": "string"
             },
@@ -23040,7 +23025,6 @@
                     "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                     "required": []
                   },
-                  "required": [],
                   "title": "env",
                   "type": "array"
                 },
@@ -23070,7 +23054,6 @@
                     "$ref": "#/definitions/io.k8s.api.core.v1.VolumeMount",
                     "required": []
                   },
-                  "required": [],
                   "title": "volumeMounts",
                   "type": "array"
                 }
@@ -23082,7 +23065,6 @@
             "schedulerName": {
               "default": "",
               "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
-              "required": [],
               "title": "schedulerName",
               "type": "string"
             },
@@ -23092,7 +23074,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
                 "required": []
               },
-              "required": [],
               "title": "tolerations",
               "type": "array"
             },
@@ -23102,7 +23083,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
                 "required": []
               },
-              "required": [],
               "title": "topologySpreadConstraints",
               "type": "array"
             },
@@ -23112,7 +23092,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.Volume",
                 "required": []
               },
-              "required": [],
               "title": "volumes",
               "type": "array"
             }
@@ -23163,7 +23142,6 @@
                 "type": {
                   "default": "ClusterIP",
                   "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
-                  "required": [],
                   "title": "type",
                   "type": "string"
                 }
@@ -23184,7 +23162,6 @@
                 "type": {
                   "default": "ClusterIP",
                   "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
-                  "required": [],
                   "title": "type",
                   "type": "string"
                 }
@@ -23205,7 +23182,6 @@
                 "type": {
                   "default": "ClusterIP",
                   "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
-                  "required": [],
                   "title": "type",
                   "type": "string"
                 }
@@ -23346,19 +23322,16 @@
                 "properties": {
                   "pullPolicy": {
                     "default": "IfNotPresent",
-                    "required": [],
                     "title": "pullPolicy",
                     "type": "string"
                   },
                   "repository": {
                     "default": "polarscloud/polars-on-premises-tests",
-                    "required": [],
                     "title": "repository",
                     "type": "string"
                   },
                   "tag": {
                     "default": "0.4.2",
-                    "required": [],
                     "title": "tag",
                     "type": "string"
                   }
@@ -23369,7 +23342,6 @@
             ],
             "required": []
           },
-          "required": [],
           "title": "images",
           "type": "array"
         },
@@ -23384,7 +23356,6 @@
             "automountServiceAccountToken": {
               "default": true,
               "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.",
-              "required": [],
               "title": "automountServiceAccountToken",
               "type": "boolean"
             },
@@ -23414,7 +23385,6 @@
             "dnsPolicy": {
               "default": "",
               "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
-              "required": [],
               "title": "dnsPolicy",
               "type": "string"
             },
@@ -23424,14 +23394,12 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
                 "required": []
               },
-              "required": [],
               "title": "hostAliases",
               "type": "array"
             },
             "hostNetwork": {
               "default": false,
               "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
-              "required": [],
               "title": "hostNetwork",
               "type": "boolean"
             },
@@ -23452,14 +23420,12 @@
             "priorityClassName": {
               "default": "",
               "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
-              "required": [],
               "title": "priorityClassName",
               "type": "string"
             },
             "runtimeClassName": {
               "default": "",
               "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
-              "required": [],
               "title": "runtimeClassName",
               "type": "string"
             },
@@ -23472,7 +23438,6 @@
                     "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                     "required": []
                   },
-                  "required": [],
                   "title": "env",
                   "type": "array"
                 },
@@ -23497,7 +23462,6 @@
                     "$ref": "#/definitions/io.k8s.api.core.v1.VolumeMount",
                     "required": []
                   },
-                  "required": [],
                   "title": "volumeMounts",
                   "type": "array"
                 }
@@ -23509,7 +23473,6 @@
             "schedulerName": {
               "default": "",
               "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
-              "required": [],
               "title": "schedulerName",
               "type": "string"
             },
@@ -23519,7 +23482,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
                 "required": []
               },
-              "required": [],
               "title": "tolerations",
               "type": "array"
             },
@@ -23529,7 +23491,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
                 "required": []
               },
-              "required": [],
               "title": "topologySpreadConstraints",
               "type": "array"
             },
@@ -23539,7 +23500,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.Volume",
                 "required": []
               },
-              "required": [],
               "title": "volumes",
               "type": "array"
             }
@@ -23593,7 +23553,6 @@
             "automountServiceAccountToken": {
               "default": true,
               "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.",
-              "required": [],
               "title": "automountServiceAccountToken",
               "type": "boolean"
             },
@@ -23623,7 +23582,6 @@
             "dnsPolicy": {
               "default": "",
               "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
-              "required": [],
               "title": "dnsPolicy",
               "type": "string"
             },
@@ -23633,14 +23591,12 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
                 "required": []
               },
-              "required": [],
               "title": "hostAliases",
               "type": "array"
             },
             "hostNetwork": {
               "default": false,
               "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
-              "required": [],
               "title": "hostNetwork",
               "type": "boolean"
             },
@@ -23673,7 +23629,6 @@
             "priorityClassName": {
               "default": "",
               "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
-              "required": [],
               "title": "priorityClassName",
               "type": "string"
             },
@@ -23686,14 +23641,12 @@
             "revisionHistoryLimit": {
               "default": 10,
               "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 10.",
-              "required": [],
               "title": "revisionHistoryLimit",
               "type": "integer"
             },
             "runtimeClassName": {
               "default": "",
               "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
-              "required": [],
               "title": "runtimeClassName",
               "type": "string"
             },
@@ -23706,7 +23659,6 @@
                     "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                     "required": []
                   },
-                  "required": [],
                   "title": "env",
                   "type": "array"
                 },
@@ -23736,7 +23688,6 @@
                     "$ref": "#/definitions/io.k8s.api.core.v1.VolumeMount",
                     "required": []
                   },
-                  "required": [],
                   "title": "volumeMounts",
                   "type": "array"
                 }
@@ -23748,7 +23699,6 @@
             "schedulerName": {
               "default": "",
               "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
-              "required": [],
               "title": "schedulerName",
               "type": "string"
             },
@@ -23758,7 +23708,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
                 "required": []
               },
-              "required": [],
               "title": "tolerations",
               "type": "array"
             },
@@ -23768,7 +23717,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
                 "required": []
               },
-              "required": [],
               "title": "topologySpreadConstraints",
               "type": "array"
             },
@@ -23778,7 +23726,6 @@
                 "$ref": "#/definitions/io.k8s.api.core.v1.Volume",
                 "required": []
               },
-              "required": [],
               "title": "volumes",
               "type": "array"
             }
