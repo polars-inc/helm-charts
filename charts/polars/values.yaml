@@ -657,7 +657,7 @@ scheduler:
 tests:
   images:
     - repository: "polarscloud/polars-on-premises-tests"
-      tag: "0.4.2"
+      tag: "0.4.3"
       pullPolicy: IfNotPresent
 
   serviceAccount:
