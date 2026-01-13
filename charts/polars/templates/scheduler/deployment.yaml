@@ -168,6 +168,8 @@ spec:
               value: {{ .Values.observatory.maxMetricsBytesTotal | quote }}
             - name: PC_CUBLET__observatory__rest_api__enabled
               value: "true"
+            - name: PC_CUBLET__monitoring__enabled
+              value: "true"
             - name: PC_CUBLET__scheduler__enabled
               value: "true"
             - name: PC_CUBLET__scheduler__allow_local_sinks
@@ -179,7 +181,7 @@ spec:
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.anonymousResults.s3.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__scheduler__anonymous_result_dst__s3__{{ .name | required "missing .Values.anonymousResults.s3.options[x].name" }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__{{ .name | required "missing .Values.anonymousResults.s3.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
