@@ -23331,7 +23331,7 @@
                     "type": "string"
                   },
                   "tag": {
-                    "default": "0.4.2",
+                    "default": "0.4.3",
                     "title": "tag",
                     "type": "string"
                   }
