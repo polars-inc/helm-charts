@@ -93,6 +93,7 @@ spec:
           args:
             - /emptydir/bin/pc-cublet
             - service
+          workingDir: /tmp
 {{- end }}
 {{- if .Values.runtime.prebuilt.enabled }}
           image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
@@ -142,16 +143,22 @@ spec:
             - name: PC_CUBLET__license
               value: "/license/license.json"
 {{- end }}
-            - name: PC_CUBLET__static_leader__leader_key
+            - name: PC_CUBLET__static_leader__leader_instance_id
               valueFrom:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: metadata.uid
-            - name: PC_CUBLET__static_leader__public_leader_addr
-              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+            - name: PC_CUBLET__static_leader__scheduler_service__public_addr__ip
+              value: "127.0.0.1"
+            - name: PC_CUBLET__static_leader__scheduler_service__public_addr__port
+              value: "5050"
+            - name: PC_CUBLET__static_leader__observatory_service__public_addr__ip
+              value: "127.0.0.1"
+            - name: PC_CUBLET__static_leader__observatory_service__public_addr__port
+              value: "5049"
             - name: PC_CUBLET__cluster_id
               value: {{ include "polars.clusterId" . | quote }}
-            - name: PC_CUBLET__cublet_id
+            - name: PC_CUBLET__instance_id
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
@@ -161,18 +168,20 @@ spec:
               value: {{ .Values.observatory.maxMetricsBytesTotal | quote }}
             - name: PC_CUBLET__observatory__rest_api__enabled
               value: "true"
+            - name: PC_CUBLET__monitoring__enabled
+              value: "true"
             - name: PC_CUBLET__scheduler__enabled
               value: "true"
-            - name: PC_CUBLET__scheduler__allow_shared_disk
+            - name: PC_CUBLET__scheduler__allow_local_sinks
               value: {{ .Values.allowSharedDisk | quote }}
 {{ if .Values.anonymousResults.s3.enabled }}
-            - name: PC_CUBLET__scheduler__anonymous_result_dst__s3__url
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__url
               value: {{ .Values.anonymousResults.s3.endpoint | quote }}
   {{- range .Values.anonymousResults.s3.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.anonymousResults.s3.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__scheduler__anonymous_result_dst__s3__{{ .name | required "missing .Values.anonymousResults.s3.options[x].name" }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__{{ .name | required "missing .Values.anonymousResults.s3.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -183,15 +192,6 @@ spec:
 {{ end }}
             - name: PC_CUBLET__scheduler__n_workers
               value: {{ .Values.worker.deployment.replicaCount | quote }}
-            - name: PC_CUBLET__service__auth
-              value: insecure
-            - name: PC_CUBLET__service__public_address
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.podIP
-            - name: PC_CUBLET__service__connection
-              value: "insecure"
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
@@ -224,6 +224,8 @@ spec:
               mountPath: /requirements.txt
               subPath: requirements.txt
   {{- end }}
+            - name: tmp-data
+              mountPath: /tmp
             - name: release-data
               mountPath: /emptydir
 {{- end }}
@@ -254,6 +256,8 @@ spec:
               - key: requirementsTxt
                 path: requirements.txt
   {{- end }}
+        - name: tmp-data
+          emptyDir: {}
         - name: release-data
           emptyDir: {}
 {{- end }}

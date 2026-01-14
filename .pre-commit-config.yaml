@@ -9,3 +9,6 @@ repos:
 
           # Sort values in the order they appear in the values.yaml file
           - --sort-values-order=file
+
+          # Ignore values without descriptions
+          - -ignore-non-descriptions
