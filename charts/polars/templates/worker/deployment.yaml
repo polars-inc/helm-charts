@@ -94,11 +94,13 @@ spec:
           imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
 {{- end }}
           ports:
+          {{- if not .Values.shuffleData.s3.enabled }}
             - name: worker-flight
-              containerPort: 5052
-              protocol: TCP
-            - name: worker-service
               containerPort: 5053
+              protocol: TCP
+          {{- end }}
+            - name: worker-service
+              containerPort: 5052
               protocol: TCP
 {{- with .Values.worker.deployment.runtimeContainer.readinessProbe }}
           readinessProbe:
