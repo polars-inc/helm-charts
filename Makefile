@@ -17,7 +17,7 @@ DEFINITIONS_FILE := _definitions-v$(DEFINITIONS_VERSION).json
 DEFINITIONS_LINK := _definitions.json
 CHARTS_DIR := charts
 
-all: schema docs
+all: schema docs fmt
 
 schema:
 	if [[ ! -f "$(DEFINITIONS_FILE)" ]]; then \
@@ -35,6 +35,9 @@ schema:
 
 docs:
 	helm-docs --chart-search-root="$(CHARTS_DIR)" --sort-values-order=file --ignore-non-descriptions
+
+fmt:
+	helmfmt charts/polars --disable-indent=tpl
 
 clean:
 	rm -f "$(DEFINITIONS_LINK)" _definitions-v*.json
