@@ -320,11 +320,15 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
 | anonymousResults.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
 | allowSharedDisk | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
-| shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}}` | Ephemeral storage for shuffle data. |
+| shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]},"sharedPersistentVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | shuffleData.ephemeralVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| shuffleData.sharedPersistentVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":""}` | Shared persistent storage for shuffle data. |
+| shuffleData.sharedPersistentVolumeClaim.enabled | bool | `false` | Enable shared persistent volume claim for shuffle data. |
+| shuffleData.sharedPersistentVolumeClaim.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| shuffleData.sharedPersistentVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
 | shuffleData.s3 | object | `{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}` | Configure S3 storage as shuffle data location. |
 | shuffleData.s3.enabled | bool | `false` | Enable S3 storage for shuffle data. |
 | shuffleData.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |

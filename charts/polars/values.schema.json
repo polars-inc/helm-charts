@@ -23258,6 +23258,32 @@
           },
           "required": [],
           "title": "s3"
+        },
+        "sharedPersistentVolumeClaim": {
+          "additionalProperties": false,
+          "description": "Shared persistent storage for shuffle data.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable shared persistent volume claim for shuffle data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "size": {
+              "default": "125Gi",
+              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
+              "required": [],
+              "title": "size"
+            },
+            "storageClassName": {
+              "default": "",
+              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
+              "required": [],
+              "title": "storageClassName"
+            }
+          },
+          "required": [],
+          "title": "sharedPersistentVolumeClaim"
         }
       },
       "required": [],

@@ -118,6 +118,15 @@ shuffleData:
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 125Gi
 
+  # -- Shared persistent storage for shuffle data.
+  sharedPersistentVolumeClaim:
+    # -- Enable shared persistent volume claim for shuffle data.
+    enabled: false
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: ""
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 125Gi
+
   # -- Configure S3 storage as shuffle data location.
   s3:
     # -- Enable S3 storage for shuffle data.
