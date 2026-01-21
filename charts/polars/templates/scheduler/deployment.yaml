@@ -166,6 +166,8 @@ spec:
               value: "true"
             - name: PC_CUBLET__observatory__max_metrics_bytes_total
               value: {{ .Values.observatory.maxMetricsBytesTotal | quote }}
+            - name: PC_CUBLET__observatory__database_path
+              value: /app/observatory_data/observatory.db
             - name: PC_CUBLET__observatory__cluster_mode
               value: "kubernetes"
             - name: PC_CUBLET__observatory__rest_api__enabled
@@ -231,6 +233,8 @@ spec:
             - name: release-data
               mountPath: /emptydir
 {{- end }}
+            - name: observatory-data
+              mountPath: /app/observatory_data
 {{- with .Values.scheduler.deployment.runtimeContainer.volumeMounts }}
             {{ toYaml . | nindent 12 }}
 {{- end }}
@@ -263,6 +267,8 @@ spec:
         - name: release-data
           emptyDir: {}
 {{- end }}
+        - name: observatory-data
+          emptyDir: {}
 {{- with .Values.scheduler.deployment.volumes }}
         {{ toYaml . | nindent 8 }}
 {{- end }}
