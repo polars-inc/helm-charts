@@ -94,7 +94,7 @@ spec:
           imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
 {{- end }}
           ports:
-{{- if not .Values.shuffleData.s3.enabled }}
+{{- if .Values.shuffleData.ephemeralVolumeClaim.enabled }}
             - name: worker-flight
               containerPort: 5053
               protocol: TCP
@@ -170,7 +170,7 @@ spec:
               value: {{ .Values.shuffleData.s3.endpoint | quote }}
   {{- range .Values.shuffleData.s3.options }}
     {{- if eq .name "url" }}
-      {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.shuffleData.s3.endpoint instead" }}
+      {{ fail "Name 'url' found in .Values.shuffleData.s3.options Please use .Values.shuffleData.s3.endpoint instead" }}
     {{- end }}
             - name: PC_CUBLET__worker__shuffle_location__s3__{{ .name | required "missing .Values.shuffleData.s3.options[x].name" }}
     {{- if .value }}
@@ -180,6 +180,9 @@ spec:
                 {{ toYaml .valueFrom | nindent 16 }}
     {{- end }}
   {{- end }}
+{{- else if .Values.shuffleData.sharedPersistentVolumeClaim.enabled }}
+            - name: PC_CUBLET__worker__shuffle_location__shared_filesystem__path
+              value: /app/shuffle_data/shuffle_data
 {{- else }}
             - name: PC_CUBLET__worker__shuffle_location__local__path
               value: /app/shuffle_data/shuffle_data
@@ -263,6 +266,9 @@ spec:
                 resources:
                   requests:
                     storage: {{ .Values.shuffleData.ephemeralVolumeClaim.size }}
+  {{- else if .Values.shuffleData.sharedPersistentVolumeClaim.enabled }}
+          persistentVolumeClaim:
+            claimName: polars-shuffle-data
   {{- else }}
           emptyDir: {}
   {{- end }}
