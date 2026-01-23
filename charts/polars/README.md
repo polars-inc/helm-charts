@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20260113](https://img.shields.io/badge/AppVersion-20260113-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20260123](https://img.shields.io/badge/AppVersion-20260123-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -154,7 +154,7 @@ Polars requires large data storage for its operation. There are two main types o
 
 #### Shuffle data
 
-High-performance storage for shuffle data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
+High-performance storage for shuffle data. The storage is only used during query execution. By default, the ephemeral volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable an ephemeral volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
 shuffleData:
@@ -180,6 +180,16 @@ shuffleData:
       - name: aws_endpoint_url
         value: "http://localhost:9000"
   # etc.
+```
+
+Finally, you may also configure a shared persistent volume for anonymous results data. This is useful when you have a `ReadWriteMany` storage class available in your Kubernetes cluster.
+
+```yaml
+anonymousResults:
+  sharedPersistentVolumeClaim:
+    enabled: true
+    storageClassName: "cephfs" # As configured in your k8s cluster
+    size: 125Gi
 ```
 
 #### Anonymous results data
