@@ -118,6 +118,15 @@ shuffleData:
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 125Gi
 
+  # -- Shared persistent storage for shuffle data.
+  sharedPersistentVolumeClaim:
+    # -- Enable shared persistent volume claim for shuffle data.
+    enabled: false
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: ""
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 125Gi
+
   # -- Configure S3 storage as shuffle data location.
   s3:
     # -- Enable S3 storage for shuffle data.
@@ -264,8 +273,8 @@ worker:
       # @schema
       # @ignore
       readinessProbe:
-        tcpSocket:
-          port: worker-service
+        grpc:
+          port: 5052
         # -- Number of seconds after the container has started before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
         initialDelaySeconds: 1
         # -- How often (in seconds) to perform the probe.

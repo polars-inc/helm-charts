@@ -11,4 +11,4 @@ repos:
           - --sort-values-order=file
 
           # Ignore values without descriptions
-          - -ignore-non-descriptions
+          - --ignore-non-descriptions

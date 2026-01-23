@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20260113](https://img.shields.io/badge/AppVersion-20260113-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20260123](https://img.shields.io/badge/AppVersion-20260123-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -24,6 +24,7 @@ $ helm upgrade --install polars polars-inc/polars \
     --set license.secretName=polars-secret-name \
     --set license.secretProperty=license.json
 $ kubectl port-forward svc/polars-scheduler 5051:5051
+$ kubectl port-forward svc/polars-observatory 3001:3001
 ```
 
 Then connect to the cluster from Python as follows:
@@ -43,6 +44,8 @@ query = (
 )
 print(query.await_result())
 ```
+
+You can see your query progress and node metrics by accessing the observatory service at `http://localhost:3001`.
 
 ### Helm Tests
 
@@ -154,7 +157,7 @@ Polars requires large data storage for its operation. There are two main types o
 
 #### Shuffle data
 
-High-performance storage for shuffle data. The storage is only used during query execution. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
+High-performance storage for shuffle data. The storage is only used during query execution. By default, the ephemeral volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable an ephemeral volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
 shuffleData:
@@ -180,6 +183,16 @@ shuffleData:
       - name: aws_endpoint_url
         value: "http://localhost:9000"
   # etc.
+```
+
+Finally, you may also configure a shared persistent volume for anonymous results data. This is useful when you have a `ReadWriteMany` storage class available in your Kubernetes cluster.
+
+```yaml
+anonymousResults:
+  sharedPersistentVolumeClaim:
+    enabled: true
+    storageClassName: "cephfs" # As configured in your k8s cluster
+    size: 125Gi
 ```
 
 #### Anonymous results data
@@ -262,6 +275,8 @@ worker:
 
 A compute cluster can be fully occupied running a query, preventing new queries from being scheduled. To avoid this, you can deploy this chart multiple times in the same cluster, reserving the resources between the different deployments.
 
+The observatory service stores host metrics and preallocates a number of bytes for host metrics. This is configurable using the `observatory.maxMetricsBytesTotal` value. For every node in the cluster, the observatory service needs around 50 bytes of storage. So if you have 3 nodes, and you want to store an hour of host metrics, you need to set `observatory.maxMetricsBytesTotal` to 3 * 50 * 3600 = 540000.
+
 ### Exposing Polars on-premise
 
 To use Polars on-premises from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, you must set `insecure=True` in the `ClusterContext`.
@@ -273,6 +288,8 @@ RuntimeError: Error setting up gRPC connection, transport error
 tcp connect error
 Hint: you may need to restart the query if this error persists
 ```
+
+The dashboard for Polars on-premises can be accessed at `http://localhost:3001`, and can be exposed outside the cluster by changing the `scheduler.services.observatory.type` value to `LoadBalancer` or `NodePort`.
 
 ## Telemetry
 
@@ -320,11 +337,15 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
 | anonymousResults.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
 | allowSharedDisk | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
-| shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}}` | Ephemeral storage for shuffle data. |
+| shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]},"sharedPersistentVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | shuffleData.ephemeralVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| shuffleData.sharedPersistentVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":""}` | Shared persistent storage for shuffle data. |
+| shuffleData.sharedPersistentVolumeClaim.enabled | bool | `false` | Enable shared persistent volume claim for shuffle data. |
+| shuffleData.sharedPersistentVolumeClaim.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| shuffleData.sharedPersistentVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
 | shuffleData.s3 | object | `{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}` | Configure S3 storage as shuffle data location. |
 | shuffleData.s3.enabled | bool | `false` | Enable S3 storage for shuffle data. |
 | shuffleData.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |

@@ -1,0 +1,12 @@
+{{- if .Values.shuffleData.sharedPersistentVolumeClaim.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: polars-shuffle-data
+spec:
+  accessModes: [ "ReadWriteMany" ]
+  storageClassName: {{ .Values.shuffleData.sharedPersistentVolumeClaim.storageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.shuffleData.sharedPersistentVolumeClaim.size }}
+{{- end }}
