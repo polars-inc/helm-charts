@@ -123,12 +123,6 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-            - name: OTEL_SERVICE_INSTANCE_ID
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.uid
-            - name: POLARS_SKIP_DSL_HASH_VERIFICATION
-              value: "1"
 {{- if .Values.license }}
             - name: PC_CUBLET__license
               value: "/license/license.json"
