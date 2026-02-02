@@ -18,7 +18,8 @@ Refer to the official Kubernetes documentation on [how to create a secret for pu
 To install the chart, ensure you have created an image pull secret as described above and ensure that a secret containing the license file exists.
 
 ```console
-$ kubectl create secret generic my-secret --from-file=license.json=license.json
+$ kubectl create secret docker-registry dockerhub-secret-name --docker-username=polarscustomer --docker-password=dckr_pat
+$ kubectl create secret generic polars-secret-name --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set imagePullSecrets[0].name=dockerhub-secret-name \
