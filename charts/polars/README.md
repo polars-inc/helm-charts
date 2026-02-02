@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20260123](https://img.shields.io/badge/AppVersion-20260123-informational?style=flat-square)
+![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20260202](https://img.shields.io/badge/AppVersion-20260202-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -17,7 +17,8 @@ Refer to the official Kubernetes documentation on [how to create a secret for pu
 To install the chart, ensure you have created an image pull secret as described above and ensure that a secret containing the license file exists.
 
 ```console
-$ kubectl create secret generic my-secret --from-file=license.json=license.json
+$ kubectl create secret docker-registry dockerhub-secret-name --docker-username=polarscustomer --docker-password=dckr_pat
+$ kubectl create secret generic polars-secret-name --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set imagePullSecrets[0].name=dockerhub-secret-name \
