@@ -278,6 +278,10 @@ A compute cluster can be fully occupied running a query, preventing new queries 
 
 The observatory service stores host metrics and preallocates a number of bytes for host metrics. This is configurable using the `observatory.maxMetricsBytesTotal` value. For every node in the cluster, the observatory service needs around 50 bytes of storage. So if you have 3 nodes, and you want to store an hour of host metrics, you need to set `observatory.maxMetricsBytesTotal` to 3 * 50 * 3600 = 540000.
 
+### Host metrics
+
+The dashboard shows host metrics for each worker node. These metrics are exported by default and can be disabled by setting `disableHostMetrics: true`.
+
 ### Exposing Polars on-premise
 
 To use Polars on-premises from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, you must set `insecure=True` in the `ClusterContext`.
@@ -332,6 +336,7 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | telemetry.otlpEndpoint | string | `""` | Endpoint to send OTLP traces and metrics to. |
 | logLevel | string | `"info"` | One of "info", "debug", "trace". |
 | workerHeartbeatIntervalSecs | int | `5` | Heartbeat interval between polars workers and the scheduler in seconds. |
+| disableHostMetrics | bool | `false` | Disable host metrics collection for the dashboard |
 | anonymousResults | object | `{"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
 | anonymousResults.s3 | object | `{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}` | Configure S3 storage for anonymous results. |
 | anonymousResults.s3.enabled | bool | `false` | Enable S3 storage for anonymous results. |

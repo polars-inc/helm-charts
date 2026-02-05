@@ -22705,6 +22705,12 @@
       "required": [],
       "title": "clusterId"
     },
+    "disableHostMetrics": {
+      "default": "false",
+      "description": "Disable host metrics collection for the dashboard",
+      "required": [],
+      "title": "disableHostMetrics"
+    },
     "fullnameOverride": {
       "default": "",
       "description": "Override the full name of the chart",
