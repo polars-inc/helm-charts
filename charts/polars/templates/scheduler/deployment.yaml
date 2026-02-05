@@ -168,6 +168,10 @@ spec:
               value: "true"
             - name: PC_CUBLET__monitoring__enabled
               value: "true"
+{{- if .Values.disableHostMetrics}}
+            - name: PC_CUBLET__monitoring__host_metrics__enabled
+              value: "false"
+{{- end }}
             - name: PC_CUBLET__scheduler__enabled
               value: "true"
             - name: PC_CUBLET__scheduler__allow_local_sinks
