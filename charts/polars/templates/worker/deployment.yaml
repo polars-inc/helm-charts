@@ -205,8 +205,15 @@ spec:
           # TODO: lifenessProbe
           # TODO: readinessProbe:
 {{- with .Values.worker.deployment.runtimeContainer.resources }}
+  {{- if and (ne .requests.memory .limits.memory) (not $.Values.acknowledgeResourceRecommendations) }}
+    {{- fail "Worker runtime container resource memory limits must equal requests. This may cause polars-on-premises to fail to handle OOM errors without data or progress loss. Consider adjusting resource requests or limits or set .Values.acknowledgeResourceRecommendations=true to bypass." }}
+  {{- end }}
           resources:
             {{ toYaml . | nindent 12 }}
+{{- else }}
+  {{- if not $.Values.acknowledgeResourceRecommendations }}
+    {{- fail "Worker runtime container is missing resources definition. This may cause polars-on-premises to fail to handle OOM errors without data or progress loss. Consider defining resources or set .Values.acknowledgeResourceRecommendations=true to bypass." }}
+  {{- end }}
 {{- end }}
           volumeMounts:
 {{- with .Values.license }}
@@ -295,6 +302,9 @@ spec:
 {{- end }}
 {{- with .Values.worker.deployment.volumes }}
         {{ toYaml . | nindent 8 }}
+{{- end }}
+{{- if not (or .Values.worker.deployment.nodeSelector .Values.worker.deployment.affinity .Values.worker.deployment.tolerations .Values.worker.deployment.topologySpreadConstraints) }}
+  {{- fail "Worker deployment must have at least one of nodeSelector, affinity, tolerations, or topologySpreadConstraints configured. Ensure each Kubernetes node has at most one Polars on-premises worker pod or set .Values.acknowledgeTopologyRecommendations=true to bypass." }}
 {{- end }}
 {{- with .Values.worker.deployment.nodeSelector }}
       nodeSelector:
