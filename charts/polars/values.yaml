@@ -84,6 +84,9 @@ logLevel: "info"
 # -- Heartbeat interval between polars workers and the scheduler in seconds.
 workerHeartbeatIntervalSecs: 5
 
+# -- Disable host metrics collection for the dashboard
+disableHostMetrics: false
+
 # -- Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results.
 anonymousResults:
   # -- Configure S3 storage for anonymous results.

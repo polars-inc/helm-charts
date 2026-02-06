@@ -145,6 +145,10 @@ spec:
                   fieldPath: metadata.uid
             - name: PC_CUBLET__monitoring__enabled
               value: "true"
+{{- if .Values.disableHostMetrics}}
+            - name: PC_CUBLET__monitoring__host_metrics__enabled
+              value: "false"
+{{- end }}
             - name: PC_CUBLET__worker__enabled
               value: "true"
             - name: PC_CUBLET__worker__task_service__public_addr__ip
