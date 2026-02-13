@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 1.3.1](https://img.shields.io/badge/Version-1.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 20260202](https://img.shields.io/badge/AppVersion-20260202-informational?style=flat-square)
+![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.1](https://img.shields.io/badge/AppVersion-0.1.1-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -379,6 +379,7 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | scheduler.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
 | scheduler.deployment.podAnnotations | object | `{}` | Additional annotations to add to the scheduler pod. |
 | scheduler.deployment.podLabels | object | `{}` | Additional labels to add to the scheduler pod. |
+| tests.helmHookDeletePolicy | string | `"hook-succeeded"` | Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies |
 | tests.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | tests.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | tests.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
