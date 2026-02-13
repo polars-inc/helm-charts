@@ -23369,7 +23369,7 @@
                     "type": "string"
                   },
                   "tag": {
-                    "default": "0.4.3",
+                    "default": "0.5.0",
                     "title": "tag",
                     "type": "string"
                   }
