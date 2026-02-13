@@ -379,6 +379,7 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | scheduler.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
 | scheduler.deployment.podAnnotations | object | `{}` | Additional annotations to add to the scheduler pod. |
 | scheduler.deployment.podLabels | object | `{}` | Additional labels to add to the scheduler pod. |
+| tests.helmHookDeletePolicy | string | `"hook-succeeded"` | Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies |
 | tests.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | tests.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | tests.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |

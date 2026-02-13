@@ -23346,6 +23346,12 @@
     "tests": {
       "additionalProperties": false,
       "properties": {
+        "helmHookDeletePolicy": {
+          "default": "hook-succeeded",
+          "description": "Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies",
+          "required": [],
+          "title": "helmHookDeletePolicy"
+        },
         "images": {
           "items": {
             "anyOf": [

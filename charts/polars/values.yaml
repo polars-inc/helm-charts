@@ -672,6 +672,9 @@ tests:
       tag: "0.4.3"
       pullPolicy: IfNotPresent
 
+  # -- Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies
+  helmHookDeletePolicy: hook-succeeded
+
   serviceAccount:
     # -- Whether to create a service account.
     create: false
