@@ -212,8 +212,15 @@ spec:
           # TODO: lifenessProbe
           # TODO: readinessProbe:
 {{- with .Values.scheduler.deployment.runtimeContainer.resources }}
+  {{- if and (ne .requests.memory .limits.memory) (not $.Values.acknowledgeResourceRecommendations) }}
+    {{- fail "Scheduler runtime container resource memory limits must equal requests. This may cause polars-on-premises to fail to handle OOM errors without data or progress loss. Consider adjusting resource requests or limits or set .Values.acknowledgeResourceRecommendations=true to bypass." }}
+  {{- end }}
           resources:
             {{ toYaml . | nindent 12 }}
+{{- else }}
+  {{- if not $.Values.acknowledgeResourceRecommendations }}
+    {{- fail "Scheduler runtime container is missing resources definition. This may cause polars-on-premises to fail to handle OOM errors without data or progress loss. Consider defining resources or set .Values.acknowledgeResourceRecommendations=true to bypass." }}
+  {{- end }}
 {{- end }}
           volumeMounts:
 {{- with .Values.license }}
