@@ -22779,13 +22779,13 @@
       "type": "object"
     },
     "podAnnotations": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Common annotations for all resources",
       "required": [],
       "title": "podAnnotations"
     },
     "podLabels": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Common labels for all resources",
       "required": [],
       "title": "podLabels"
@@ -22983,13 +22983,13 @@
               "type": "object"
             },
             "podAnnotations": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "description": "Additional annotations to add to the scheduler pod.",
               "required": [],
               "title": "podAnnotations"
             },
             "podLabels": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "description": "Additional labels to add to the scheduler pod.",
               "required": [],
               "title": "podLabels"
@@ -23140,7 +23140,7 @@
               "additionalProperties": false,
               "properties": {
                 "annotations": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
                   "required": [],
                   "title": "annotations"
@@ -23160,7 +23160,7 @@
               "additionalProperties": false,
               "properties": {
                 "annotations": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
                   "required": [],
                   "title": "annotations"
@@ -23180,7 +23180,7 @@
               "additionalProperties": false,
               "properties": {
                 "annotations": {
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
                   "required": [],
                   "title": "annotations"
@@ -23648,13 +23648,13 @@
               "type": "object"
             },
             "podAnnotations": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "description": "Additional annotations to add to the scheduler pod.",
               "required": [],
               "title": "podAnnotations"
             },
             "podLabels": {
-              "additionalProperties": false,
+              "additionalProperties": true,
               "description": "Additional labels to add to the scheduler pod.",
               "required": [],
               "title": "podLabels"

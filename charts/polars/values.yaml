@@ -3,8 +3,14 @@ nameOverride: ""
 # -- Override the full name of the chart
 fullnameOverride: ""
 
+# @schema
+# additionalProperties: true
+# @schema
 # -- Common labels for all resources
 podLabels: {}
+# @schema
+# additionalProperties: true
+# @schema
 # -- Common annotations for all resources
 podAnnotations: {}
 
@@ -183,9 +189,15 @@ worker:
     # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10.
     revisionHistoryLimit: 10
 
+    # @schema
+    # additionalProperties: true
+    # @schema
     # -- Additional annotations to add to the scheduler pod.
     podAnnotations: {}
 
+    # @schema
+    # additionalProperties: true
+    # @schema
     # -- Additional labels to add to the scheduler pod.
     podLabels: {}
 
@@ -406,6 +418,9 @@ scheduler:
       # @schema
       # -- type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. "ExternalName" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
       type: ClusterIP
+      # @schema
+      # additionalProperties: true
+      # @schema
       # -- Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.
       annotations: {}
     scheduler:
@@ -414,6 +429,9 @@ scheduler:
       # @schema
       # -- type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. "ExternalName" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
       type: ClusterIP
+      # @schema
+      # additionalProperties: true
+      # @schema
       # -- Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.
       annotations: {}
     observatory:
@@ -422,6 +440,9 @@ scheduler:
       # @schema
       # -- type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. "ExternalName" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
       type: ClusterIP
+      # @schema
+      # additionalProperties: true
+      # @schema
       # -- Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.
       annotations: {}
 
@@ -451,9 +472,15 @@ scheduler:
       rollingUpdate:
         maxUnavailable: 1
 
+    # @schema
+    # additionalProperties: true
+    # @schema
     # -- Additional annotations to add to the scheduler pod.
     podAnnotations: {}
 
+    # @schema
+    # additionalProperties: true
+    # @schema
     # -- Additional labels to add to the scheduler pod.
     podLabels: {}
 
