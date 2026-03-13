@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: polars-shuffle-data
+  name: {{ include "polars.fullname" . }}-polars-shuffle-data
 spec:
   accessModes: [ "ReadWriteMany" ]
   storageClassName: {{ .Values.shuffleData.sharedPersistentVolumeClaim.storageClassName }}
