@@ -140,6 +140,17 @@ Create observatory fullname
 {{- end }}
 
 {{/*
+Shuffle data shared PVC name
+*/}}
+{{- define "polars.shuffleDataPvcName" -}}
+  {{- if .Values.shuffleData.sharedPersistentVolumeClaim.existingClaimName }}
+{{- .Values.shuffleData.sharedPersistentVolumeClaim.existingClaimName }}
+  {{- else }}
+{{- printf "%s-polars-shuffle-data" (include "polars.fullname" .) }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Cluster ID
 */}}
 {{- define "polars.clusterId" -}}

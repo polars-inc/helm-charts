@@ -23275,6 +23275,18 @@
               "required": [],
               "title": "enabled"
             },
+            "create": {
+              "default": "true",
+              "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
+              "required": [],
+              "title": "create"
+            },
+            "existingClaimName": {
+              "default": "",
+              "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-shuffle-data\".",
+              "required": [],
+              "title": "existingClaimName"
+            },
             "size": {
               "default": "125Gi",
               "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
