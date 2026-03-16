@@ -1,12 +1,18 @@
 {{- if .Values.shuffleData.sharedPersistentVolumeClaim.enabled }}
+  {{- if .Values.shuffleData.sharedPersistentVolumeClaim.create }}
+    {{- if .Values.shuffleData.sharedPersistentVolumeClaim.existingClaimName }}
+      {{ fail ".Values.shuffleData.sharedPersistentVolumeClaim.create shuffleData.sharedPersistentVolumeClaim.existingClaimName are mutually exclusive"}}
+    {{- end }}
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "polars.fullname" . }}-polars-shuffle-data
+  name: {{ include "polars.shuffleDataPvcName" . }}
 spec:
   accessModes: [ "ReadWriteMany" ]
   storageClassName: {{ .Values.shuffleData.sharedPersistentVolumeClaim.storageClassName }}
   resources:
     requests:
       storage: {{ .Values.shuffleData.sharedPersistentVolumeClaim.size }}
+  {{- end }}
 {{- end }}
