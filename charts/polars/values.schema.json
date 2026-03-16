@@ -23269,17 +23269,17 @@
           "additionalProperties": false,
           "description": "Shared persistent storage for shuffle data.",
           "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable shared persistent volume claim for shuffle data.",
-              "required": [],
-              "title": "enabled"
-            },
             "create": {
               "default": "true",
               "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
               "required": [],
               "title": "create"
+            },
+            "enabled": {
+              "default": "false",
+              "description": "Enable shared persistent volume claim for shuffle data.",
+              "required": [],
+              "title": "enabled"
             },
             "existingClaimName": {
               "default": "",

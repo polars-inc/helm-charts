@@ -146,7 +146,7 @@ Shuffle data shared PVC name
   {{- if .Values.shuffleData.sharedPersistentVolumeClaim.existingClaimName }}
 {{- .Values.shuffleData.sharedPersistentVolumeClaim.existingClaimName }}
   {{- else }}
-{{- printf "%s-polars-shuffle-data" (include "polars.fullname" .) }}
+    {{- printf "%s-polars-shuffle-data" (include "polars.fullname" .) }}
   {{- end }}
 {{- end }}
 
