@@ -266,7 +266,7 @@ spec:
                     storage: {{ .Values.shuffleData.ephemeralVolumeClaim.size }}
   {{- else if .Values.shuffleData.sharedPersistentVolumeClaim.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "polars.fullname" . }}-polars-shuffle-data
+            claimName: {{ include "polars.shuffleDataPvcName" . }}
   {{- else }}
           emptyDir: {}
   {{- end }}

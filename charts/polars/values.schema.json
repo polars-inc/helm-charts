@@ -23269,11 +23269,23 @@
           "additionalProperties": false,
           "description": "Shared persistent storage for shuffle data.",
           "properties": {
+            "create": {
+              "default": "true",
+              "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
+              "required": [],
+              "title": "create"
+            },
             "enabled": {
               "default": "false",
               "description": "Enable shared persistent volume claim for shuffle data.",
               "required": [],
               "title": "enabled"
+            },
+            "existingClaimName": {
+              "default": "",
+              "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-shuffle-data\".",
+              "required": [],
+              "title": "existingClaimName"
             },
             "size": {
               "default": "125Gi",
