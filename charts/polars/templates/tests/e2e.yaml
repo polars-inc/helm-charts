@@ -2,11 +2,11 @@
 
 {{ $E2E_SINK := "" }}
 {{- if .Values.anonymousResults.s3.enabled }}
-{{ $E2E_SINK = "anonymous" -}}
+  {{ $E2E_SINK = "anonymous" -}}
 {{- else if .Values.allowSharedDisk }}
-{{ $E2E_SINK = "/tmp/helm-tests" }}
+  {{ $E2E_SINK = "/tmp/helm-tests" }}
 {{- else }}
-{{ $fail = "helm test requires either .Values.s3.enabled or .Values.allowSharedDisk" }}
+  {{ $fail = "helm test requires either .Values.s3.enabled or .Values.allowSharedDisk" }}
 {{- end }}
 
 {{- range .Values.tests.images }}
