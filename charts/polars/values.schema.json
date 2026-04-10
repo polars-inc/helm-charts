@@ -22730,7 +22730,13 @@
         "required": []
       },
       "title": "imagePullSecrets",
-      "type": "array"
+      "type": "array",
+      "x-kubernetes-list-map-keys": [
+        "name"
+      ],
+      "x-kubernetes-list-type": "map",
+      "x-kubernetes-patch-merge-key": "name",
+      "x-kubernetes-patch-strategy": "merge"
     },
     "license": {
       "additionalProperties": false,
@@ -22965,7 +22971,13 @@
                 "required": []
               },
               "title": "hostAliases",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "ip"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "ip",
+              "x-kubernetes-patch-strategy": "merge"
             },
             "hostNetwork": {
               "default": false,
@@ -22980,7 +22992,8 @@
               "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
               "required": [],
               "title": "nodeSelector",
-              "type": "object"
+              "type": "object",
+              "x-kubernetes-map-type": "atomic"
             },
             "podAnnotations": {
               "additionalProperties": true,
@@ -23014,7 +23027,8 @@
             "rollout": {
               "$ref": "#/definitions/io.k8s.api.apps.v1.DeploymentStrategy",
               "description": "The deployment strategy to use to replace existing pods with new ones.",
-              "required": []
+              "required": [],
+              "x-kubernetes-patch-strategy": "retainKeys"
             },
             "runtimeClassName": {
               "default": "",
@@ -23032,7 +23046,13 @@
                     "required": []
                   },
                   "title": "env",
-                  "type": "array"
+                  "type": "array",
+                  "x-kubernetes-list-map-keys": [
+                    "name"
+                  ],
+                  "x-kubernetes-list-type": "map",
+                  "x-kubernetes-patch-merge-key": "name",
+                  "x-kubernetes-patch-strategy": "merge"
                 },
                 "lifecycleHooks": {
                   "$ref": "#/definitions/io.k8s.api.core.v1.Lifecycle",
@@ -23061,7 +23081,13 @@
                     "required": []
                   },
                   "title": "volumeMounts",
-                  "type": "array"
+                  "type": "array",
+                  "x-kubernetes-list-map-keys": [
+                    "mountPath"
+                  ],
+                  "x-kubernetes-list-type": "map",
+                  "x-kubernetes-patch-merge-key": "mountPath",
+                  "x-kubernetes-patch-strategy": "merge"
                 }
               },
               "required": [],
@@ -23081,7 +23107,8 @@
                 "required": []
               },
               "title": "tolerations",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-type": "atomic"
             },
             "topologySpreadConstraints": {
               "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
@@ -23090,7 +23117,14 @@
                 "required": []
               },
               "title": "topologySpreadConstraints",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "topologyKey",
+                "whenUnsatisfiable"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "topologyKey",
+              "x-kubernetes-patch-strategy": "merge"
             },
             "volumes": {
               "description": "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes",
@@ -23099,7 +23133,13 @@
                 "required": []
               },
               "title": "volumes",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "name"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "name",
+              "x-kubernetes-patch-strategy": "merge,retainKeys"
             }
           },
           "required": [],
@@ -23445,7 +23485,13 @@
                 "required": []
               },
               "title": "hostAliases",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "ip"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "ip",
+              "x-kubernetes-patch-strategy": "merge"
             },
             "hostNetwork": {
               "default": false,
@@ -23460,7 +23506,8 @@
               "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
               "required": [],
               "title": "nodeSelector",
-              "type": "object"
+              "type": "object",
+              "x-kubernetes-map-type": "atomic"
             },
             "podSecurityContext": {
               "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
@@ -23489,7 +23536,13 @@
                     "required": []
                   },
                   "title": "env",
-                  "type": "array"
+                  "type": "array",
+                  "x-kubernetes-list-map-keys": [
+                    "name"
+                  ],
+                  "x-kubernetes-list-type": "map",
+                  "x-kubernetes-patch-merge-key": "name",
+                  "x-kubernetes-patch-strategy": "merge"
                 },
                 "lifecycleHooks": {
                   "$ref": "#/definitions/io.k8s.api.core.v1.Lifecycle",
@@ -23513,7 +23566,13 @@
                     "required": []
                   },
                   "title": "volumeMounts",
-                  "type": "array"
+                  "type": "array",
+                  "x-kubernetes-list-map-keys": [
+                    "mountPath"
+                  ],
+                  "x-kubernetes-list-type": "map",
+                  "x-kubernetes-patch-merge-key": "mountPath",
+                  "x-kubernetes-patch-strategy": "merge"
                 }
               },
               "required": [],
@@ -23533,7 +23592,8 @@
                 "required": []
               },
               "title": "tolerations",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-type": "atomic"
             },
             "topologySpreadConstraints": {
               "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
@@ -23542,7 +23602,14 @@
                 "required": []
               },
               "title": "topologySpreadConstraints",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "topologyKey",
+                "whenUnsatisfiable"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "topologyKey",
+              "x-kubernetes-patch-strategy": "merge"
             },
             "volumes": {
               "description": "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes",
@@ -23551,7 +23618,13 @@
                 "required": []
               },
               "title": "volumes",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "name"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "name",
+              "x-kubernetes-patch-strategy": "merge,retainKeys"
             }
           },
           "required": [],
@@ -23642,7 +23715,13 @@
                 "required": []
               },
               "title": "hostAliases",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "ip"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "ip",
+              "x-kubernetes-patch-strategy": "merge"
             },
             "hostNetwork": {
               "default": false,
@@ -23657,7 +23736,8 @@
               "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
               "required": [],
               "title": "nodeSelector",
-              "type": "object"
+              "type": "object",
+              "x-kubernetes-map-type": "atomic"
             },
             "podAnnotations": {
               "additionalProperties": true,
@@ -23710,7 +23790,13 @@
                     "required": []
                   },
                   "title": "env",
-                  "type": "array"
+                  "type": "array",
+                  "x-kubernetes-list-map-keys": [
+                    "name"
+                  ],
+                  "x-kubernetes-list-type": "map",
+                  "x-kubernetes-patch-merge-key": "name",
+                  "x-kubernetes-patch-strategy": "merge"
                 },
                 "lifecycleHooks": {
                   "$ref": "#/definitions/io.k8s.api.core.v1.Lifecycle",
@@ -23739,7 +23825,13 @@
                     "required": []
                   },
                   "title": "volumeMounts",
-                  "type": "array"
+                  "type": "array",
+                  "x-kubernetes-list-map-keys": [
+                    "mountPath"
+                  ],
+                  "x-kubernetes-list-type": "map",
+                  "x-kubernetes-patch-merge-key": "mountPath",
+                  "x-kubernetes-patch-strategy": "merge"
                 }
               },
               "required": [],
@@ -23759,7 +23851,8 @@
                 "required": []
               },
               "title": "tolerations",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-type": "atomic"
             },
             "topologySpreadConstraints": {
               "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
@@ -23768,7 +23861,14 @@
                 "required": []
               },
               "title": "topologySpreadConstraints",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "topologyKey",
+                "whenUnsatisfiable"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "topologyKey",
+              "x-kubernetes-patch-strategy": "merge"
             },
             "volumes": {
               "description": "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes",
@@ -23777,7 +23877,13 @@
                 "required": []
               },
               "title": "volumes",
-              "type": "array"
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "name"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "name",
+              "x-kubernetes-patch-strategy": "merge,retainKeys"
             }
           },
           "required": [],
