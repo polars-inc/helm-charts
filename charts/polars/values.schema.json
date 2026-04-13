@@ -22705,6 +22705,12 @@
       "required": [],
       "title": "clusterId"
     },
+    "denyAnonymousUsers": {
+      "default": "false",
+      "description": "Enabling this option ensures that all queries must be sent with a set username.",
+      "required": [],
+      "title": "denyAnonymousUsers"
+    },
     "disableHostMetrics": {
       "default": "false",
       "description": "Disable host metrics collection for the dashboard",

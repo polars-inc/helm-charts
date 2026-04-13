@@ -194,6 +194,8 @@ spec:
 {{ end }}
             - name: PC_CUBLET__scheduler__n_workers
               value: {{ .Values.worker.deployment.replicaCount | quote }}
+            - name: PC_CUBLET__scheduler__deny_anonymous_users
+              value: {{ .Values.denyAnonymousUsers | quote }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
