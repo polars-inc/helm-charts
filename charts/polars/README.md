@@ -35,7 +35,7 @@ import polars_cloud as pc
 import polars as pl
 
 # Directly connect to the cluster
-ctx = pc.ClusterContext(compute_address="127.0.0.1", compute_port=5051, insecure=True)
+ctx = pc.ClusterContext(compute_address="127.0.0.1", insecure=True)
 query = (
     pl.LazyFrame()
     .with_columns(a=pl.arange(0, 100000000).sum())
