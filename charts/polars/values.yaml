@@ -116,6 +116,12 @@ anonymousResults:
 # -- Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage
 allowSharedDisk: true
 
+# @schema
+# required: false
+# @schema
+# -- Enabling this option ensures that all queries must be sent with a set username.
+denyAnonymousUsers: false
+
 # -- Ephemeral storage for shuffle data.
 shuffleData:
   # -- Configure ephemeral storage for shuffle data.

@@ -200,6 +200,8 @@ anonymousResults:
 
 For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
+Note that Anonymous Users and Anonymous Results are different. Anonymous Users refer to queries that are submitted without a username, while Anonymous Results refer to queries without an explicit output sink.
+
 ```yaml
 anonymousResults:
   s3:
@@ -280,6 +282,20 @@ A compute cluster can be fully occupied running a query, preventing new queries 
 
 The observatory service stores host metrics and preallocates a number of bytes for host metrics. This is configurable using the `observatory.maxMetricsBytesTotal` value. For every node in the cluster, the observatory service needs around 50 bytes of storage. So if you have 3 nodes, and you want to store an hour of host metrics, you need to set `observatory.maxMetricsBytesTotal` to 3 * 50 * 3600 = 540000.
 
+### Anonymous Users
+
+By default, queries can be anonymously submitted to the scheduler. In the dashboard, queries submitted anonymously are shown as `Anonymous User` in the query list. To attach a username to a query, you can use the `POLARS_CLOUD_USER_NAME` environment variable or the
+`pc.Config.set_single_node()` method.
+
+```python
+import polars_cloud as pc
+pc.Config.set_user_name("Polars")
+```
+
+To deny all queries that don't have any username attached, you can set the `denyAnonymousUsers` value to `true`.
+
+Note that Anonymous Users and Anonymous Results are different. Anonymous Users refer to queries that are submitted without a username, while Anonymous Results refer to queries without an explicit output sink.
+
 ### Host metrics
 
 The dashboard shows host metrics for each worker node. These metrics are exported by default and can be disabled by setting `disableHostMetrics: true`.
@@ -345,6 +361,7 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
 | anonymousResults.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
 | allowSharedDisk | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
+| denyAnonymousUsers | bool | `false` | Enabling this option ensures that all queries must be sent with a set username. |
 | shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]},"sharedPersistentVolumeClaim":{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for shuffle data. |
