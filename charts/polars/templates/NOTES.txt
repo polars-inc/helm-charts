@@ -19,7 +19,7 @@
   import polars_cloud as pc
 
   # Directly connect to the cluster
-  ctx = pc.ClusterContext(compute_address={{- if contains "NodePort" .Values.scheduler.services.scheduler.type }}os.environ["NODE_IP"]{{- else if contains "LoadBalancer" .Values.scheduler.services.scheduler.type }}os.environ["SERVICE_IP"]{{- else if contains "ClusterIP" .Values.scheduler.services.scheduler.type }}"127.0.0.1"{{- end }}{{- if contains "NodePort" .Values.scheduler.services.scheduler.type }}, compute_port=int(os.environ["NODE_PORT"]){{- end }}, insecure=True)
+  ctx = pc.ClusterContext(compute_address={{- if contains "NodePort" .Values.scheduler.services.scheduler.type }}os.environ["NODE_IP"]{{- else if contains "LoadBalancer" .Values.scheduler.services.scheduler.type }}os.environ["SERVICE_IP"]{{- else if contains "ClusterIP" .Values.scheduler.services.scheduler.type }}"127.0.0.1"{{- end }}{{- if contains "NodePort" .Values.scheduler.services.scheduler.type }}, scheduler_port=int(os.environ["NODE_PORT"]){{- end }}, insecure=True)
   query = (
     pl.LazyFrame()
     .with_columns(a=pl.arange(0, 100000000).sum())
