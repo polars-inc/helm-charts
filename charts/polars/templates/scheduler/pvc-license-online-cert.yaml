@@ -1,0 +1,11 @@
+{{- if include "polars.isOnlineLicense" . }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "polars.onlineLicenseCertificatePvcName" . }}
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 1Mi
+{{- end }}

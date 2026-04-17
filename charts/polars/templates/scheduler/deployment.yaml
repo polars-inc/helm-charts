@@ -135,9 +135,18 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if .Values.license }}
-            - name: PC_CUBLET__license
-              value: "/license/license.json"
+{{- if include "polars.isOnlineLicense" . }}
+            - name: PC_CUBLET__license__online__client_id
+              {{ include "polars.envVarValue" .Values.clientId | nindent 14 }}
+            - name: PC_CUBLET__license__online__client_secret
+              {{ include "polars.envVarValue" .Values.clientSecret | nindent 14 }}
+            - name: PC_CUBLET__license__online__workspace_id
+              {{ include "polars.envVarValue" .Values.workspaceId | nindent 14 }}
+            - name: PC_CUBLET__license__online__cert_dir
+              value: /mnt/certs
+{{- else }}
+            - name: PC_CUBLET__license__offline__license_path
+              value: "/mnt/license/license.json"
 {{- end }}
             - name: PC_CUBLET__static_leader__leader_instance_id
               valueFrom:
@@ -226,9 +235,13 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
-{{- with .Values.license }}
+
+{{- if include "polars.isOnlineLicense" . }}
+            - name: certs
+              mountPath: /mnt/certs
+{{- else }}
             - name: license
-              mountPath: /license/
+              mountPath: /mnt/license/
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
   {{- if .Values.runtime.composed.requirements }}
@@ -253,7 +266,11 @@ spec:
       runtimeClassName: {{ .Values.scheduler.deployment.runtimeClassName | quote }}
 {{- end }}
       volumes:
-{{- with .Values.license }}
+{{- if include "polars.isOnlineLicense" . }}
+        - name: certs
+          persistentVolumeClaim:
+            claimName: {{ include "polars.onlineLicenseCertificatePvcName" . }}
+{{- else }}
         - name: license
           secret:
             secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
