@@ -162,6 +162,40 @@ Observatory data PVC name
 {{- end }}
 
 {{/*
+Online License Certificate Volume
+*/}}
+{{- define "polars.onlineLicenseCertificatePvcName" -}}
+  {{- printf "%s-polars-online-license-certificate" (include "polars.fullname" .) }}
+{{- end }}
+
+{{/*
+Returns "true" if the license is configured in online mode (clientId/Secret/workspaceId),
+or empty string if offline (license.secretName). Fails if both or neither are set. Use with `if`.
+*/}}
+{{- define "polars.isOnlineLicense" -}}
+  {{- if and .Values.license.secretName (or .Values.clientId .Values.clientSecret .Values.workspaceId) }}
+    {{ fail "Either .Values.license or (.Values.clientId and .Values.clientSecret and .Values.workspaceId) must be set, but not both" }}
+  {{- else if not .Values.license.secretName }}
+    {{- if or (not .Values.clientId) (not .Values.clientSecret) (not .Values.workspaceId) }}
+      {{ fail "Either .Values.license or (.Values.clientId and .Values.clientSecret and .Values.workspaceId) must be set" }}
+    {{- end }}
+  {{- "true" }}
+  {{- end }}
+{{- end }}
+
+{{/*
+Renders a single env var value, supporting both plain strings and valueFrom objects.
+Usage: {{ include "polars.envVarValue" .Values.clientId }}
+*/}}
+{{- define "polars.envVarValue" -}}
+  {{- if kindIs "string" . }}
+value: {{ . | quote }}
+  {{- else }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Cluster ID
 */}}
 {{- define "polars.clusterId" -}}
