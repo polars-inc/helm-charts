@@ -195,6 +195,10 @@ spec:
             - name: POLARS_EULA_ACCEPTED
               value: "yes"
 {{- end }}
+{{- with .Values.worker.deployment.runtimeContainer.resources.requests.cpu }}
+            - name: PC_CUBLET__cpu_reserved
+              value: {{ . | quote }}
+{{- end }}
 {{- with .Values.worker.deployment.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
 {{- end }}
