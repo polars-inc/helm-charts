@@ -186,10 +186,10 @@ shuffleData:
   # etc.
 ```
 
-Finally, you may also configure a shared persistent volume for anonymous results data. This is useful when you have a `ReadWriteMany` storage class available in your Kubernetes cluster.
+Finally, you may also configure a shared persistent volume for shuffle data. This is useful when you have a `ReadWriteMany` storage class available in your Kubernetes cluster.
 
 ```yaml
-anonymousResults:
+shuffleData:
   sharedPersistentVolumeClaim:
     enabled: true
     storageClassName: "cephfs" # As configured in your k8s cluster
