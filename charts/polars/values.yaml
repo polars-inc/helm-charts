@@ -179,6 +179,18 @@ observatory:
   # -- Maximum number of bytes for host metrics storage
   maxMetricsBytesTotal: 104857600
 
+  persistentVolumeClaim:
+    # -- Enable a persistent volume claim
+    enabled: false
+    # -- Create the PVC resource. Set to false if you want to use an existing PVC.
+    create: true
+    # -- Override the PVC name. Defaults to "{{ fullname }}-polars-observatory-data".
+    existingClaimName: ""
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: ""
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 1Gi
+
 worker:
   serviceAccount:
     # -- Whether to create a service account.

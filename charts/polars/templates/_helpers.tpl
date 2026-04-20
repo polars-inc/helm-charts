@@ -151,6 +151,17 @@ Shuffle data shared PVC name
 {{- end }}
 
 {{/*
+Observatory data PVC name
+*/}}
+{{- define "polars.observatoryDataPvcName" -}}
+  {{- if .Values.observatory.persistentVolumeClaim.existingClaimName }}
+{{- .Values.observatory.persistentVolumeClaim.existingClaimName }}
+  {{- else }}
+    {{- printf "%s-polars-observatory-data" (include "polars.fullname" .) }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Cluster ID
 */}}
 {{- define "polars.clusterId" -}}

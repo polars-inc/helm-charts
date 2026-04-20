@@ -232,6 +232,32 @@ temporaryData:
     size: 125Gi
 ```
 
+#### Observatory data
+
+The observatory stores profiling data in an SQLite database file. By default, this file is stored in an `emptyDir`, so data is lost when the scheduler pod is recreated. This volume can also be configured as a persistent volume claim, allowing the observatory to persist profiling data across scheduler pod restarts or even cluster recreation.  The storage needed for this file is in the order of several tens of MB, depending on the number of queries and their complexity.
+
+You can configure the chart to create a persistent volume claim by configuring these volumes:
+
+```yaml
+observatory:
+  data:
+    persistentVolumeClaim:
+      enabled: true
+      storageClassName: "hostpath" # As configured in your k8s cluster
+      size: 1Gi
+```
+
+Or reuse an existing volume claim as shown below. Make sure the volume has the `ReadWriteOnce` access mode as the observatory requires exclusive access to the database file.
+
+```yaml
+observatory:
+  data:
+    persistentVolumeClaim:
+      enabled: true
+      create: false
+      existingClaimName: "your-persistent-volume-claim"
+```
+
 ### Resource allocation and node selectors
 
 Most of the time, it is a good idea to run Polars on-premises on dedicated nodes, with only one worker pod per node.
@@ -383,6 +409,11 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | temporaryData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | temporaryData.ephemeralVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
 | observatory.maxMetricsBytesTotal | int | `104857600` | Maximum number of bytes for host metrics storage |
+| observatory.persistentVolumeClaim.enabled | bool | `false` | Enable a persistent volume claim |
+| observatory.persistentVolumeClaim.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |
+| observatory.persistentVolumeClaim.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-observatory-data". |
+| observatory.persistentVolumeClaim.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| observatory.persistentVolumeClaim.size | string | `"1Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
 | worker.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | worker.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | worker.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |

@@ -1,0 +1,18 @@
+{{- if .Values.observatory.persistentVolumeClaim.enabled }}
+  {{- if .Values.observatory.persistentVolumeClaim.create }}
+    {{- if .Values.observatory.persistentVolumeClaim.existingClaimName }}
+      {{ fail ".Values.observatory.persistentVolumeClaim.create observatory.persistentVolumeClaim.existingClaimName are mutually exclusive"}}
+    {{- end }}
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "polars.observatoryDataPvcName" . }}
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: {{ .Values.observatory.persistentVolumeClaim.storageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.observatory.persistentVolumeClaim.size }}
+  {{- end }}
+{{- end }}

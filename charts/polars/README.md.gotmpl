@@ -233,6 +233,32 @@ temporaryData:
     size: 125Gi
 ```
 
+#### Observatory data
+
+The observatory stores profiling data in an SQLite database file. By default, this file is stored in an `emptyDir`, so data is lost when the scheduler pod is recreated. This volume can also be configured as a persistent volume claim, allowing the observatory to persist profiling data across scheduler pod restarts or even cluster recreation.  The storage needed for this file is in the order of several tens of MB, depending on the number of queries and their complexity.
+
+You can configure the chart to create a persistent volume claim by configuring these volumes:
+
+```yaml
+observatory:
+  data:
+    persistentVolumeClaim:
+      enabled: true
+      storageClassName: "hostpath" # As configured in your k8s cluster
+      size: 1Gi
+```
+
+Or reuse an existing volume claim as shown below. Make sure the volume has the `ReadWriteOnce` access mode as the observatory requires exclusive access to the database file.
+
+```yaml
+observatory:
+  data:
+    persistentVolumeClaim:
+      enabled: true
+      create: false
+      existingClaimName: "your-persistent-volume-claim"
+```
+
 ### Resource allocation and node selectors
 
 Most of the time, it is a good idea to run Polars on-premises on dedicated nodes, with only one worker pod per node.
