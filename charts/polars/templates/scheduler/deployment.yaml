@@ -268,7 +268,12 @@ spec:
           emptyDir: {}
 {{- end }}
         - name: observatory-data
+{{- if .Values.observatory.persistentVolumeClaim.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "polars.observatoryDataPvcName" . }}
+{{- else }}
           emptyDir: {}
+{{- end }}
 {{- with .Values.scheduler.deployment.volumes }}
         {{ toYaml . | nindent 8 }}
 {{- end }}
