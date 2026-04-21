@@ -22764,6 +22764,42 @@
       "title": "license",
       "type": "object"
     },
+    "lineage": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": "false",
+          "description": "Enable support for lineage exporting to a specific endpoint",
+          "required": [],
+          "title": "enabled"
+        },
+        "transport": {
+          "additionalProperties": false,
+          "properties": {
+            "http": {
+              "additionalProperties": false,
+              "properties": {
+                "endpoint": {
+                  "default": "http://marquez.default.svc.cluster.local:5000",
+                  "description": "Transport protocol to use for lineage export",
+                  "required": [],
+                  "title": "endpoint"
+                }
+              },
+              "required": [],
+              "title": "http",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "transport",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "lineage",
+      "type": "object"
+    },
     "logLevel": {
       "default": "info",
       "description": "One of \"info\", \"debug\", \"trace\".",
