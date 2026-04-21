@@ -344,6 +344,20 @@ The dashboard for Polars on-premises can be accessed at `http://localhost:3001`,
 
 Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
 
+## Lineage
+
+OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+
+The cluster must be configured with a lineage transport endpoint, pointing at the collector. HTTP(S) is the only supported transport protocol. The following example points at an instance of Marquez.
+
+```yaml
+[lineage]
+enabled = true
+transport.http.endpoint = "http://marquez.svc.cluster.local:5000"
+```
+
+See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+
 ## Maintainers
 
 | Name | Email | Url |
@@ -414,6 +428,8 @@ Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTL
 | observatory.persistentVolumeClaim.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-observatory-data". |
 | observatory.persistentVolumeClaim.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | observatory.persistentVolumeClaim.size | string | `"1Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| lineage.enabled | bool | `false` | Enable support for lineage exporting to a specific endpoint |
+| lineage.transport.http.endpoint | string | `"http://marquez.default.svc.cluster.local:5000"` | Transport protocol to use for lineage export |
 | worker.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | worker.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | worker.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |

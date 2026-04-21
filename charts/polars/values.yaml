@@ -191,6 +191,14 @@ observatory:
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 1Gi
 
+lineage:
+  # -- Enable support for lineage exporting to a specific endpoint
+  enabled: false
+  transport:
+    http:
+      # -- Transport protocol to use for lineage export
+      endpoint: "http://marquez.default.svc.cluster.local:5000"
+
 worker:
   serviceAccount:
     # -- Whether to create a service account.
