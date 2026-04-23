@@ -21,14 +21,16 @@ spec:
     type: {{ .Values.scheduler.deployment.rollout.strategy }}
   template:
     metadata:
-{{- with .Values.scheduler.deployment.podAnnotations }}
+{{- $podAnnotations := merge .Values.scheduler.deployment.podAnnotations .Values.podAnnotations }}
+{{- with $podAnnotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
       labels:
         app.kubernetes.io/component: scheduler
         {{ include "polars.labels" . | nindent 8 }}
-{{- with .Values.scheduler.deployment.podLabels }}
+{{- $podLabels := merge .Values.scheduler.deployment.podLabels .Values.podLabels }}
+{{- with $podLabels }}
         {{ toYaml . | nindent 8 }}
 {{- end }}
     spec:

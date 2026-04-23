@@ -15,14 +15,16 @@ spec:
     type: "Recreate"
   template:
     metadata:
-{{- with .Values.worker.deployment.podAnnotations }}
+{{- $podAnnotations := merge .Values.worker.deployment.podAnnotations .Values.podAnnotations }}
+{{- with $podAnnotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
       labels:
         app.kubernetes.io/component: worker
         {{ include "polars.labels" . | nindent 8 }}
-{{- with .Values.worker.deployment.podLabels }}
+{{- $podLabels := merge .Values.worker.deployment.podLabels .Values.podLabels }}
+{{- with $podLabels }}
         {{ toYaml . | nindent 8 }}
 {{- end }}
     spec:
