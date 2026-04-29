@@ -7,27 +7,50 @@
 
 {{ template "chart.homepageLine" . }}
 
-## Access to Polars on-premises artifacts
-
-First of all, make sure to obtain a license for Polars on-premises by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
-You will receive an access key for our private Docker registry as well as a license for running Polars on-premises.
-Refer to the official Kubernetes documentation on [how to create a secret for pulling images from a private registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
 
 ## Quick Start
 
-To install the chart, ensure you have created an image pull secret as described above and ensure that a secret containing the license file exists.
+Get started right away by setting up your on-premises workspace on [Polars Cloud](https://cloud.pola.rs) or get a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
+
+<details>
+
+<summary>Quick start online license</summary>
+
+### Online license
+
+To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret.
 
 ```console
-$ kubectl create secret docker-registry dockerhub-secret-name --docker-username=polarscustomer --docker-password=dckr_pat
-$ kubectl create secret generic polars-secret-name --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set imagePullSecrets[0].name=dockerhub-secret-name \
-    --set license.secretName=polars-secret-name \
+    --set clientId=<YOUR_CLIENT_ID> \
+    --set clientSecret=<YOUR_CLIENT_SECRET> \
+    --set workspaceId=<YOUR_WORKSPACE_ID>
+$ kubectl port-forward svc/polars-scheduler 5051:5051
+$ kubectl port-forward svc/polars-observatory 3001:3001
+```
+
+</details>
+
+<details>
+
+<summary>Quick start offline license</summary>
+
+### Offline license
+
+To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv) and the license file exists at `./license.json`.
+
+```console
+$ kubectl create secret generic polars-offline-license --from-file=license.json=license.json
+$ helm repo add polars-inc https://polars-inc.github.io/helm-charts
+$ helm upgrade --install polars polars-inc/polars \
+    --set license.secretName=polars-offline-license \
     --set license.secretProperty=license.json
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
 ```
+
+</details>
 
 Then connect to the cluster from Python as follows:
 

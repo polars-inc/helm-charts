@@ -22699,6 +22699,58 @@
       "required": [],
       "title": "anonymousResults"
     },
+    "clientId": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "properties": {
+            "valueFrom": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+              "required": []
+            }
+          },
+          "required": [
+            "valueFrom"
+          ],
+          "type": "object"
+        }
+      ],
+      "default": "",
+      "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+      "required": [],
+      "title": "clientId"
+    },
+    "clientSecret": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "properties": {
+            "valueFrom": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+              "required": []
+            }
+          },
+          "required": [
+            "valueFrom"
+          ],
+          "type": "object"
+        }
+      ],
+      "default": "",
+      "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+      "required": [],
+      "title": "clientSecret"
+    },
     "clusterId": {
       "default": "",
       "description": "Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to \"helm namespace/helm release name\" if not set.",
@@ -24006,6 +24058,32 @@
       "description": "Heartbeat interval between polars workers and the scheduler in seconds.",
       "required": [],
       "title": "workerHeartbeatIntervalSecs"
+    },
+    "workspaceId": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "properties": {
+            "valueFrom": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+              "required": []
+            }
+          },
+          "required": [
+            "valueFrom"
+          ],
+          "type": "object"
+        }
+      ],
+      "default": "",
+      "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+      "required": [],
+      "title": "workspaceId"
     }
   },
   "required": [

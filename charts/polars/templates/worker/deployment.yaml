@@ -125,10 +125,6 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if .Values.license }}
-            - name: PC_CUBLET__license
-              value: "/license/license.json"
-{{- end }}
             - name: PC_CUBLET__static_leader__leader_instance_id
               value: "{{ include "polars.worker.fullname" . }}-0"
             - name: PC_CUBLET__static_leader__scheduler_service__public_addr__hostname
@@ -215,10 +211,6 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
-{{- with .Values.license }}
-            - name: license
-              mountPath: /license/
-{{- end }}
 {{- if .Values.runtime.composed.enabled }}
   {{- if .Values.runtime.composed.requirements }}
             - name: requirements-txt
@@ -276,14 +268,6 @@ spec:
   {{- else }}
           emptyDir: {}
   {{- end }}
-{{- end }}
-{{- with .Values.license }}
-        - name: license
-          secret:
-            secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
-            items:
-              - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
-                path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
   {{- if .Values.runtime.composed.requirements }}
