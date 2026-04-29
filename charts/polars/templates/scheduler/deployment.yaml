@@ -21,14 +21,16 @@ spec:
     type: {{ .Values.scheduler.deployment.rollout.strategy }}
   template:
     metadata:
-{{- with .Values.scheduler.deployment.podAnnotations }}
+{{- $podAnnotations := merge .Values.scheduler.deployment.podAnnotations .Values.podAnnotations }}
+{{- with $podAnnotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
       labels:
         app.kubernetes.io/component: scheduler
         {{ include "polars.labels" . | nindent 8 }}
-{{- with .Values.scheduler.deployment.podLabels }}
+{{- $podLabels := merge .Values.scheduler.deployment.podLabels .Values.podLabels }}
+{{- with $podLabels }}
         {{ toYaml . | nindent 8 }}
 {{- end }}
     spec:
@@ -196,6 +198,12 @@ spec:
               value: {{ .Values.worker.deployment.replicaCount | quote }}
             - name: PC_CUBLET__scheduler__deny_anonymous_users
               value: {{ .Values.denyAnonymousUsers | quote }}
+{{- if .Values.lineage.enabled }}
+            - name: PC_CUBLET__lineage__enabled
+              value: "true"
+            - name: PC_CUBLET__lineage__transport__http__endpoint
+              value: {{ .Values.lineage.transport.http.endpoint | quote }}
+{{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
@@ -268,7 +276,12 @@ spec:
           emptyDir: {}
 {{- end }}
         - name: observatory-data
+{{- if .Values.observatory.persistentVolumeClaim.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "polars.observatoryDataPvcName" . }}
+{{- else }}
           emptyDir: {}
+{{- end }}
 {{- with .Values.scheduler.deployment.volumes }}
         {{ toYaml . | nindent 8 }}
 {{- end }}

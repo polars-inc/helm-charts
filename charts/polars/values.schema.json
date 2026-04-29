@@ -22764,6 +22764,42 @@
       "title": "license",
       "type": "object"
     },
+    "lineage": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": "false",
+          "description": "Enable support for lineage exporting to a specific endpoint",
+          "required": [],
+          "title": "enabled"
+        },
+        "transport": {
+          "additionalProperties": false,
+          "properties": {
+            "http": {
+              "additionalProperties": false,
+              "properties": {
+                "endpoint": {
+                  "default": "http://marquez.default.svc.cluster.local:5000",
+                  "description": "Transport protocol to use for lineage export",
+                  "required": [],
+                  "title": "endpoint"
+                }
+              },
+              "required": [],
+              "title": "http",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "transport",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "lineage",
+      "type": "object"
+    },
     "logLevel": {
       "default": "info",
       "description": "One of \"info\", \"debug\", \"trace\".",
@@ -22784,6 +22820,44 @@
           "description": "Maximum number of bytes for host metrics storage",
           "required": [],
           "title": "maxMetricsBytesTotal"
+        },
+        "persistentVolumeClaim": {
+          "additionalProperties": false,
+          "properties": {
+            "create": {
+              "default": "true",
+              "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
+              "required": [],
+              "title": "create"
+            },
+            "enabled": {
+              "default": "false",
+              "description": "Enable a persistent volume claim",
+              "required": [],
+              "title": "enabled"
+            },
+            "existingClaimName": {
+              "default": "",
+              "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-observatory-data\".",
+              "required": [],
+              "title": "existingClaimName"
+            },
+            "size": {
+              "default": "1Gi",
+              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
+              "required": [],
+              "title": "size"
+            },
+            "storageClassName": {
+              "default": "",
+              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
+              "required": [],
+              "title": "storageClassName"
+            }
+          },
+          "required": [],
+          "title": "persistentVolumeClaim",
+          "type": "object"
         }
       },
       "required": [],
@@ -23427,7 +23501,7 @@
                     "type": "string"
                   },
                   "tag": {
-                    "default": "0.6.0",
+                    "default": "0.6.1",
                     "title": "tag",
                     "type": "string"
                   }

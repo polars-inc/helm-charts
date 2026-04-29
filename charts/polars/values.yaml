@@ -179,6 +179,26 @@ observatory:
   # -- Maximum number of bytes for host metrics storage
   maxMetricsBytesTotal: 104857600
 
+  persistentVolumeClaim:
+    # -- Enable a persistent volume claim
+    enabled: false
+    # -- Create the PVC resource. Set to false if you want to use an existing PVC.
+    create: true
+    # -- Override the PVC name. Defaults to "{{ fullname }}-polars-observatory-data".
+    existingClaimName: ""
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: ""
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 1Gi
+
+lineage:
+  # -- Enable support for lineage exporting to a specific endpoint
+  enabled: false
+  transport:
+    http:
+      # -- Transport protocol to use for lineage export
+      endpoint: "http://marquez.default.svc.cluster.local:5000"
+
 worker:
   serviceAccount:
     # -- Whether to create a service account.
@@ -706,7 +726,7 @@ scheduler:
 tests:
   images:
     - repository: "polarscloud/polars-on-premises-tests"
-      tag: "0.6.0"
+      tag: "0.6.1"
       pullPolicy: IfNotPresent
 
   # -- Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies
