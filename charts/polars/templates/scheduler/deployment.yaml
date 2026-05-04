@@ -144,7 +144,7 @@ spec:
               {{ include "polars.envVarValue" .Values.workspaceId | nindent 14 }}
             - name: PC_CUBLET__license__online__cert_dir
               value: /mnt/certs
-{{- else }}
+{{- else if include "polars.isOfflineLicense" . }}
             - name: PC_CUBLET__license__offline__license_path
               value: "/mnt/license/license.json"
 {{- end }}
@@ -239,7 +239,7 @@ spec:
 {{- if include "polars.isOnlineLicense" . }}
             - name: certs
               mountPath: /mnt/certs
-{{- else }}
+{{- else if include "polars.isOfflineLicense" . }}
             - name: license
               mountPath: /mnt/license/
 {{- end }}
@@ -270,12 +270,12 @@ spec:
         - name: certs
           persistentVolumeClaim:
             claimName: {{ include "polars.onlineLicenseCertificatePvcName" . }}
-{{- else }}
+{{- else if include "polars.isOfflineLicense" . }}
         - name: license
           secret:
-            secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
+            secretName: {{ required ".Values.license.secretName is required" .Values.license.secretName | quote }}
             items:
-              - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
+              - key: {{ required ".Values.license.secretProperty is required" .Values.license.secretProperty | quote }}
                 path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}

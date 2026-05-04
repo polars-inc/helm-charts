@@ -169,19 +169,62 @@ Online License Certificate Volume
 {{- end }}
 
 {{/*
-Returns "true" if the license is configured in online mode (clientId/Secret/workspaceId),
-or empty string if offline (license.secretName). Fails if both or neither are set. Use with `if`.
+Validates license config. Fails on:
+- Both online and offline fields set simultaneously
+- Partial online fields (missing clientId, clientSecret, or workspaceId)
+- Partial offline fields (secretName set but secretProperty missing, or vice versa)
 */}}
-{{- define "polars.isOnlineLicense" -}}
-  {{- if and .Values.license.secretName (or .Values.clientId .Values.clientSecret .Values.workspaceId) }}
-    {{ fail "Either .Values.license or (.Values.clientId and .Values.clientSecret and .Values.workspaceId) must be set, but not both" }}
-  {{- else if not .Values.license.secretName }}
-    {{- if or (not .Values.clientId) (not .Values.clientSecret) (not .Values.workspaceId) }}
-      {{ fail "Either .Values.license or (.Values.clientId and .Values.clientSecret and .Values.workspaceId) must be set" }}
+{{- define "polars.validateLicense" -}}
+  {{- if not .Values.disableValidateLicense }}
+    {{- $hasOnline := or .Values.clientId .Values.clientSecret .Values.workspaceId -}}
+    {{- $hasOfflineDisabled := kindIs "invalid" .Values.license -}}
+    {{- $hasOffline := "" -}}
+    {{- if not $hasOfflineDisabled -}}
+      {{- $hasOffline = or .Values.license.secretName .Values.license.secretProperty -}}
+    {{- end -}}
+
+    {{- if and $hasOnline $hasOffline -}}
+      {{- fail "License error: .Values.clientId/.Values.clientSecret/.Values.workspaceId and .Values.license.secretName/.Values.license.secretProperty are mutually exclusive" -}}
+    {{- end -}}
+
+    {{- if and (not $hasOnline) (not $hasOffline) (not $hasOfflineDisabled) -}}
+      {{- fail "License error: either .Values.clientId/.Values.clientSecret/.Values.workspaceId or .Values.license.secretName/.Values.license.secretProperty is required" -}}
     {{- end }}
-  {{- "true" }}
+
+    {{- if $hasOnline -}}
+      {{- if not .Values.clientId -}}
+        {{- fail "License error: .Values.clientId is required when using online license" -}}
+      {{- end -}}
+      {{- if not .Values.clientSecret -}}
+        {{- fail "License error: .Values.clientSecret is required when using online license" -}}
+      {{- end -}}
+      {{- if not .Values.workspaceId -}}
+        {{- fail "License error: .Values.workspaceId is required when using online license" -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- if $hasOffline -}}
+      {{- if not .Values.license.secretName -}}
+        {{- fail "License error: .Values.license.secretName is required when using offline license" -}}
+      {{- end -}}
+      {{- if not .Values.license.secretProperty -}}
+        {{- fail "License error: .Values.license.secretProperty is required when using offline license" -}}
+      {{- end -}}
+    {{- end -}}
   {{- end }}
-{{- end }}
+{{- end -}}
+
+
+{{- define "polars.isOnlineLicense" -}}
+  {{- include "polars.validateLicense" . -}}
+  {{- if .Values.clientId -}}true{{- end -}}
+{{- end -}}
+
+
+{{- define "polars.isOfflineLicense" -}}
+  {{- include "polars.validateLicense" . -}}
+  {{- if (.Values.license).secretName -}}true{{- end -}}
+{{- end -}}
 
 {{/*
 Renders a single env var value, supporting both plain strings and valueFrom objects.
