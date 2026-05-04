@@ -204,6 +204,9 @@ Validates license config. Fails on:
     {{- end -}}
 
     {{- if $hasOffline -}}
+      {{- if not .Values.acceptEula }}
+        {{ fail "EULA not accepted. Please refer to the EULA as forwarded by Polars together with your license." }}
+      {{- end }}
       {{- if not .Values.license.secretName -}}
         {{- fail "License error: .Values.license.secretName is required when using offline license" -}}
       {{- end -}}
