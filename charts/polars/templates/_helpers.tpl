@@ -251,3 +251,10 @@ Cluster ID
     {{- printf "%s/%s" .Release.Namespace .Release.Name | quote }}
   {{- end }}
 {{- end }}
+
+{{/*
+Create seaweedfs fullname
+*/}}
+{{- define "polars.seaweedfs.fullname" -}}
+  {{- printf "%s-seaweedfs" (include "polars.fullname" .) }}
+{{- end }}

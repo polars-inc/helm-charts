@@ -45,9 +45,11 @@ $ kubectl create secret generic polars-offline-license --from-file=license.json=
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set license.secretName=polars-offline-license \
-    --set license.secretProperty=license.json
+    --set license.secretProperty=license.json \
+    --set anonymousResults.seaweedfs.enabled=true
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
+$ kubectl port-forward svc/polars-observatory 8333:8333
 ```
 
 </details>
