@@ -151,6 +151,11 @@ anonymousResults:
 #          secretKeyRef:
 #            name: my-s3-secret
 #            key: accessKeyId
+  # -- Configure using quick-start seaweedfs
+  seaweedfs:
+    # -- Enable seaweedfs S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.
+    enabled: false
+    presignEndpointUrl: "http://localhost:8333"
 
 # -- Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage
 allowSharedDisk: true
@@ -973,3 +978,166 @@ tests:
     # @ignore
     # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
     hostNetwork: false
+
+# @ignore
+# -- Configuration of seaweedfs deployment used for anonymous results
+seaweedfs:
+  service:
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Additional annotations on the Service object
+    annotations: {}
+
+  deployment:
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.apps.v1.DeploymentSpec/properties/revisionHistoryLimit
+    # @schema
+    # @ignore
+    # -- revisionHistoryLimit is the maximum number of revisions that will be maintained in the Deployment's revision history. The default value is 10.
+    revisionHistoryLimit: 10
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Additional annotations to add to the seaweedfs pod.
+    podAnnotations: {}
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Additional labels to add to the seaweedfs pod.
+    podLabels: {}
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsPolicy
+    # @schema
+    # @ignore
+    # -- Set DNS policy for the pod. Defaults to "ClusterFirst". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+    dnsPolicy: ""
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/dnsConfig
+    # @schema
+    # @ignore
+    # -- Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy. More info: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+    dnsConfig: {}
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/schedulerName
+    # @schema
+    # @ignore
+    # -- If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
+    schedulerName: ""
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext
+    # @schema
+    # @ignore
+    # -- SecurityContext holds pod-level security attributes and common container settings.
+    podSecurityContext: {}
+    #  fsGroup: 2000
+    #  runAsUser: 1000
+    #  runAsNonRoot: true
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostAliases
+    # @schema
+    # @ignore
+    # -- List of host aliases to add to the pod's /etc/hosts file. More info: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+    hostAliases: []
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/priorityClassName
+    # @schema
+    # @ignore
+    # -- If specified, indicates the pod's priority. "system-node-critical" and "system-cluster-critical" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default. More info: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+    priorityClassName: ""
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/runtimeClassName
+    # @schema
+    # @ignore
+    # -- RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod. If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+    runtimeClassName: ""
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/hostNetwork
+    # @schema
+    # @ignore
+    # -- Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false.
+    hostNetwork: false
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector
+    # @schema
+    # @ignore
+    # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    nodeSelector: {}
+    #  kubernetes.io/e2e-az-name: e2e-az1
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/affinity
+    # @schema
+    # @ignore
+    # -- If specified, the pod's scheduling constraints
+    affinity: {}
+    #  nodeAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      nodeSelectorTerms:
+    #      - matchExpressions:
+    #        - key: kubernetes.io/e2e-az-name
+    #          operator: In
+    #          values:
+    #          - e2e-az1
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/tolerations
+    # @schema
+    # @ignore
+    # -- If specified, the pod's tolerations.
+    tolerations: []
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/topologySpreadConstraints
+    # @schema
+    # @ignore
+    # -- TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.
+    topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: DoNotSchedule
+
+    container:
+      image:
+        # -- Container image name. More info: https://kubernetes.io/docs/concepts/containers/images
+        repository: "chrislusf/seaweedfs"
+        # -- Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images
+        tag: "4.23"
+        # @schema
+        # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/imagePullPolicy
+        # @schema
+        # -- Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+        pullPolicy: IfNotPresent
+      # @schema
+      # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
+      # @schema
+      # @ignore
+      # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      securityContext: {}
+      # @schema
+      # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
+      # @schema
+      # @ignore
+      # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+      resources: {}
+      #  requests:
+      #    cpu: 250m
+      #    memory: 256Mi
+      #  limits:
+      #    cpu: 500m
+      #    memory: 512Mi
