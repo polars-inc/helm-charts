@@ -337,6 +337,6 @@ spec:
 {{- if .Values.scheduler.deployment.topologySpreadConstraints }}
         {{ toYaml .Values.scheduler.deployment.topologySpreadConstraints | nindent 8 }}
 {{- else }}
-        {{ include "polars.defaultTopologySpreadConstraints" | nindent 8 }}
+        {{ include "polars.defaultTopologySpreadConstraints" . | nindent 8 }}
 {{- end }}
       hostNetwork: {{ .Values.scheduler.deployment.hostNetwork }}
