@@ -162,6 +162,86 @@ Observatory data PVC name
 {{- end }}
 
 {{/*
+Online License Certificate Volume
+*/}}
+{{- define "polars.onlineLicenseCertificatePvcName" -}}
+  {{- printf "%s-polars-online-license-certificate" (include "polars.fullname" .) }}
+{{- end }}
+
+{{/*
+Validates license config. Fails on:
+- Both online and offline fields set simultaneously
+- Partial online fields (missing clientId, clientSecret, or workspaceId)
+- Partial offline fields (secretName set but secretProperty missing, or vice versa)
+*/}}
+{{- define "polars.validateLicense" -}}
+  {{- if not .Values.disableValidateLicense }}
+    {{- $hasOnline := or .Values.clientId .Values.clientSecret .Values.workspaceId -}}
+    {{- $hasOfflineDisabled := kindIs "invalid" .Values.license -}}
+    {{- $hasOffline := "" -}}
+    {{- if not $hasOfflineDisabled -}}
+      {{- $hasOffline = or .Values.license.secretName .Values.license.secretProperty -}}
+    {{- end -}}
+
+    {{- if and $hasOnline $hasOffline -}}
+      {{- fail "License error: .Values.clientId/.Values.clientSecret/.Values.workspaceId and .Values.license.secretName/.Values.license.secretProperty are mutually exclusive" -}}
+    {{- end -}}
+
+    {{- if and (not $hasOnline) (not $hasOffline) (not $hasOfflineDisabled) -}}
+      {{- fail "License error: either .Values.clientId/.Values.clientSecret/.Values.workspaceId or .Values.license.secretName/.Values.license.secretProperty is required" -}}
+    {{- end }}
+
+    {{- if $hasOnline -}}
+      {{- if not .Values.clientId -}}
+        {{- fail "License error: .Values.clientId is required when using online license" -}}
+      {{- end -}}
+      {{- if not .Values.clientSecret -}}
+        {{- fail "License error: .Values.clientSecret is required when using online license" -}}
+      {{- end -}}
+      {{- if not .Values.workspaceId -}}
+        {{- fail "License error: .Values.workspaceId is required when using online license" -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- if $hasOffline -}}
+      {{- if not .Values.acceptEula }}
+        {{ fail "EULA not accepted. Please refer to the EULA as forwarded by Polars together with your license." }}
+      {{- end }}
+      {{- if not .Values.license.secretName -}}
+        {{- fail "License error: .Values.license.secretName is required when using offline license" -}}
+      {{- end -}}
+      {{- if not .Values.license.secretProperty -}}
+        {{- fail "License error: .Values.license.secretProperty is required when using offline license" -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end }}
+{{- end -}}
+
+
+{{- define "polars.isOnlineLicense" -}}
+  {{- include "polars.validateLicense" . -}}
+  {{- if .Values.clientId -}}true{{- end -}}
+{{- end -}}
+
+
+{{- define "polars.isOfflineLicense" -}}
+  {{- include "polars.validateLicense" . -}}
+  {{- if (.Values.license).secretName -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+Renders a single env var value, supporting both plain strings and valueFrom objects.
+Usage: {{ include "polars.envVarValue" .Values.clientId }}
+*/}}
+{{- define "polars.envVarValue" -}}
+  {{- if kindIs "string" . }}
+value: {{ . | quote }}
+  {{- else }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Cluster ID
 */}}
 {{- define "polars.clusterId" -}}
