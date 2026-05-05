@@ -23,6 +23,45 @@ clusterId: ""
 # -- To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.
 acceptEula: false
 
+# @schema
+# anyOf:
+#   - type: "null"
+#   - type: string
+#   - type: object
+#     required:
+#       - valueFrom
+#     properties:
+#       valueFrom:
+#         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
+# @schema
+clientId:
+
+# @schema
+# anyOf:
+#   - type: "null"
+#   - type: string
+#   - type: object
+#     required:
+#       - valueFrom
+#     properties:
+#       valueFrom:
+#         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
+# @schema
+clientSecret:
+
+# @schema
+# anyOf:
+#   - type: "null"
+#   - type: string
+#   - type: object
+#     required:
+#       - valueFrom
+#     properties:
+#       valueFrom:
+#         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
+# @schema
+workspaceId:
+
 license:
   # -- the name containing your polars license key
   secretName: ""
