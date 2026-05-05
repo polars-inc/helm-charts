@@ -18,7 +18,7 @@ Get started right away by setting up your on-premises workspace on [Polars Cloud
 
 ### Online license
 
-To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret.
+To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret. For the purpose of this quick start, we deploy Seaweed as an anonymous results destination. This allows you to run queries without specifying a results destination. To configure a different anonymous results destination, see [Anonymous results data](#Anonymous-results-data)
 
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
@@ -45,9 +45,11 @@ $ kubectl create secret generic polars-offline-license --from-file=license.json=
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set license.secretName=polars-offline-license \
-    --set license.secretProperty=license.json
+    --set license.secretProperty=license.json \
+    --set anonymousResults.seaweedfs.enabled=true
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
+$ kubectl port-forward svc/polars-seaweedfs 8333:8333
 ```
 
 </details>

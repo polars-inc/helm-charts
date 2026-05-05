@@ -251,3 +251,18 @@ Cluster ID
     {{- printf "%s/%s" .Release.Namespace .Release.Name | quote }}
   {{- end }}
 {{- end }}
+
+{{/*
+Create seaweedfs fullname
+*/}}
+{{- define "polars.seaweedfs.fullname" -}}
+  {{- printf "%s-seaweedfs" (include "polars.fullname" .) }}
+{{- end }}
+
+
+{{/*
+Whether anonymous results is enabled
+*/}}
+{{- define "polars.isAnonymousResultsEnabled" -}}
+  {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.seaweedfs.enabled -}}true{{- end -}}
+{{- end -}}

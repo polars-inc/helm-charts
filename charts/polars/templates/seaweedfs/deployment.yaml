@@ -1,0 +1,132 @@
+{{- if .Values.anonymousResults.seaweedfs.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "polars.seaweedfs.fullname" . }}
+  labels:
+    {{ include "polars.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.seaweedfs.deployment.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: seaweedfs
+      {{ include "polars.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: "Recreate"
+  template:
+    metadata:
+  {{- $podAnnotations := merge .Values.seaweedfs.deployment.podAnnotations .Values.podAnnotations }}
+  {{- with $podAnnotations }}
+      annotations:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+      labels:
+        app.kubernetes.io/component: seaweedfs
+        {{ include "polars.labels" . | nindent 8 }}
+  {{- $podLabels := merge .Values.seaweedfs.deployment.podLabels .Values.podLabels }}
+  {{- with $podLabels }}
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+    spec:
+  {{- with .Values.seaweedfs.deployment.dnsPolicy }}
+      dnsPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.seaweedfs.deployment.dnsConfig }}
+      dnsConfig:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.seaweedfs.deployment.schedulerName }}
+      schedulerName: {{ . }}
+  {{- end }}
+  {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+      automountServiceAccountToken: false
+  {{- with .Values.seaweedfs.deployment.podSecurityContext }}
+      securityContext:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.seaweedfs.deployment.hostAliases }}
+      hostAliases:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+      containers:
+        - name: seaweedfs
+  {{- with .Values.seaweedfs.deployment.container.securityContext }}
+          securityContext:
+            {{ toYaml . | nindent 12 }}
+  {{- end }}
+          image: "{{ .Values.seaweedfs.deployment.container.image.repository }}:{{ .Values.seaweedfs.deployment.container.image.tag }}"
+          imagePullPolicy: {{ .Values.seaweedfs.deployment.container.image.pullPolicy }}
+          args:
+            - mini
+            - -dir=/data
+            - -s3
+            - -s3.port=8333
+            - -webdav=false
+            - -admin.ui=false
+            - -filer.disableDirListing=true
+            - -bucket=polars
+          ports:
+            - name: s3
+              containerPort: 8333
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: s3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: s3
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 5
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "polars.seaweedfs.fullname" . }}
+                  key: aws_access_key_id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "polars.seaweedfs.fullname" . }}
+                  key: aws_secret_access_key
+  {{- with .Values.seaweedfs.deployment.container.resources }}
+          resources:
+            {{ toYaml . | nindent 12 }}
+  {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  {{- with .Values.seaweedfs.deployment.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.seaweedfs.deployment.runtimeClassName }}
+      runtimeClassName: {{ . | quote }}
+  {{- end }}
+      volumes:
+        - name: data
+          emptyDir: {}
+  {{- with .Values.seaweedfs.deployment.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.seaweedfs.deployment.affinity }}
+      affinity:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.seaweedfs.deployment.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.seaweedfs.deployment.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{ toYaml . | nindent 8 }}
+  {{- end }}
+      hostNetwork: {{ .Values.seaweedfs.deployment.hostNetwork }}
+{{- end }}

@@ -202,6 +202,25 @@ spec:
                 {{ toYaml .valueFrom | nindent 16 }}
     {{- end }}
   {{- end }}
+{{ else if .Values.anonymousResults.seaweedfs.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__url
+              value: "s3://polars/"
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_endpoint_url
+              value: http://{{ include "polars.seaweedfs.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:8333
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_region
+              value: us-east-1
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_access_key_id
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "polars.seaweedfs.fullname" . }}
+                  key: aws_access_key_id
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_secret_access_key
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "polars.seaweedfs.fullname" . }}
+                  key: aws_secret_access_key
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__presign_aws_endpoint_url
+              value: {{ .Values.anonymousResults.seaweedfs.presignEndpointUrl }}
 {{ end }}
             - name: PC_CUBLET__scheduler__n_workers
               value: {{ .Values.worker.deployment.replicaCount | quote }}
