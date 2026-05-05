@@ -266,3 +266,15 @@ Whether anonymous results is enabled
 {{- define "polars.isAnonymousResultsEnabled" -}}
   {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.seaweedfs.enabled -}}true{{- end -}}
 {{- end -}}
+
+{{/*
+Default topology spread
+*/}}
+{{- define "polars.defaultTopologySpreadConstraints" -}}
+- maxSkew: 1
+  topologyKey: kubernetes.io/hostname
+  whenUnsatisfiable: ScheduleAnyway
+  labelSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
