@@ -333,8 +333,10 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
-{{- with .Values.scheduler.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
-        {{ toYaml . | nindent 8 }}
+{{- if .Values.scheduler.deployment.topologySpreadConstraints }}
+        {{ toYaml .Values.scheduler.deployment.topologySpreadConstraints | nindent 8 }}
+{{- else }}
+        {{ include "polars.defaultTopologySpreadConstraints" | nindent 8 }}
 {{- end }}
       hostNetwork: {{ .Values.scheduler.deployment.hostNetwork }}
