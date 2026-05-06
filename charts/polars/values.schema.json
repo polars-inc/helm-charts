@@ -22835,6 +22835,38 @@
       "title": "license",
       "type": "object"
     },
+    "licenseData": {
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "default": "true",
+          "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
+          "required": [],
+          "title": "create"
+        },
+        "enabled": {
+          "default": "false",
+          "description": "Enable persistent volume claim for the license data.",
+          "required": [],
+          "title": "enabled"
+        },
+        "existingClaimName": {
+          "default": "",
+          "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-online-license-certificate\".",
+          "required": [],
+          "title": "existingClaimName"
+        },
+        "storageClassName": {
+          "default": "",
+          "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
+          "required": [],
+          "title": "storageClassName"
+        }
+      },
+      "required": [],
+      "title": "licenseData",
+      "type": "object"
+    },
     "lineage": {
       "additionalProperties": false,
       "properties": {
