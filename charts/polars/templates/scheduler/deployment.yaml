@@ -143,7 +143,7 @@ spec:
             - name: PC_CUBLET__license__online__workspace_id
               {{ include "polars.envVarValue" .Values.workspaceId | nindent 14 }}
             - name: PC_CUBLET__license__online__cert_dir
-              value: /mnt/certs
+              value: /mnt/license_data
 {{- else if include "polars.isOfflineLicense" . }}
             - name: PC_CUBLET__license__offline__license_path
               value: "/mnt/license/license.json"
@@ -256,8 +256,8 @@ spec:
           volumeMounts:
 
 {{- if include "polars.isOnlineLicense" . }}
-            - name: certs
-              mountPath: /mnt/certs
+            - name: license-data
+              mountPath: /mnt/license_data
 {{- else if include "polars.isOfflineLicense" . }}
             - name: license
               mountPath: /mnt/license/
@@ -286,9 +286,13 @@ spec:
 {{- end }}
       volumes:
 {{- if include "polars.isOnlineLicense" . }}
-        - name: certs
+        - name: license-data
+  {{- if .Values.licenseData.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "polars.onlineLicenseCertificatePvcName" . }}
+  {{- else }}
+          emptyDir: {}
+  {{- end }}
 {{- else if include "polars.isOfflineLicense" . }}
         - name: license
           secret:
