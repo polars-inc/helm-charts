@@ -6,22 +6,14 @@ Distributed query execution engine for Polars
 
 **Homepage:** <https://pola.rs>
 
-## Access to Polars on-premises artifacts
-
-First of all, make sure to obtain a license for Polars on-premises by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
-You will receive an access key for our private Docker registry as well as a license for running Polars on-premises.
-Refer to the official Kubernetes documentation on [how to create a secret for pulling images from a private registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
-
 ## Quick Start
 
-To install the chart, ensure you have created an image pull secret as described above and ensure that a secret containing the license file exists.
+To install the chart, ensure you have an offline license key (by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv)) and then install the Polars On-Prem cluster:
 
 ```console
-$ kubectl create secret docker-registry dockerhub-secret-name --docker-username=polarscustomer --docker-password=dckr_pat
 $ kubectl create secret generic polars-secret-name --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set imagePullSecrets[0].name=dockerhub-secret-name \
     --set license.secretName=polars-secret-name \
     --set license.secretProperty=license.json
 $ kubectl port-forward svc/polars-scheduler 5051:5051
@@ -41,7 +33,7 @@ query = (
     .with_columns(a=pl.arange(0, 100000000).sum())
     .remote(ctx)
     .distributed()
-    .execute()
+    .sink_parquet("s3://my-destination-bucket/")
 )
 print(query.await_result())
 ```
@@ -54,11 +46,11 @@ You can instead also run the provided helm tests by running `helm test polars`. 
 
 ## Configuration
 
-Running Polars on-premises in a production environment requires some configuration. The most important aspects are described below.
+Running Polars On-Prem in a production environment requires some configuration. The most important aspects are described below.
 
 ### Runtime
 
-Polars on-premises consists of a single scheduler and multiple workers. Both components are contained in a single binary. While the scheduler can run without any system-level dependencies, the worker node needs the following:
+Polars On-Prem consists of a single scheduler and multiple workers. Both components are contained in a single binary. While the scheduler can run without any system-level dependencies, the worker node needs the following:
 
 * Python runtime (e.g. any version)
 * Polars (i.e. pip wheel)
@@ -91,7 +83,7 @@ runtime:
     polarsExtras: "async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone"
 ```
 
-Behind the scenes, this mechanism copies the Polars on-premises binary, wheel, uv, and a setup script from an init-container to the pod's main container. On startup of the main container, the setup script uses uv to install the polars wheel with the additional specified packages before starting the worker.
+Behind the scenes, this mechanism copies the Polars On-Prem binary, wheel, uv, and a setup script from an init-container to the pod's main container. On startup of the main container, the setup script uses uv to install the polars wheel with the additional specified packages before starting the worker.
 
 If you prefer self-building a Docker image, you can instead configure the chart to use your image:
 
@@ -260,7 +252,7 @@ observatory:
 
 ### Resource allocation and node selectors
 
-Most of the time, it is a good idea to run Polars on-premises on dedicated nodes, with only one worker pod per node.
+Most of the time, it is a good idea to run Polars On-Prem on dedicated nodes, with only one worker pod per node.
 
 First, figure out the available resources on your nodes. This is usually lower than the actual node resources, as Kubernetes reserves some resources for system daemons. For example, if you have a cluster of 3 `m4.xlarge` nodes (4 vCPUs, 16GiB memory), you may have 3770m CPU and 14.31GiB memory available.
 
@@ -280,7 +272,7 @@ worker:
           memory: 14.31GiB
 ```
 
-If your cluster has other workloads running on it, we still recommend running Polars on-premises on dedicated nodes, and using node selectors and taints/tolerations to ensure that only Polars on-premises pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
+If your cluster has other workloads running on it, we still recommend running Polars On-Prem on dedicated nodes, and using node selectors and taints/tolerations to ensure that only Polars On-Prem pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
 
 ```yaml
 worker:
@@ -328,7 +320,7 @@ The dashboard shows host metrics for each worker node. These metrics are exporte
 
 ### Exposing Polars on-premise
 
-To use Polars on-premises from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, you must set `insecure=True` in the `ClusterContext`.
+To use Polars On-Prem from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, you must set `insecure=True` in the `ClusterContext`.
 
 When the python client can't reach the scheduler, it will fail with a connection timeout like this:
 
@@ -338,11 +330,11 @@ tcp connect error
 Hint: you may need to restart the query if this error persists
 ```
 
-The dashboard for Polars on-premises can be accessed at `http://localhost:3001`, and can be exposed outside the cluster by changing the `scheduler.services.observatory.type` value to `LoadBalancer` or `NodePort`.
+The dashboard for Polars On-Prem can be accessed at `http://localhost:3001`, and can be exposed outside the cluster by changing the `scheduler.services.observatory.type` value to `LoadBalancer` or `NodePort`.
 
 ## Telemetry
 
-Polars on-premises uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
+Polars On-Prem uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
 
 ## Lineage
 
