@@ -165,7 +165,11 @@ Observatory data PVC name
 Online License Certificate Volume
 */}}
 {{- define "polars.onlineLicenseCertificatePvcName" -}}
-  {{- printf "%s-polars-online-license-certificate" (include "polars.fullname" .) }}
+  {{- if .Values.licenseData.existingClaimName }}
+{{- .Values.licenseData.existingClaimName }}
+  {{- else }}
+    {{- printf "%s-polars-online-license-certificate" (include "polars.fullname" .) }}
+  {{- end }}
 {{- end }}
 
 {{/*
