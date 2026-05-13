@@ -257,10 +257,10 @@ Cluster ID
 {{- end }}
 
 {{/*
-Create seaweedfs fullname
+Create temporary storage fullname
 */}}
-{{- define "polars.seaweedfs.fullname" -}}
-  {{- printf "%s-seaweedfs" (include "polars.fullname" .) }}
+{{- define "polars.temporaryStorage.fullname" -}}
+  {{- printf "%s-temporary-storage" (include "polars.fullname" .) }}
 {{- end }}
 
 
@@ -268,7 +268,7 @@ Create seaweedfs fullname
 Whether anonymous results is enabled
 */}}
 {{- define "polars.isAnonymousResultsEnabled" -}}
-  {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.seaweedfs.enabled -}}true{{- end -}}
+  {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.temporaryStorage.enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*

@@ -24,9 +24,9 @@
 {{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type }}
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.observatory.fullname" . }} 3001:3001
 {{- end }}
-{{- if .Values.anonymousResults.seaweedfs.enabled }}
+{{- if .Values.anonymousResults.temporaryStorage.enabled }}
 3. Get the S3 storage URL:
-  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.seaweedfs.fullname" . }} 8333:8333
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.temporaryStorage.fullname" . }} 8333:8333
 {{- end }}
 
 Use Polars on-premises with Python:
