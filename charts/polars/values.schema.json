@@ -22697,11 +22697,11 @@
         },
         "temporaryStorage": {
           "additionalProperties": false,
-          "description": "Configure using quick-start seaweedfs",
+          "description": "Configure using quick-start temporary storage server",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Enable seaweedfs S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.",
+              "description": "Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.",
               "required": [],
               "title": "enabled"
             },
@@ -23580,7 +23580,7 @@
     },
     "temporaryStorage": {
       "additionalProperties": false,
-      "description": "Configuration of seaweedfs deployment used for anonymous results",
+      "description": "Configuration of the temporary storage deployment used for anonymous results",
       "properties": {
         "deployment": {
           "additionalProperties": false,
@@ -23678,13 +23678,13 @@
             },
             "podAnnotations": {
               "additionalProperties": true,
-              "description": "Additional annotations to add to the seaweedfs pod.",
+              "description": "Additional annotations to add to the temporary storage pod.",
               "required": [],
               "title": "podAnnotations"
             },
             "podLabels": {
               "additionalProperties": true,
-              "description": "Additional labels to add to the seaweedfs pod.",
+              "description": "Additional labels to add to the temporary storage pod.",
               "required": [],
               "title": "podLabels"
             },

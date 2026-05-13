@@ -161,9 +161,9 @@ anonymousResults:
 #          secretKeyRef:
 #            name: my-s3-secret
 #            key: accessKeyId
-  # -- Configure using quick-start seaweedfs
+  # -- Configure using quick-start temporary storage server
   temporaryStorage:
-    # -- Enable seaweedfs S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.
+    # -- Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.
     enabled: false
     presignEndpointUrl: "http://localhost:8333"
 
@@ -990,7 +990,7 @@ tests:
     hostNetwork: false
 
 # @ignore
-# -- Configuration of seaweedfs deployment used for anonymous results
+# -- Configuration of the temporary storage deployment used for anonymous results
 temporaryStorage:
   # Services
   services:
@@ -1017,13 +1017,13 @@ temporaryStorage:
     # @schema
     # additionalProperties: true
     # @schema
-    # -- Additional annotations to add to the seaweedfs pod.
+    # -- Additional annotations to add to the temporary storage pod.
     podAnnotations: {}
 
     # @schema
     # additionalProperties: true
     # @schema
-    # -- Additional labels to add to the seaweedfs pod.
+    # -- Additional labels to add to the temporary storage pod.
     podLabels: {}
 
     # @schema
