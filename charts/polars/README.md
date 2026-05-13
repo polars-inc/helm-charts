@@ -44,10 +44,10 @@ $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set license.secretName=polars-offline-license \
     --set license.secretProperty=license.json \
-    --set anonymousResults.seaweedfs.enabled=true
+    --set anonymousResults.temporaryStorage.enabled=true
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
-$ kubectl port-forward svc/polars-seaweedfs 8333:8333
+$ kubectl port-forward svc/polars-temporary-storage 8333:8333
 ```
 
 </details>
@@ -425,13 +425,13 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | logLevel | string | `"info"` | One of "info", "debug", "trace". |
 | workerHeartbeatIntervalSecs | int | `5` | Heartbeat interval between polars workers and the scheduler in seconds. |
 | disableHostMetrics | bool | `false` | Disable host metrics collection for the dashboard |
-| anonymousResults | object | `{"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]},"seaweedfs":{"enabled":false,"presignEndpointUrl":"http://localhost:8333"}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
+| anonymousResults | object | `{"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]},"temporaryStorage":{"enabled":false,"presignEndpointUrl":"http://localhost:8333"}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
 | anonymousResults.s3 | object | `{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]}` | Configure S3 storage for anonymous results. |
 | anonymousResults.s3.enabled | bool | `false` | Enable S3 storage for anonymous results. |
 | anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field. |
 | anonymousResults.s3.options | list | `[]` | Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html |
-| anonymousResults.seaweedfs | object | `{"enabled":false,"presignEndpointUrl":"http://localhost:8333"}` | Configure using quick-start seaweedfs |
-| anonymousResults.seaweedfs.enabled | bool | `false` | Enable seaweedfs S3 storage for anonymous results. This will deploy a seaweedfs mini deployment. |
+| anonymousResults.temporaryStorage | object | `{"enabled":false,"presignEndpointUrl":"http://localhost:8333"}` | Configure using quick-start temporary storage server |
+| anonymousResults.temporaryStorage.enabled | bool | `false` | Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment. |
 | allowSharedDisk | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
 | denyAnonymousUsers | bool | `false` | Enabling this option ensures that all queries must be sent with a set username. |
 | shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[]},"sharedPersistentVolumeClaim":{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |

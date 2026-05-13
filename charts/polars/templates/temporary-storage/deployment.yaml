@@ -1,42 +1,42 @@
-{{- if .Values.anonymousResults.seaweedfs.enabled }}
+{{- if .Values.anonymousResults.temporaryStorage.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "polars.seaweedfs.fullname" . }}
+  name: {{ include "polars.temporaryStorage.fullname" . }}
   labels:
     {{ include "polars.labels" . | nindent 4 }}
 spec:
   replicas: 1
-  revisionHistoryLimit: {{ .Values.seaweedfs.deployment.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.temporaryStorage.deployment.revisionHistoryLimit }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: seaweedfs
+      app.kubernetes.io/component: temporary-storage
       {{ include "polars.selectorLabels" . | nindent 6 }}
   strategy:
     type: "Recreate"
   template:
     metadata:
-  {{- $podAnnotations := merge .Values.seaweedfs.deployment.podAnnotations .Values.podAnnotations }}
+  {{- $podAnnotations := merge .Values.temporaryStorage.deployment.podAnnotations .Values.podAnnotations }}
   {{- with $podAnnotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
   {{- end }}
       labels:
-        app.kubernetes.io/component: seaweedfs
+        app.kubernetes.io/component: temporary-storage
         {{ include "polars.labels" . | nindent 8 }}
-  {{- $podLabels := merge .Values.seaweedfs.deployment.podLabels .Values.podLabels }}
+  {{- $podLabels := merge .Values.temporaryStorage.deployment.podLabels .Values.podLabels }}
   {{- with $podLabels }}
         {{ toYaml . | nindent 8 }}
   {{- end }}
     spec:
-  {{- with .Values.seaweedfs.deployment.dnsPolicy }}
+  {{- with .Values.temporaryStorage.deployment.dnsPolicy }}
       dnsPolicy: {{ . }}
   {{- end }}
-  {{- with .Values.seaweedfs.deployment.dnsConfig }}
+  {{- with .Values.temporaryStorage.deployment.dnsConfig }}
       dnsConfig:
         {{ toYaml . | nindent 8 }}
   {{- end }}
-  {{- with .Values.seaweedfs.deployment.schedulerName }}
+  {{- with .Values.temporaryStorage.deployment.schedulerName }}
       schedulerName: {{ . }}
   {{- end }}
   {{- with .Values.imagePullSecrets }}
@@ -44,22 +44,22 @@ spec:
         {{ toYaml . | nindent 8 }}
   {{- end }}
       automountServiceAccountToken: false
-  {{- with .Values.seaweedfs.deployment.podSecurityContext }}
+  {{- with .Values.temporaryStorage.deployment.podSecurityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
   {{- end }}
-  {{- with .Values.seaweedfs.deployment.hostAliases }}
+  {{- with .Values.temporaryStorage.deployment.hostAliases }}
       hostAliases:
         {{ toYaml . | nindent 8 }}
   {{- end }}
       containers:
         - name: seaweedfs
-  {{- with .Values.seaweedfs.deployment.container.securityContext }}
+  {{- with .Values.temporaryStorage.deployment.container.securityContext }}
           securityContext:
             {{ toYaml . | nindent 12 }}
   {{- end }}
-          image: "{{ .Values.seaweedfs.deployment.container.image.repository }}:{{ .Values.seaweedfs.deployment.container.image.tag }}"
-          imagePullPolicy: {{ .Values.seaweedfs.deployment.container.image.pullPolicy }}
+          image: "{{ .Values.temporaryStorage.deployment.container.image.repository }}:{{ .Values.temporaryStorage.deployment.container.image.tag }}"
+          imagePullPolicy: {{ .Values.temporaryStorage.deployment.container.image.pullPolicy }}
           args:
             - mini
             - -dir=/data
@@ -89,44 +89,44 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "polars.seaweedfs.fullname" . }}
+                  name: {{ include "polars.temporaryStorage.fullname" . }}
                   key: aws_access_key_id
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "polars.seaweedfs.fullname" . }}
+                  name: {{ include "polars.temporaryStorage.fullname" . }}
                   key: aws_secret_access_key
-  {{- with .Values.seaweedfs.deployment.container.resources }}
+  {{- with .Values.temporaryStorage.deployment.container.resources }}
           resources:
             {{ toYaml . | nindent 12 }}
   {{- end }}
           volumeMounts:
             - name: data
               mountPath: /data
-  {{- with .Values.seaweedfs.deployment.priorityClassName }}
+  {{- with .Values.temporaryStorage.deployment.priorityClassName }}
       priorityClassName: {{ . | quote }}
   {{- end }}
-  {{- with .Values.seaweedfs.deployment.runtimeClassName }}
+  {{- with .Values.temporaryStorage.deployment.runtimeClassName }}
       runtimeClassName: {{ . | quote }}
   {{- end }}
       volumes:
         - name: data
           emptyDir: {}
-  {{- with .Values.seaweedfs.deployment.nodeSelector }}
+  {{- with .Values.temporaryStorage.deployment.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
   {{- end }}
-  {{- with .Values.seaweedfs.deployment.affinity }}
+  {{- with .Values.temporaryStorage.deployment.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
   {{- end }}
-  {{- with .Values.seaweedfs.deployment.tolerations }}
+  {{- with .Values.temporaryStorage.deployment.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
   {{- end }}
-  {{- with .Values.seaweedfs.deployment.topologySpreadConstraints }}
+  {{- with .Values.temporaryStorage.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{ toYaml . | nindent 8 }}
   {{- end }}
-      hostNetwork: {{ .Values.seaweedfs.deployment.hostNetwork }}
+      hostNetwork: {{ .Values.temporaryStorage.deployment.hostNetwork }}
 {{- end }}
