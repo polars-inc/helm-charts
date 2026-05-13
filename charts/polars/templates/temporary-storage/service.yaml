@@ -1,19 +1,19 @@
-{{- if .Values.anonymousResults.seaweedfs.enabled }}
+{{- if .Values.anonymousResults.temporaryStorage.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "polars.seaweedfs.fullname" . }}
+  name: {{ include "polars.temporaryStorage.fullname" . }}
   labels:
-    app.kubernetes.io/component: seaweedfs
+    app.kubernetes.io/component: temporary-storage
     {{ include "polars.labels" . | nindent 4 }}
-  {{- with .Values.seaweedfs.service.annotations }}
+  {{- with .Values.temporaryStorage.services.s3.annotations }}
   annotations:
     {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/component: seaweedfs
+    app.kubernetes.io/component: temporary-storage
     {{ include "polars.selectorLabels" . | nindent 4 }}
   ports:
     - name: s3
