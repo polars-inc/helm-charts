@@ -21,9 +21,13 @@ spec:
     type: {{ .Values.scheduler.deployment.rollout.strategy }}
   template:
     metadata:
+      annotations:
+{{- if .Values.anonymousResults.seaweedfs.enabled }}
+        # To restart this deployment on secret updates caused by Helm
+        checksum/secret: {{ include (print $.Template.BasePath "/seaweedfs/secret.yaml") . | sha256sum }}
+{{- end }}
 {{- $podAnnotations := merge .Values.scheduler.deployment.podAnnotations .Values.podAnnotations }}
 {{- with $podAnnotations }}
-      annotations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
       labels:
