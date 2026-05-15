@@ -223,7 +223,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "polars.temporaryStorage.fullname" . }}
                   key: aws_secret_access_key
-            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__presign_aws_endpoint_url
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__external_endpoint
               value: {{ .Values.anonymousResults.temporaryStorage.presignEndpointUrl }}
 {{ end }}
             - name: PC_CUBLET__scheduler__n_workers
