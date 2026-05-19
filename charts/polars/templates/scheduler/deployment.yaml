@@ -195,7 +195,7 @@ spec:
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__url
               value: {{ .Values.anonymousResults.s3.endpoint | quote }}
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__presign_duration
-              value: "{{ .Values.anonymousResults.s3.presignDuration }}"
+              value: {{ .Values.anonymousResults.s3.presignDuration | quote }}
   {{- range .Values.anonymousResults.s3.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.anonymousResults.s3.endpoint instead" }}
@@ -212,7 +212,7 @@ spec:
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__url
               value: "s3://polars/"
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__presign_duration
-              value: "{{ .Values.anonymousResults.temporaryStorage.presignDuration }}"
+              value: {{ .Values.anonymousResults.temporaryStorage.presignDuration | quote }}
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_endpoint_url
               value: http://{{ include "polars.temporaryStorage.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:8333
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_region
