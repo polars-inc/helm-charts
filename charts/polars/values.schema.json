@@ -22690,6 +22690,12 @@
               },
               "required": [],
               "title": "options"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
             }
           },
           "required": [],
@@ -22704,6 +22710,12 @@
               "description": "Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.",
               "required": [],
               "title": "enabled"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
             },
             "presignEndpointUrl": {
               "default": "http://localhost:8333",
