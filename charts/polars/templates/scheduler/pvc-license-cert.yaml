@@ -6,7 +6,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "polars.onlineLicenseCertificatePvcName" . }}
+  name: {{ include "polars.licenseCertificatePvcName" . }}
 spec:
   accessModes: [ "ReadWriteOnce" ]
   storageClassName: {{ .Values.licenseData.storageClassName }}

@@ -162,73 +162,73 @@ Observatory data PVC name
 {{- end }}
 
 {{/*
-Online License Certificate Volume
+License Certificate Volume
 */}}
-{{- define "polars.onlineLicenseCertificatePvcName" -}}
+{{- define "polars.licenseCertificatePvcName" -}}
   {{- if .Values.licenseData.existingClaimName }}
 {{- .Values.licenseData.existingClaimName }}
   {{- else }}
-    {{- printf "%s-polars-online-license-certificate" (include "polars.fullname" .) }}
+    {{- printf "%s-polars-license-certificate" (include "polars.fullname" .) }}
   {{- end }}
 {{- end }}
 
 {{/*
 Validates license config. Fails on:
-- Both online and offline fields set simultaneously
-- Partial online fields (missing clientId, clientSecret, or workspaceId)
-- Partial offline fields (secretName set but secretProperty missing, or vice versa)
+- Both On-Prem and On-Prem enterprise fields set simultaneously
+- Partial On-Prem (missing clientId, clientSecret, or workspaceId)
+- Partial On-Prem enterprise fields (secretName set but secretProperty missing, or vice versa)
 */}}
 {{- define "polars.validateLicense" -}}
   {{- if not .Values.disableValidateLicense }}
-    {{- $hasOnline := or .Values.clientId .Values.clientSecret .Values.workspaceId -}}
-    {{- $hasOfflineDisabled := kindIs "invalid" .Values.license -}}
-    {{- $hasOffline := "" -}}
-    {{- if not $hasOfflineDisabled -}}
-      {{- $hasOffline = or .Values.license.secretName .Values.license.secretProperty -}}
+    {{- $hasOnPrem := or .Values.clientId .Values.clientSecret .Values.workspaceId -}}
+    {{- $hasOnPremEnterpriseDisabled := kindIs "invalid" .Values.license -}}
+    {{- $hasOnPremEnterprise := "" -}}
+    {{- if not $hasOnPremEnterpriseDisabled -}}
+      {{- $hasOnPremEnterprise = or .Values.license.secretName .Values.license.secretProperty -}}
     {{- end -}}
 
-    {{- if and $hasOnline $hasOffline -}}
+    {{- if and $hasOnPrem $hasOnPremEnterprise -}}
       {{- fail "License error: .Values.clientId/.Values.clientSecret/.Values.workspaceId and .Values.license.secretName/.Values.license.secretProperty are mutually exclusive" -}}
     {{- end -}}
 
-    {{- if and (not $hasOnline) (not $hasOffline) (not $hasOfflineDisabled) -}}
+    {{- if and (not $hasOnPrem) (not $hasOnPremEnterprise) (not $hasOnPremEnterpriseDisabled) -}}
       {{- fail "License error: either .Values.clientId/.Values.clientSecret/.Values.workspaceId or .Values.license.secretName/.Values.license.secretProperty is required" -}}
     {{- end }}
 
-    {{- if $hasOnline -}}
+    {{- if $hasOnPrem -}}
       {{- if not .Values.clientId -}}
-        {{- fail "License error: .Values.clientId is required when using online license" -}}
+        {{- fail "License error: .Values.clientId is required when using Polars On-Prem license" -}}
       {{- end -}}
       {{- if not .Values.clientSecret -}}
-        {{- fail "License error: .Values.clientSecret is required when using online license" -}}
+        {{- fail "License error: .Values.clientSecret is required when using Polars On-Prem license" -}}
       {{- end -}}
       {{- if not .Values.workspaceId -}}
-        {{- fail "License error: .Values.workspaceId is required when using online license" -}}
+        {{- fail "License error: .Values.workspaceId is required when using Polars On-Prem license" -}}
       {{- end -}}
     {{- end -}}
 
-    {{- if $hasOffline -}}
+    {{- if $hasOnPremEnterprise -}}
       {{- if not .Values.acceptEula }}
         {{ fail "EULA not accepted. Please refer to the EULA as forwarded by Polars together with your license." }}
       {{- end }}
       {{- if not .Values.license.secretName -}}
-        {{- fail "License error: .Values.license.secretName is required when using offline license" -}}
+        {{- fail "License error: .Values.license.secretName is required when using Polars On-Prem Enterprise license" -}}
       {{- end -}}
       {{- if not .Values.license.secretProperty -}}
-        {{- fail "License error: .Values.license.secretProperty is required when using offline license" -}}
+        {{- fail "License error: .Values.license.secretProperty is required when using Polars On-Prem Enterprise license" -}}
       {{- end -}}
     {{- end -}}
   {{- end }}
 {{- end -}}
 
 
-{{- define "polars.isOnlineLicense" -}}
+{{- define "polars.isOnPremLicense" -}}
   {{- include "polars.validateLicense" . -}}
   {{- if .Values.clientId -}}true{{- end -}}
 {{- end -}}
 
 
-{{- define "polars.isOfflineLicense" -}}
+{{- define "polars.isOnPremEnterpriseLicense" -}}
   {{- include "polars.validateLicense" . -}}
   {{- if (.Values.license).secretName -}}true{{- end -}}
 {{- end -}}

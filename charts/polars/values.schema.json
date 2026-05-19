@@ -22864,7 +22864,7 @@
         },
         "existingClaimName": {
           "default": "",
-          "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-online-license-certificate\".",
+          "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-license-certificate\".",
           "required": [],
           "title": "existingClaimName"
         },

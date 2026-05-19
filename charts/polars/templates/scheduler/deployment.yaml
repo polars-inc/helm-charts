@@ -139,7 +139,7 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if include "polars.isOnlineLicense" . }}
+{{- if include "polars.isOnPremLicense" . }}
             - name: PC_CUBLET__license__online__client_id
               {{ include "polars.envVarValue" .Values.clientId | nindent 14 }}
             - name: PC_CUBLET__license__online__client_secret
@@ -148,7 +148,7 @@ spec:
               {{ include "polars.envVarValue" .Values.workspaceId | nindent 14 }}
             - name: PC_CUBLET__license__online__cert_dir
               value: /mnt/license_data
-{{- else if include "polars.isOfflineLicense" . }}
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
             - name: PC_CUBLET__license__offline__license_path
               value: "/mnt/license/license.json"
 {{- end }}
@@ -263,10 +263,10 @@ spec:
 {{- end }}
           volumeMounts:
 
-{{- if include "polars.isOnlineLicense" . }}
+{{- if include "polars.isOnPremLicense" . }}
             - name: license-data
               mountPath: /mnt/license_data
-{{- else if include "polars.isOfflineLicense" . }}
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
             - name: license
               mountPath: /mnt/license/
 {{- end }}
@@ -293,15 +293,15 @@ spec:
       runtimeClassName: {{ .Values.scheduler.deployment.runtimeClassName | quote }}
 {{- end }}
       volumes:
-{{- if include "polars.isOnlineLicense" . }}
+{{- if include "polars.isOnPremLicense" . }}
         - name: license-data
   {{- if .Values.licenseData.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "polars.onlineLicenseCertificatePvcName" . }}
+            claimName: {{ include "polars.licenseCertificatePvcName" . }}
   {{- else }}
           emptyDir: {}
   {{- end }}
-{{- else if include "polars.isOfflineLicense" . }}
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license
           secret:
             secretName: {{ required ".Values.license.secretName is required" .Values.license.secretName | quote }}

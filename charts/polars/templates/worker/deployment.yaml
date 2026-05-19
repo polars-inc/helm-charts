@@ -125,10 +125,10 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if include "polars.isOnlineLicense" . }}
+{{- if include "polars.isOnPremLicense" . }}
             - name: PC_CUBLET__license__online__enabled
               value: "true"
-{{- else if include "polars.isOfflineLicense" . }}
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
             - name: PC_CUBLET__license__offline__license_path
               value: "/mnt/license/license.json"
 {{- end }}
@@ -218,7 +218,7 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
-{{- if include "polars.isOfflineLicense" . }}
+{{- if include "polars.isOnPremEnterpriseLicense" . }}
             - name: license
               mountPath: /mnt/license/
 {{- end }}
@@ -280,7 +280,7 @@ spec:
           emptyDir: {}
   {{- end }}
 {{- end }}
-{{- if include "polars.isOfflineLicense" . }}
+{{- if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license
           secret:
             secretName: {{ required ".Values.license.secretName is required" .Values.license.secretName | quote }}
