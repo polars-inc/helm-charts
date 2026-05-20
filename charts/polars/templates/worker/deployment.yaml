@@ -126,7 +126,7 @@ spec:
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
 {{- if include "polars.isOnPremLicense" . }}
-            - name: PC_CUBLET__license__online__enabled
+            - name: PC_CUBLET__license__on_prem__enabled
               value: "true"
 {{- else if include "polars.isOnPremEnterpriseLicense" . }}
             - name: PC_CUBLET__license__on_prem_enterprise__license_path
