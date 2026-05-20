@@ -190,7 +190,9 @@ spec:
             - name: PC_CUBLET__scheduler__enabled
               value: "true"
             - name: PC_CUBLET__scheduler__allow_local_sinks
-              value: {{ .Values.allowSharedDisk | quote }}
+              value: {{ .Values.allowLocalSinks | quote }}
+            - name: PC_CUBLET__scheduler__allow_local_scans
+              value: {{ .Values.allowLocalScans | quote }}
 {{ if .Values.anonymousResults.s3.enabled }}
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__url
               value: {{ .Values.anonymousResults.s3.endpoint | quote }}
