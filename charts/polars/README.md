@@ -8,21 +8,20 @@ Distributed query execution engine for Polars
 
 ## Quick Start
 
-Get started right away by setting up your on-premises workspace on [Polars Cloud](https://cloud.pola.rs) or get a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv).
+Get started right away with Polars On-Prem.
 
-<details>
+<details open="true" name="quickstart">
 
-<summary>Quick start online license</summary>
-
-### Online license
+<summary>Polars On-Prem</summary>
 
 To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret. For the purpose of this quick start, we deploy Seaweed as an anonymous results destination. This allows you to run queries without specifying a results destination. To configure a different anonymous results destination, see [Anonymous results data](#Anonymous-results-data)
 
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set clientId=<YOUR_CLIENT_ID> \
-    --set clientSecret=<YOUR_CLIENT_SECRET> \
+    --set license.onPrem.enabled=true \
+    --set license.onPrem.clientId=<YOUR_CLIENT_ID> \
+    --set license.onPrem.clientSecret=<YOUR_CLIENT_SECRET> \
     --set workspaceId=<YOUR_WORKSPACE_ID>
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
@@ -30,20 +29,19 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 
 </details>
 
-<details>
+<details name="quickstart">
 
-<summary>Quick start offline license</summary>
-
-### Offline license
+<summary>Polars On-Prem Enterprise (offline)</summary>
 
 To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv) and the license file exists at `./license.json`.
 
 ```console
-$ kubectl create secret generic polars-offline-license --from-file=license.json=license.json
+$ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set license.secretName=polars-offline-license \
-    --set license.secretProperty=license.json \
+    --set license.onPremEnterprise.enabled=true \
+    --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
+    --set license.onPremEnterprise.secretProperty=license.json \
     --set anonymousResults.temporaryStorage.enabled=true
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
@@ -54,23 +52,40 @@ $ kubectl port-forward svc/polars-temporary-storage 8333:8333
 
 Then connect to the cluster from Python as follows:
 
-```python
-import polars_cloud as pc
-import polars as pl
-
-# Directly connect to the cluster
-ctx = pc.ClusterContext(compute_address="127.0.0.1", insecure=True)
-query = (
-    pl.LazyFrame()
-    .with_columns(a=pl.arange(0, 100000000).sum())
-    .remote(ctx)
-    .distributed()
-    .execute()
-)
-print(query.await_result())
+```shell
+kubectl port-forward svc/polars-scheduler 5051:5051
 ```
 
-You can see your query progress and node metrics by accessing the observatory service at `http://localhost:3001`.
+```bash
+uv run --isolated --with polars,polars_cloud - << 'EOF'
+import polars as pl
+import polars_cloud as pc
+
+ctx = pc.ClusterContext(compute_address="localhost")
+
+result = (
+    pl.LazyFrame(
+        {
+            "a": [1, 2, 3],
+            "b": [4, 4, 5],
+        }
+    )
+    .with_columns(
+        pl.col("a").max().over("b").alias("c"),
+    )
+    .remote(ctx)
+    .execute()
+)
+
+print(result.head)
+EOF
+```
+
+Then view your query progress and node metrics by accessing the observatory service at `http://localhost:3001`:
+
+```bash
+kubectl port-forward svc/polars-observatory 3001:3001
+```
 
 ### Helm Tests
 
@@ -405,13 +420,13 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | podLabels | object | `{}` | Common labels for all resources |
 | podAnnotations | object | `{}` | Common annotations for all resources |
 | clusterId | uuid | `""` | Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
-| acceptEula | bool | `false` | To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
-| licenseData.enabled | bool | `false` | Enable persistent volume claim for the license data. |
-| licenseData.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |
-| licenseData.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-online-license-certificate". |
-| licenseData.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
-| license.secretName | string | `""` | the name containing your polars license key |
-| license.secretProperty | string | `""` | the property on the secret containing your license key |
+| acceptEula | bool | `false` | To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
+| license.onPrem.licenseData.enabled | bool | `false` | Enable persistent volume claim for the license data. |
+| license.onPrem.licenseData.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |
+| license.onPrem.licenseData.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-license-certificate". |
+| license.onPrem.licenseData.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| license.onPremEnterprise.secretName | string | `""` | the name containing your polars license key |
+| license.onPremEnterprise.secretProperty | string | `""` | the property on the secret containing your license key |
 | imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |
 | runtime.prebuilt.runtime.repository | string | `"your-prebuilt-image"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |

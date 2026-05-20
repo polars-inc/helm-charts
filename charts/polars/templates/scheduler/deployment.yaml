@@ -139,17 +139,17 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if include "polars.isOnlineLicense" . }}
-            - name: PC_CUBLET__license__online__client_id
-              {{ include "polars.envVarValue" .Values.clientId | nindent 14 }}
-            - name: PC_CUBLET__license__online__client_secret
-              {{ include "polars.envVarValue" .Values.clientSecret | nindent 14 }}
-            - name: PC_CUBLET__license__online__workspace_id
-              {{ include "polars.envVarValue" .Values.workspaceId | nindent 14 }}
-            - name: PC_CUBLET__license__online__cert_dir
+{{- if include "polars.isOnPremLicense" . }}
+            - name: PC_CUBLET__license__on_prem__client_id
+              {{ include "polars.envVarValue" .Values.license.onPrem.clientId | nindent 14 }}
+            - name: PC_CUBLET__license__on_prem__client_secret
+              {{ include "polars.envVarValue" .Values.license.onPrem.clientSecret | nindent 14 }}
+            - name: PC_CUBLET__license__on_prem__workspace_id
+              {{ include "polars.envVarValue" .Values.license.onPrem.workspaceId | nindent 14 }}
+            - name: PC_CUBLET__license__on_prem__cert_dir
               value: /mnt/license_data
-{{- else if include "polars.isOfflineLicense" . }}
-            - name: PC_CUBLET__license__offline__license_path
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
+            - name: PC_CUBLET__license__on_prem_enterprise__license_path
               value: "/mnt/license/license.json"
 {{- end }}
             - name: PC_CUBLET__static_leader__leader_instance_id
@@ -265,10 +265,10 @@ spec:
 {{- end }}
           volumeMounts:
 
-{{- if include "polars.isOnlineLicense" . }}
+{{- if include "polars.isOnPremLicense" . }}
             - name: license-data
               mountPath: /mnt/license_data
-{{- else if include "polars.isOfflineLicense" . }}
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
             - name: license
               mountPath: /mnt/license/
 {{- end }}
@@ -295,20 +295,20 @@ spec:
       runtimeClassName: {{ .Values.scheduler.deployment.runtimeClassName | quote }}
 {{- end }}
       volumes:
-{{- if include "polars.isOnlineLicense" . }}
+{{- if include "polars.isOnPremLicense" . }}
         - name: license-data
-  {{- if .Values.licenseData.enabled }}
+  {{- if .Values.license.onPrem.licenseData.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "polars.onlineLicenseCertificatePvcName" . }}
+            claimName: {{ include "polars.onPremLicenseCertificatePvcName" . }}
   {{- else }}
           emptyDir: {}
   {{- end }}
-{{- else if include "polars.isOfflineLicense" . }}
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license
           secret:
-            secretName: {{ required ".Values.license.secretName is required" .Values.license.secretName | quote }}
+            secretName: {{ required ".Values.license.onPremEnterprise.secretName is required" .Values.license.onPremEnterprise.secretName | quote }}
             items:
-              - key: {{ required ".Values.license.secretProperty is required" .Values.license.secretProperty | quote }}
+              - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
                 path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}

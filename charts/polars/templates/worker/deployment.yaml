@@ -125,11 +125,11 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if include "polars.isOnlineLicense" . }}
-            - name: PC_CUBLET__license__online__enabled
+{{- if include "polars.isOnPremLicense" . }}
+            - name: PC_CUBLET__license__on_prem__enabled
               value: "true"
-{{- else if include "polars.isOfflineLicense" . }}
-            - name: PC_CUBLET__license__offline__license_path
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
+            - name: PC_CUBLET__license__on_prem_enterprise__license_path
               value: "/mnt/license/license.json"
 {{- end }}
             - name: PC_CUBLET__static_leader__leader_instance_id
@@ -218,7 +218,7 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
-{{- if include "polars.isOfflineLicense" . }}
+{{- if include "polars.isOnPremEnterpriseLicense" . }}
             - name: license
               mountPath: /mnt/license/
 {{- end }}
@@ -280,12 +280,12 @@ spec:
           emptyDir: {}
   {{- end }}
 {{- end }}
-{{- if include "polars.isOfflineLicense" . }}
+{{- if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license
           secret:
-            secretName: {{ required ".Values.license.secretName is required" .Values.license.secretName | quote }}
+            secretName: {{ required ".Values.license.onPremEnterprise.secretName is required" .Values.license.onPremEnterprise.secretName | quote }}
             items:
-              - key: {{ required ".Values.license.secretProperty is required" .Values.license.secretProperty | quote }}
+              - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
                 path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
