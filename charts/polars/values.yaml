@@ -20,63 +20,65 @@ clusterId: ""
 # @schema
 # required: true
 # @schema
-# -- To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.
+# -- To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.
 acceptEula: false
 
-# @schema
-# anyOf:
-#   - type: "null"
-#   - type: string
-#   - type: object
-#     required:
-#       - valueFrom
-#     properties:
-#       valueFrom:
-#         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
-# @schema
-clientId:
-
-# @schema
-# anyOf:
-#   - type: "null"
-#   - type: string
-#   - type: object
-#     required:
-#       - valueFrom
-#     properties:
-#       valueFrom:
-#         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
-# @schema
-clientSecret:
-
-# @schema
-# anyOf:
-#   - type: "null"
-#   - type: string
-#   - type: object
-#     required:
-#       - valueFrom
-#     properties:
-#       valueFrom:
-#         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
-# @schema
-workspaceId:
-
-licenseData:
-  # -- Enable persistent volume claim for the license data.
-  enabled: false
-  # -- Create the PVC resource. Set to false if you want to use an existing PVC.
-  create: true
-  # -- Override the PVC name. Defaults to "{{ fullname }}-polars-license-certificate".
-  existingClaimName: ""
-  # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
-  storageClassName: ""
-
 license:
-  # -- the name containing your polars license key
-  secretName: ""
-  # -- the property on the secret containing your license key
-  secretProperty: ""
+  onPrem:
+    enabled: false
+    # @schema
+    # anyOf:
+    #   - type: "null"
+    #   - type: string
+    #   - type: object
+    #     required:
+    #       - valueFrom
+    #     properties:
+    #       valueFrom:
+    #         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
+    # @schema
+    clientId:
+    # @schema
+    # anyOf:
+    #   - type: "null"
+    #   - type: string
+    #   - type: object
+    #     required:
+    #       - valueFrom
+    #     properties:
+    #       valueFrom:
+    #         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
+    # @schema
+    clientSecret:
+    # @schema
+    # anyOf:
+    #   - type: "null"
+    #   - type: string
+    #   - type: object
+    #     required:
+    #       - valueFrom
+    #     properties:
+    #       valueFrom:
+    #         $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVarSource
+    # @schema
+    workspaceId:
+
+    licenseData:
+      # -- Enable persistent volume claim for the license data.
+      enabled: false
+      # -- Create the PVC resource. Set to false if you want to use an existing PVC.
+      create: true
+      # -- Override the PVC name. Defaults to "{{ fullname }}-polars-license-certificate".
+      existingClaimName: ""
+      # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+      storageClassName: ""
+
+  onPremEnterprise:
+    enabled: false
+    # -- the name containing your polars license key
+    secretName: ""
+    # -- the property on the secret containing your license key
+    secretProperty: ""
 
 # @schema
 # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/imagePullSecrets

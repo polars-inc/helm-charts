@@ -22652,7 +22652,7 @@
   "properties": {
     "acceptEula": {
       "default": "false",
-      "description": "To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.",
+      "description": "To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.",
       "required": [],
       "title": "acceptEula"
     },
@@ -22730,58 +22730,6 @@
       "required": [],
       "title": "anonymousResults"
     },
-    "clientId": {
-      "anyOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "string"
-        },
-        {
-          "properties": {
-            "valueFrom": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
-              "required": []
-            }
-          },
-          "required": [
-            "valueFrom"
-          ],
-          "type": "object"
-        }
-      ],
-      "default": "",
-      "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
-      "required": [],
-      "title": "clientId"
-    },
-    "clientSecret": {
-      "anyOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "string"
-        },
-        {
-          "properties": {
-            "valueFrom": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
-              "required": []
-            }
-          },
-          "required": [
-            "valueFrom"
-          ],
-          "type": "object"
-        }
-      ],
-      "default": "",
-      "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
-      "required": [],
-      "title": "clientSecret"
-    },
     "clusterId": {
       "default": "",
       "description": "Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to \"helm namespace/helm release name\" if not set.",
@@ -22830,53 +22778,157 @@
     "license": {
       "additionalProperties": false,
       "properties": {
-        "secretName": {
-          "default": "",
-          "description": "the name containing your polars license key",
+        "onPrem": {
+          "additionalProperties": false,
+          "properties": {
+            "clientId": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "properties": {
+                    "valueFrom": {
+                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "valueFrom"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "default": "",
+              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+              "required": [],
+              "title": "clientId"
+            },
+            "clientSecret": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "properties": {
+                    "valueFrom": {
+                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "valueFrom"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "default": "",
+              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+              "required": [],
+              "title": "clientSecret"
+            },
+            "enabled": {
+              "default": false,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "licenseData": {
+              "additionalProperties": false,
+              "properties": {
+                "create": {
+                  "default": "true",
+                  "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
+                  "required": [],
+                  "title": "create"
+                },
+                "enabled": {
+                  "default": "false",
+                  "description": "Enable persistent volume claim for the license data.",
+                  "required": [],
+                  "title": "enabled"
+                },
+                "existingClaimName": {
+                  "default": "",
+                  "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-license-certificate\".",
+                  "required": [],
+                  "title": "existingClaimName"
+                },
+                "storageClassName": {
+                  "default": "",
+                  "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
+                  "required": [],
+                  "title": "storageClassName"
+                }
+              },
+              "required": [],
+              "title": "licenseData",
+              "type": "object"
+            },
+            "workspaceId": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "properties": {
+                    "valueFrom": {
+                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "valueFrom"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "default": "",
+              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+              "required": [],
+              "title": "workspaceId"
+            }
+          },
           "required": [],
-          "title": "secretName"
+          "title": "onPrem",
+          "type": "object"
         },
-        "secretProperty": {
-          "default": "",
-          "description": "the property on the secret containing your license key",
+        "onPremEnterprise": {
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "secretName": {
+              "default": "",
+              "description": "the name containing your polars license key",
+              "required": [],
+              "title": "secretName"
+            },
+            "secretProperty": {
+              "default": "",
+              "description": "the property on the secret containing your license key",
+              "required": [],
+              "title": "secretProperty"
+            }
+          },
           "required": [],
-          "title": "secretProperty"
+          "title": "onPremEnterprise",
+          "type": "object"
         }
       },
       "required": [],
       "title": "license",
-      "type": "object"
-    },
-    "licenseData": {
-      "additionalProperties": false,
-      "properties": {
-        "create": {
-          "default": "true",
-          "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
-          "required": [],
-          "title": "create"
-        },
-        "enabled": {
-          "default": "false",
-          "description": "Enable persistent volume claim for the license data.",
-          "required": [],
-          "title": "enabled"
-        },
-        "existingClaimName": {
-          "default": "",
-          "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-license-certificate\".",
-          "required": [],
-          "title": "existingClaimName"
-        },
-        "storageClassName": {
-          "default": "",
-          "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-          "required": [],
-          "title": "storageClassName"
-        }
-      },
-      "required": [],
-      "title": "licenseData",
       "type": "object"
     },
     "lineage": {
@@ -24324,32 +24376,6 @@
       "description": "Heartbeat interval between polars workers and the scheduler in seconds.",
       "required": [],
       "title": "workerHeartbeatIntervalSecs"
-    },
-    "workspaceId": {
-      "anyOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "string"
-        },
-        {
-          "properties": {
-            "valueFrom": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
-              "required": []
-            }
-          },
-          "required": [
-            "valueFrom"
-          ],
-          "type": "object"
-        }
-      ],
-      "default": "",
-      "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
-      "required": [],
-      "title": "workspaceId"
     }
   },
   "required": [

@@ -19,8 +19,9 @@ To install the chart, ensure you have signed up online at [cloud.pola.rs](https:
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set clientId=<YOUR_CLIENT_ID> \
-    --set clientSecret=<YOUR_CLIENT_SECRET> \
+    --set license.onPrem.enabled=true \
+    --set license.onPrem.clientId=<YOUR_CLIENT_ID> \
+    --set license.onPrem.clientSecret=<YOUR_CLIENT_SECRET> \
     --set workspaceId=<YOUR_WORKSPACE_ID>
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
@@ -38,8 +39,9 @@ To install the chart, ensure you have requested a Polars on-premises enterprise 
 $ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set license.secretName=polars-on-prem-enterprise-license \
-    --set license.secretProperty=license.json \
+    --set license.onPremEnterprise.enabled=true \
+    --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
+    --set license.onPremEnterprise.secretProperty=license.json \
     --set anonymousResults.temporaryStorage.enabled=true
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
@@ -418,13 +420,13 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | podLabels | object | `{}` | Common labels for all resources |
 | podAnnotations | object | `{}` | Common annotations for all resources |
 | clusterId | uuid | `""` | Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
-| acceptEula | bool | `false` | To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
-| licenseData.enabled | bool | `false` | Enable persistent volume claim for the license data. |
-| licenseData.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |
-| licenseData.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-license-certificate". |
-| licenseData.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
-| license.secretName | string | `""` | the name containing your polars license key |
-| license.secretProperty | string | `""` | the property on the secret containing your license key |
+| acceptEula | bool | `false` | To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
+| license.onPrem.licenseData.enabled | bool | `false` | Enable persistent volume claim for the license data. |
+| license.onPrem.licenseData.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |
+| license.onPrem.licenseData.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-license-certificate". |
+| license.onPrem.licenseData.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| license.onPremEnterprise.secretName | string | `""` | the name containing your polars license key |
+| license.onPremEnterprise.secretProperty | string | `""` | the property on the secret containing your license key |
 | imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |
 | runtime.prebuilt.runtime.repository | string | `"your-prebuilt-image"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |

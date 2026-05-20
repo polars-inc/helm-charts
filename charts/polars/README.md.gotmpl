@@ -21,8 +21,9 @@ To install the chart, ensure you have signed up online at [cloud.pola.rs](https:
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set clientId=<YOUR_CLIENT_ID> \
-    --set clientSecret=<YOUR_CLIENT_SECRET> \
+    --set license.onPrem.enabled=true \
+    --set license.onPrem.clientId=<YOUR_CLIENT_ID> \
+    --set license.onPrem.clientSecret=<YOUR_CLIENT_SECRET> \
     --set workspaceId=<YOUR_WORKSPACE_ID>
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
@@ -40,8 +41,9 @@ To install the chart, ensure you have requested a Polars on-premises enterprise 
 $ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set license.secretName=polars-on-prem-enterprise-license \
-    --set license.secretProperty=license.json \
+    --set license.onPremEnterprise.enabled=true \
+    --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
+    --set license.onPremEnterprise.secretProperty=license.json \
     --set anonymousResults.temporaryStorage.enabled=true
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001

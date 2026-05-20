@@ -1,17 +1,20 @@
-{{- if .Values.licenseData.enabled }}
-  {{- if .Values.licenseData.create }}
-    {{- if .Values.licenseData.existingClaimName }}
-      {{ fail ".Values.licenseData.create .Values.licenseData.existingClaimName are mutually exclusive"}}
-    {{- end }}
+{{- if include "polars.isOnPremLicense" . }}
+  {{- if .Values.license.onPrem.licenseData.enabled}}
+
+    {{- if .Values.license.onPrem.licenseData.create }}
+      {{- if .Values.license.onPrem.licenseData.existingClaimName }}
+        {{ fail ".Values.license.onPrem.licenseData.create .Values.license.onPrem.licenseData.existingClaimName are mutually exclusive"}}
+      {{- end }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "polars.licenseCertificatePvcName" . }}
+  name: {{ include "polars.onPremLicenseCertificatePvcName" . }}
 spec:
   accessModes: [ "ReadWriteOnce" ]
-  storageClassName: {{ .Values.licenseData.storageClassName }}
+  storageClassName: {{ .Values.license.onPrem.licenseData.storageClassName }}
   resources:
     requests:
       storage: 1Mi
+    {{- end }}
   {{- end }}
 {{- end }}

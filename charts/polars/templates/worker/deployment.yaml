@@ -129,7 +129,7 @@ spec:
             - name: PC_CUBLET__license__online__enabled
               value: "true"
 {{- else if include "polars.isOnPremEnterpriseLicense" . }}
-            - name: PC_CUBLET__license__offline__license_path
+            - name: PC_CUBLET__license__on_prem_enterprise__license_path
               value: "/mnt/license/license.json"
 {{- end }}
             - name: PC_CUBLET__static_leader__leader_instance_id

@@ -162,13 +162,13 @@ Observatory data PVC name
 {{- end }}
 
 {{/*
-License Certificate Volume
+On Prem License Certificate Volume
 */}}
-{{- define "polars.licenseCertificatePvcName" -}}
-  {{- if .Values.licenseData.existingClaimName }}
-{{- .Values.licenseData.existingClaimName }}
+{{- define "polars.onPremLicenseCertificatePvcName" -}}
+  {{- if .Values.license.onPrem.licenseData.existingClaimName }}
+{{- .Values.license.onPrem.licenseData.existingClaimName }}
   {{- else }}
-    {{- printf "%s-polars-license-certificate" (include "polars.fullname" .) }}
+    {{- printf "%s-on-prem-license-certificate" (include "polars.fullname" .) }}
   {{- end }}
 {{- end }}
 
@@ -177,33 +177,30 @@ Validates license config. Fails on:
 - Both On-Prem and On-Prem enterprise fields set simultaneously
 - Partial On-Prem (missing clientId, clientSecret, or workspaceId)
 - Partial On-Prem enterprise fields (secretName set but secretProperty missing, or vice versa)
+Setting `license=null` removes the license check from the helm chart (still enforced in the release artifacts).
 */}}
 {{- define "polars.validateLicense" -}}
-  {{- if not .Values.disableValidateLicense }}
-    {{- $hasOnPrem := or .Values.clientId .Values.clientSecret .Values.workspaceId -}}
-    {{- $hasOnPremEnterpriseDisabled := kindIs "invalid" .Values.license -}}
-    {{- $hasOnPremEnterprise := "" -}}
-    {{- if not $hasOnPremEnterpriseDisabled -}}
-      {{- $hasOnPremEnterprise = or .Values.license.secretName .Values.license.secretProperty -}}
-    {{- end -}}
+  {{- if not (kindIs "invalid" .Values.license) -}}
+    {{- $hasOnPrem := .Values.license.onPrem.enabled -}}
+    {{- $hasOnPremEnterprise := .Values.license.onPremEnterprise.enabled -}}
 
     {{- if and $hasOnPrem $hasOnPremEnterprise -}}
-      {{- fail "License error: .Values.clientId/.Values.clientSecret/.Values.workspaceId and .Values.license.secretName/.Values.license.secretProperty are mutually exclusive" -}}
+      {{- fail "License error: .Values.license.onPrem.enabled and .Values.license.onPremEnterprise.enabled are mutually exclusive" -}}
     {{- end -}}
 
-    {{- if and (not $hasOnPrem) (not $hasOnPremEnterprise) (not $hasOnPremEnterpriseDisabled) -}}
-      {{- fail "License error: either .Values.clientId/.Values.clientSecret/.Values.workspaceId or .Values.license.secretName/.Values.license.secretProperty is required" -}}
+    {{- if and (not $hasOnPrem) (not $hasOnPremEnterprise) -}}
+      {{- fail "License error: either .Values.license.onPrem.enabled or .Values.license.onPremEnterprise.enabled is required" -}}
     {{- end }}
 
     {{- if $hasOnPrem -}}
-      {{- if not .Values.clientId -}}
-        {{- fail "License error: .Values.clientId is required when using Polars On-Prem license" -}}
+      {{- if not .Values.license.onPrem.clientId -}}
+        {{- fail "License error: .Values.license.onPrem.clientId is required when using Polars On-Prem license" -}}
       {{- end -}}
-      {{- if not .Values.clientSecret -}}
-        {{- fail "License error: .Values.clientSecret is required when using Polars On-Prem license" -}}
+      {{- if not .Values.license.onPrem.clientSecret -}}
+        {{- fail "License error: .Values.license.onPrem.clientSecret is required when using Polars On-Prem license" -}}
       {{- end -}}
-      {{- if not .Values.workspaceId -}}
-        {{- fail "License error: .Values.workspaceId is required when using Polars On-Prem license" -}}
+      {{- if not .Values.license.onPrem.workspaceId -}}
+        {{- fail "License error: .Values.license.onPrem.workspaceId is required when using Polars On-Prem license" -}}
       {{- end -}}
     {{- end -}}
 
@@ -211,11 +208,11 @@ Validates license config. Fails on:
       {{- if not .Values.acceptEula }}
         {{ fail "EULA not accepted. Please refer to the EULA as forwarded by Polars together with your license." }}
       {{- end }}
-      {{- if not .Values.license.secretName -}}
-        {{- fail "License error: .Values.license.secretName is required when using Polars On-Prem Enterprise license" -}}
+      {{- if not .Values.license.onPremEnterprise.secretName -}}
+        {{- fail "License error: .Values.license.onPremEnterprise.secretName is required when using Polars On-Prem Enterprise license" -}}
       {{- end -}}
-      {{- if not .Values.license.secretProperty -}}
-        {{- fail "License error: .Values.license.secretProperty is required when using Polars On-Prem Enterprise license" -}}
+      {{- if not .Values.license.onPremEnterprise.secretProperty -}}
+        {{- fail "License error: .Values.license.onPremEnterprise.secretProperty is required when using Polars On-Prem Enterprise license" -}}
       {{- end -}}
     {{- end -}}
   {{- end }}
@@ -224,18 +221,18 @@ Validates license config. Fails on:
 
 {{- define "polars.isOnPremLicense" -}}
   {{- include "polars.validateLicense" . -}}
-  {{- if .Values.clientId -}}true{{- end -}}
+  {{- if ((.Values.license).onPrem).enabled -}}true{{- end -}}
 {{- end -}}
 
 
 {{- define "polars.isOnPremEnterpriseLicense" -}}
   {{- include "polars.validateLicense" . -}}
-  {{- if (.Values.license).secretName -}}true{{- end -}}
+  {{- if ((.Values.license).onPremEnterprise).enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*
 Renders a single env var value, supporting both plain strings and valueFrom objects.
-Usage: {{ include "polars.envVarValue" .Values.clientId }}
+Usage: {{ include "polars.envVarValue" .Values.license.onPrem.clientId }}
 */}}
 {{- define "polars.envVarValue" -}}
   {{- if kindIs "string" . }}
