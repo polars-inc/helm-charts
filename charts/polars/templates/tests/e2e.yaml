@@ -3,7 +3,7 @@
 {{ $E2E_SINK := "" }}
 {{- if .Values.anonymousResults.s3.enabled }}
   {{ $E2E_SINK = "anonymous" -}}
-{{- else if coalesce .Values.allowLocalSinks }}
+{{- else if .Values.allowLocalSinks }}
   {{ $E2E_SINK = "/tmp/helm-tests" }}
 {{- else }}
   {{ $fail = "helm test requires either .Values.s3.enabled or .Values.allowLocalSinks" }}

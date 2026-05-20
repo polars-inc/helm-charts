@@ -22658,7 +22658,7 @@
     },
     "allowLocalScans": {
       "default": "false",
-      "description": "Disabling this option prevents the worker from reading from local disk. It is currently not possible to configure which scan locations are allowed. Users can alternatively configure scans that read to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#reading-from-cloud-storage",
+      "description": "Disabling this option prevents the worker from reading from local disk. It is currently not possible to configure which scan locations are allowed. Users can alternatively configure scans that read from S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#reading-from-cloud-storage",
       "required": [],
       "title": "allowLocalScans"
     },
