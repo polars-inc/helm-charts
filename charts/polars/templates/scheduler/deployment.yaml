@@ -304,9 +304,9 @@ spec:
 {{- else if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license
           secret:
-            secretName: {{ required ".Values.license.secretName is required" .Values.license.secretName | quote }}
+            secretName: {{ required ".Values.license.onPremEnterprise.secretName is required" .Values.license.onPremEnterprise.secretName | quote }}
             items:
-              - key: {{ required ".Values.license.secretProperty is required" .Values.license.secretProperty | quote }}
+              - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
                 path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
