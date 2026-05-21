@@ -24,7 +24,7 @@ $ helm upgrade --install polars polars-inc/polars \
     --set license.onPrem.enabled=true \
     --set license.onPrem.clientId=<YOUR_CLIENT_ID> \
     --set license.onPrem.clientSecret=<YOUR_CLIENT_SECRET> \
-    --set workspaceId=<YOUR_WORKSPACE_ID>
+    --set license.onPrem.workspaceId=<YOUR_WORKSPACE_ID>
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
 ```
