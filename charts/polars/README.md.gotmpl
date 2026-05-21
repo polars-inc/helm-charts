@@ -21,6 +21,7 @@ To install the chart, ensure you have signed up online at [cloud.pola.rs](https:
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
+    --set clusterId="My First Cluster" \
     --set license.onPrem.enabled=true \
     --set license.onPrem.clientId=<YOUR_CLIENT_ID> \
     --set license.onPrem.clientSecret=<YOUR_CLIENT_SECRET> \
