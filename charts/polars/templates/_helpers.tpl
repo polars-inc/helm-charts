@@ -286,7 +286,7 @@ Verify that .Values.runtime.composed.polarsExtras contains cloudpickle and retur
 */}}
 {{- define "polars.runtimeComposedExtras" -}}
   {{- if not (contains "cloudpickle" .Values.runtime.composed.polarsExtras) -}}
-{{- fail ".Values.runtime.composed.polarsExtras must include cloudpickle" }}
+    {{- fail ".Values.runtime.composed.polarsExtras must include cloudpickle" }}
   {{- end }}
 {{ .Values.runtime.composed.polarsExtras }}
 {{- end }}
