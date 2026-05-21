@@ -110,7 +110,7 @@ spec:
 {{- end }}
           env:
             - name: POLARS_EXTRAS
-              value: {{ .Values.runtime.composed.polarsExtras | default "" }}
+              value: {{ include "polars.runtimeComposedExtras" . | quote }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
 {{- if .Values.runtime.composed.enabled }}
