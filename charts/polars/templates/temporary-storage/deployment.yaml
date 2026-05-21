@@ -16,9 +16,11 @@ spec:
     type: "Recreate"
   template:
     metadata:
+      annotations:
+        # To restart this deployment on secret updates caused by Helm
+        checksum/secret: {{ include (print $.Template.BasePath "/temporary-storage/secret.yaml") . | sha256sum }}
   {{- $podAnnotations := merge .Values.temporaryStorage.deployment.podAnnotations .Values.podAnnotations }}
   {{- with $podAnnotations }}
-      annotations:
         {{ toYaml . | nindent 8 }}
   {{- end }}
       labels:
