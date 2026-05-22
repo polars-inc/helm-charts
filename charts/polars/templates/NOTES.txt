@@ -47,11 +47,13 @@ Use Polars on-premises with Python:
     .with_columns(
       pl.col("a").max().over("b").alias("c"),
     )
-    {{- if not (include "polars.isAnonymousResultsEnabled" .) }}
-    .sink_parquet("s3://your-bucket/path/to/output.parquet", sink_to_single_file=True)
-    {{- end }}
     .remote(ctx)
+    .distributed()
+    {{- if not (include "polars.isAnonymousResultsEnabled" .) }}
+    .sink_parquet("s3://your-bucket/path/to/output")
+    {{- else }}
     .execute()
+    {{- end }}
   )
 
   print(result.head)
