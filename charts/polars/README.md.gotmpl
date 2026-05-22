@@ -240,15 +240,16 @@ shuffleData:
 
 #### Anonymous results data
 
-For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are can be backed by S3-compatible storage, Azure Blob Storage, and Google Cloud Storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 Note that Anonymous Users and Anonymous Results are different. Anonymous Users refer to queries that are submitted without a username, while Anonymous Results refer to queries without an explicit output sink.
 
 ```yaml
 anonymousResults:
+  # AWS S3 Storage
   s3:
     enabled: true
-    endpoint: "s3://my-bucket/path/to/dir"
+    endpoint: "s3://my-storage-location/path/to/dir"
     presignDuration: "8h"
     options:
       - name: aws_access_key_id
@@ -261,7 +262,33 @@ anonymousResults:
   # etc.
 ```
 
-If you wish to disable anonymous results, keep `anonymousResults.s3.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
+```yaml
+anonymousResults:
+  # Google Cloud Storage
+  gcs:
+    enabled: true
+    endpoint: "gs://my-storage-location/path/to/dir"
+    presignDuration: "8h"
+    options:
+      - name: project
+        value: "my-google-cloud-project"
+  # etc.
+```
+
+```yaml
+anonymousResults:
+  # Azure Blob Storage
+  abs:
+    enabled: true
+    endpoint: "az://my-storage-location/path/to/dir"
+    presignDuration: "8h"
+    options:
+      - name: account_name
+        value: "my-account-name"
+  # etc.
+```
+
+If you wish to disable anonymous results, keep `anonymousResults.*.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
 
 #### Temporary data
 

@@ -207,11 +207,11 @@ anonymousResults:
     # @schema
     # -- Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html
     options: []
-#      - name: service_account
+#      - name: project
 #        valueFrom:
 #          secretKeyRef:
-#            name: my-abs-sa-secret
-#            key: serviceAccount
+#            name: my-project
+#            key: project-name
 
 # -- Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage
 allowLocalSinks: true
