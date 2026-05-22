@@ -265,7 +265,7 @@ Create temporary storage fullname
 Whether anonymous results is enabled
 */}}
 {{- define "polars.isAnonymousResultsEnabled" -}}
-  {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.temporaryStorage.enabled -}}true{{- end -}}
+  {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.temporaryStorage.enabled .Values.anonymousResults.abs.enabled .Values.anonymousResults.gcs.enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*
