@@ -231,6 +231,40 @@ spec:
                   key: aws_secret_access_key
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__external_endpoint
               value: {{ .Values.anonymousResults.temporaryStorage.presignEndpointUrl }}
+{{- else if .Values.anonymousResults.abs.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__abs__url
+              value: {{ .Values.anonymousResults.abs.endpoint | quote }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__abs__presign_duration
+              value: {{ .Values.anonymousResults.abs.presignDuration | quote }}
+  {{- range .Values.anonymousResults.abs.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.abs.options Please use .Values.anonymousResults.abs.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__abs__{{ .name | required "missing .Values.anonymousResults.abs.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{- else if .Values.anonymousResults.gcs.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__gcs__url
+              value: {{ .Values.anonymousResults.gcs.endpoint | quote }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__gcs__presign_duration
+              value: {{ .Values.anonymousResults.gcs.presignDuration | quote }}
+  {{- range .Values.anonymousResults.gcs.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.gcs.options Please use .Values.anonymousResults.gcs.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__gcs__{{ .name | required "missing .Values.anonymousResults.gcs.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
 {{ end }}
             - name: PC_CUBLET__scheduler__n_workers
               value: {{ .Values.worker.deployment.replicaCount | quote }}

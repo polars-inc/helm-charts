@@ -22672,24 +22672,94 @@
       "additionalProperties": false,
       "description": "Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results.",
       "properties": {
-        "s3": {
+        "abs": {
           "additionalProperties": false,
-          "description": "Configure S3 storage for anonymous results.",
+          "description": "Configure Azure Blob Storage as anonymous results location.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Enable S3 storage for anonymous results.",
+              "description": "Enable Azure Blob Storage for anonymous results.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "az://my-storage-location/path/to/dir",
+              "description": "The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
+            }
+          },
+          "required": [],
+          "title": "abs"
+        },
+        "gcs": {
+          "additionalProperties": false,
+          "description": "Configure Google Cloud Storage as anonymous results location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable Google Cloud storage for anonymous results.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "gs://my-storage-location/path/to/dir",
+              "description": "The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
+            }
+          },
+          "required": [],
+          "title": "gcs"
+        },
+        "s3": {
+          "additionalProperties": false,
+          "description": "Configure AWS S3 storage as anonymous results location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable AWS S3 storage for anonymous results.",
               "required": [],
               "title": "enabled"
             },
             "endpoint": {
               "default": "s3://my-bucket/path/to/dir",
-              "description": "The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.",
+              "description": "The entire S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
               "required": [],
               "title": "endpoint"
             },
             "options": {
-              "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
+              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
               "items": {
                 "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
@@ -23531,22 +23601,22 @@
         },
         "s3": {
           "additionalProperties": false,
-          "description": "Configure S3 storage as shuffle data location.",
+          "description": "Configure AWS S3 storage as shuffle data location.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Enable S3 storage for shuffle data.",
+              "description": "Enable AWS S3 storage for shuffle data.",
               "required": [],
               "title": "enabled"
             },
             "endpoint": {
-              "default": "s3://my-bucket/path/to/dir",
-              "description": "The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.",
+              "default": "s3://my-storage-location/path/to/dir",
+              "description": "The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
               "required": [],
               "title": "endpoint"
             },
             "options": {
-              "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
+              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
               "items": {
                 "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
