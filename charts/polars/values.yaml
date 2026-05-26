@@ -146,11 +146,11 @@ disableHostMetrics: false
 
 # -- Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results.
 anonymousResults:
-  # -- Configure S3 storage for anonymous results.
+  # -- Configure AWS S3 storage as anonymous results location.
   s3:
-    # -- Enable S3 storage for anonymous results.
+    # -- Enable AWS S3 storage for anonymous results.
     enabled: false
-    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.
+    # -- The entire S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.
     endpoint: "s3://my-bucket/path/to/dir"
     # -- The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.
     presignDuration: "8h"
@@ -158,7 +158,7 @@ anonymousResults:
     # items:
     #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
-    # -- Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html
+    # -- Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html
     options: []
 #      - name: aws_access_key_id
 #        valueFrom:
@@ -172,6 +172,46 @@ anonymousResults:
     presignEndpointUrl: "http://localhost:8333"
     # -- The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.
     presignDuration: "8h"
+
+  # -- Configure Azure Blob Storage as anonymous results location.
+  abs:
+    # -- Enable Azure Blob Storage for anonymous results.
+    enabled: false
+    # -- The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "az://my-storage-location/path/to/dir"
+    # -- The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.
+    presignDuration: "8h"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
+    options: []
+#      - name: service_account
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-account-name-secret
+#            key: account_name
+
+  # -- Configure Google Cloud Storage as anonymous results location.
+  gcs:
+    # -- Enable Google Cloud storage for anonymous results.
+    enabled: false
+    # -- The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "gs://my-storage-location/path/to/dir"
+    # -- The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.
+    presignDuration: "8h"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html
+    options: []
+#      - name: project
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-project
+#            key: project-name
 
 # -- Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage
 allowLocalSinks: true
@@ -209,17 +249,17 @@ shuffleData:
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 125Gi
 
-  # -- Configure S3 storage as shuffle data location.
+  # -- Configure AWS S3 storage as shuffle data location.
   s3:
-    # -- Enable S3 storage for shuffle data.
+    # -- Enable AWS S3 storage for shuffle data.
     enabled: false
-    # -- The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.
-    endpoint: "s3://my-bucket/path/to/dir"
+    # -- The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "s3://my-storage-location/path/to/dir"
     # @schema
     # items:
     #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
-    # -- Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html
+    # -- Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html
     options: []
 #      - name: aws_access_key_id
 #        valueFrom:
