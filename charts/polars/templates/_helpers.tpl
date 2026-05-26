@@ -247,9 +247,9 @@ Cluster ID
 */}}
 {{- define "polars.clusterId" -}}
   {{- if .Values.clusterId }}
-{{- .Values.clusterId | quote }}
+{{- .Values.clusterId }}
   {{- else }}
-    {{- printf "%s/%s" .Release.Namespace .Release.Name | quote }}
+    {{- printf "%s/%s" .Release.Namespace .Release.Name }}
   {{- end }}
 {{- end }}
 
