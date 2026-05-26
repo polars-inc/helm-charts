@@ -162,12 +162,131 @@ Observatory data PVC name
 {{- end }}
 
 {{/*
+On Prem License Certificate Volume
+*/}}
+{{- define "polars.onPremLicenseCertificatePvcName" -}}
+  {{- if .Values.license.onPrem.licenseData.existingClaimName }}
+{{- .Values.license.onPrem.licenseData.existingClaimName }}
+  {{- else }}
+    {{- printf "%s-on-prem-license-certificate" (include "polars.fullname" .) }}
+  {{- end }}
+{{- end }}
+
+{{/*
+Validates license config. Fails on:
+- Both On-Prem and On-Prem enterprise fields set simultaneously
+- Partial On-Prem (missing clientId, clientSecret, or workspaceId)
+- Partial On-Prem enterprise fields (secretName set but secretProperty missing, or vice versa)
+Setting `license=null` removes the license check from the helm chart (still enforced in the release artifacts).
+*/}}
+{{- define "polars.validateLicense" -}}
+  {{- if not (kindIs "invalid" .Values.license) -}}
+    {{- $hasOnPrem := .Values.license.onPrem.enabled -}}
+    {{- $hasOnPremEnterprise := .Values.license.onPremEnterprise.enabled -}}
+
+    {{- if and $hasOnPrem $hasOnPremEnterprise -}}
+      {{- fail "License error: .Values.license.onPrem.enabled and .Values.license.onPremEnterprise.enabled are mutually exclusive" -}}
+    {{- end -}}
+
+    {{- if and (not $hasOnPrem) (not $hasOnPremEnterprise) -}}
+      {{- fail "License error: either .Values.license.onPrem.enabled or .Values.license.onPremEnterprise.enabled is required" -}}
+    {{- end }}
+
+    {{- if $hasOnPrem -}}
+      {{- if not .Values.license.onPrem.clientId -}}
+        {{- fail "License error: .Values.license.onPrem.clientId is required when using Polars On-Prem license" -}}
+      {{- end -}}
+      {{- if not .Values.license.onPrem.clientSecret -}}
+        {{- fail "License error: .Values.license.onPrem.clientSecret is required when using Polars On-Prem license" -}}
+      {{- end -}}
+      {{- if not .Values.license.onPrem.workspaceId -}}
+        {{- fail "License error: .Values.license.onPrem.workspaceId is required when using Polars On-Prem license" -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- if $hasOnPremEnterprise -}}
+      {{- if not .Values.acceptEula }}
+        {{ fail "EULA not accepted. Please refer to the EULA as forwarded by Polars together with your license." }}
+      {{- end }}
+      {{- if not .Values.license.onPremEnterprise.secretName -}}
+        {{- fail "License error: .Values.license.onPremEnterprise.secretName is required when using Polars On-Prem Enterprise license" -}}
+      {{- end -}}
+      {{- if not .Values.license.onPremEnterprise.secretProperty -}}
+        {{- fail "License error: .Values.license.onPremEnterprise.secretProperty is required when using Polars On-Prem Enterprise license" -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end }}
+{{- end -}}
+
+
+{{- define "polars.isOnPremLicense" -}}
+  {{- include "polars.validateLicense" . -}}
+  {{- if ((.Values.license).onPrem).enabled -}}true{{- end -}}
+{{- end -}}
+
+
+{{- define "polars.isOnPremEnterpriseLicense" -}}
+  {{- include "polars.validateLicense" . -}}
+  {{- if ((.Values.license).onPremEnterprise).enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+Renders a single env var value, supporting both plain strings and valueFrom objects.
+Usage: {{ include "polars.envVarValue" .Values.license.onPrem.clientId }}
+*/}}
+{{- define "polars.envVarValue" -}}
+  {{- if kindIs "string" . }}
+value: {{ . | quote }}
+  {{- else }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Cluster ID
 */}}
 {{- define "polars.clusterId" -}}
   {{- if .Values.clusterId }}
-{{- .Values.clusterId | quote }}
+{{- .Values.clusterId }}
   {{- else }}
-    {{- printf "%s/%s" .Release.Namespace .Release.Name | quote }}
+    {{- printf "%s/%s" .Release.Namespace .Release.Name }}
   {{- end }}
+{{- end }}
+
+{{/*
+Create temporary storage fullname
+*/}}
+{{- define "polars.temporaryStorage.fullname" -}}
+  {{- printf "%s-temporary-storage" (include "polars.fullname" .) }}
+{{- end }}
+
+
+{{/*
+Whether anonymous results is enabled
+*/}}
+{{- define "polars.isAnonymousResultsEnabled" -}}
+  {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.temporaryStorage.enabled .Values.anonymousResults.abs.enabled .Values.anonymousResults.gcs.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+Default topology spread
+*/}}
+{{- define "polars.defaultTopologySpreadConstraints" -}}
+- maxSkew: 1
+  topologyKey: kubernetes.io/hostname
+  whenUnsatisfiable: ScheduleAnyway
+  labelSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+
+{{/*
+Verify that .Values.runtime.composed.polarsExtras contains cloudpickle and return the entire string
+*/}}
+{{- define "polars.runtimeComposedExtras" -}}
+  {{- if not (contains "cloudpickle" .Values.runtime.composed.polarsExtras) -}}
+    {{- fail ".Values.runtime.composed.polarsExtras must include cloudpickle" }}
+  {{- end }}
+{{ .Values.runtime.composed.polarsExtras }}
 {{- end }}

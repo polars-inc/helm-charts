@@ -7,39 +7,88 @@
 
 {{ template "chart.homepageLine" . }}
 
+
 ## Quick Start
 
-To install the chart, ensure you have an offline license key (by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv)) and then install the Polars On-Prem cluster:
+Get started right away with Polars On-Prem.
+
+<details open="true" name="quickstart">
+
+<summary>Polars On-Prem</summary>
+
+To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret. For the purpose of this quick start, we deploy Seaweed as an anonymous results destination. This allows you to run queries without specifying a results destination. To configure a different anonymous results destination, see [Anonymous results data](#Anonymous-results-data)
 
 ```console
-$ kubectl create secret generic polars-secret-name --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
-    --set license.secretName=polars-secret-name \
-    --set license.secretProperty=license.json
+    --set clusterId="My First Cluster" \
+    --set license.onPrem.enabled=true \
+    --set license.onPrem.clientId=<YOUR_CLIENT_ID> \
+    --set license.onPrem.clientSecret=<YOUR_CLIENT_SECRET> \
+    --set license.onPrem.workspaceId=<YOUR_WORKSPACE_ID>
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
 ```
 
-Then connect to the cluster from Python as follows:
+</details>
 
-```python
-import polars_cloud as pc
-import polars as pl
+<details name="quickstart">
 
-# Directly connect to the cluster
-ctx = pc.ClusterContext(compute_address="127.0.0.1", insecure=True)
-query = (
-    pl.LazyFrame()
-    .with_columns(a=pl.arange(0, 100000000).sum())
-    .remote(ctx)
-    .distributed()
-    .sink_parquet("s3://my-destination-bucket/")
-)
-print(query.await_result())
+<summary>Polars On-Prem Enterprise (offline)</summary>
+
+To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv) and the license file exists at `./license.json`.
+
+```console
+$ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
+$ helm repo add polars-inc https://polars-inc.github.io/helm-charts
+$ helm upgrade --install polars polars-inc/polars \
+    --set license.onPremEnterprise.enabled=true \
+    --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
+    --set license.onPremEnterprise.secretProperty=license.json \
+    --set anonymousResults.temporaryStorage.enabled=true
+$ kubectl port-forward svc/polars-scheduler 5051:5051
+$ kubectl port-forward svc/polars-observatory 3001:3001
+$ kubectl port-forward svc/polars-temporary-storage 8333:8333
 ```
 
-You can see your query progress and node metrics by accessing the observatory service at `http://localhost:3001`.
+</details>
+
+Then connect to the cluster from Python as follows:
+
+```shell
+kubectl port-forward svc/polars-scheduler 5051:5051
+```
+
+```bash
+uv run --isolated --with polars,polars_cloud - << 'EOF'
+import polars as pl
+import polars_cloud as pc
+
+ctx = pc.ClusterContext(compute_address="localhost")
+
+result = (
+    pl.LazyFrame(
+        {
+            "a": [1, 2, 3],
+            "b": [4, 4, 5],
+        }
+    )
+    .with_columns(
+        pl.col("a").max().over("b").alias("c"),
+    )
+    .remote(ctx)
+    .execute()
+)
+
+print(result.head)
+EOF
+```
+
+Then view your query progress and node metrics by accessing the observatory service at `http://localhost:3001`:
+
+```bash
+kubectl port-forward svc/polars-observatory 3001:3001
+```
 
 ### Helm Tests
 
@@ -191,15 +240,17 @@ shuffleData:
 
 #### Anonymous results data
 
-For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are backed by S3-compatible storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are can be backed by S3-compatible storage, Azure Blob Storage, and Google Cloud Storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 Note that Anonymous Users and Anonymous Results are different. Anonymous Users refer to queries that are submitted without a username, while Anonymous Results refer to queries without an explicit output sink.
 
 ```yaml
 anonymousResults:
+  # AWS S3 Storage
   s3:
     enabled: true
-    endpoint: "s3://my-bucket/path/to/dir"
+    endpoint: "s3://my-storage-location/path/to/dir"
+    presignDuration: "8h"
     options:
       - name: aws_access_key_id
         valueFrom:
@@ -211,7 +262,33 @@ anonymousResults:
   # etc.
 ```
 
-If you wish to disable anonymous results, keep `anonymousResults.s3.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
+```yaml
+anonymousResults:
+  # Google Cloud Storage
+  gcs:
+    enabled: true
+    endpoint: "gs://my-storage-location/path/to/dir"
+    presignDuration: "8h"
+    options:
+      - name: project
+        value: "my-google-cloud-project"
+  # etc.
+```
+
+```yaml
+anonymousResults:
+  # Azure Blob Storage
+  abs:
+    enabled: true
+    endpoint: "az://my-storage-location/path/to/dir"
+    presignDuration: "8h"
+    options:
+      - name: account_name
+        value: "my-account-name"
+  # etc.
+```
+
+If you wish to disable anonymous results, keep `anonymousResults.*.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
 
 #### Temporary data
 

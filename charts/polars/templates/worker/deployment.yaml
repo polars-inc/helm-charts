@@ -110,7 +110,7 @@ spec:
 {{- end }}
           env:
             - name: POLARS_EXTRAS
-              value: {{ .Values.runtime.composed.polarsExtras | default "" }}
+              value: {{ include "polars.runtimeComposedExtras" . | quote }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
 {{- if .Values.runtime.composed.enabled }}
@@ -125,9 +125,12 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if .Values.license }}
-            - name: PC_CUBLET__license
-              value: "/license/license.json"
+{{- if include "polars.isOnPremLicense" . }}
+            - name: PC_CUBLET__license__on_prem__enabled
+              value: "true"
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
+            - name: PC_CUBLET__license__on_prem_enterprise__license_path
+              value: "/mnt/license/license.json"
 {{- end }}
             - name: PC_CUBLET__static_leader__leader_instance_id
               value: "{{ include "polars.worker.fullname" . }}-0"
@@ -215,9 +218,9 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
-{{- with .Values.license }}
+{{- if include "polars.isOnPremEnterpriseLicense" . }}
             - name: license
-              mountPath: /license/
+              mountPath: /mnt/license/
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
   {{- if .Values.runtime.composed.requirements }}
@@ -277,12 +280,12 @@ spec:
           emptyDir: {}
   {{- end }}
 {{- end }}
-{{- with .Values.license }}
+{{- if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license
           secret:
-            secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
+            secretName: {{ required ".Values.license.onPremEnterprise.secretName is required" .Values.license.onPremEnterprise.secretName | quote }}
             items:
-              - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
+              - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
                 path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
@@ -314,8 +317,10 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
-{{- with .Values.worker.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
-        {{ toYaml . | nindent 8 }}
+{{- if .Values.worker.deployment.topologySpreadConstraints }}
+        {{ toYaml .Values.worker.deployment.topologySpreadConstraints | nindent 8 }}
+{{- else }}
+        {{ include "polars.defaultTopologySpreadConstraints" . | nindent 8 }}
 {{- end }}
       hostNetwork: {{ .Values.worker.deployment.hostNetwork }}

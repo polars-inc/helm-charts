@@ -22652,48 +22652,155 @@
   "properties": {
     "acceptEula": {
       "default": "false",
-      "description": "To use this Helm Chart, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.",
+      "description": "To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.",
       "required": [],
       "title": "acceptEula"
     },
-    "allowSharedDisk": {
+    "allowLocalScans": {
+      "default": "false",
+      "description": "Disabling this option prevents the worker from reading from local disk. It is currently not possible to configure which scan locations are allowed. Users can alternatively configure scans that read from S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#reading-from-cloud-storage",
+      "required": [],
+      "title": "allowLocalScans"
+    },
+    "allowLocalSinks": {
       "default": "true",
       "description": "Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage",
       "required": [],
-      "title": "allowSharedDisk"
+      "title": "allowLocalSinks"
     },
     "anonymousResults": {
       "additionalProperties": false,
       "description": "Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results.",
       "properties": {
-        "s3": {
+        "abs": {
           "additionalProperties": false,
-          "description": "Configure S3 storage for anonymous results.",
+          "description": "Configure Azure Blob Storage as anonymous results location.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Enable S3 storage for anonymous results.",
+              "description": "Enable Azure Blob Storage for anonymous results.",
               "required": [],
               "title": "enabled"
             },
             "endpoint": {
-              "default": "s3://my-bucket/path/to/dir",
-              "description": "The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.",
+              "default": "az://my-storage-location/path/to/dir",
+              "description": "The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
               "required": [],
               "title": "endpoint"
             },
             "options": {
-              "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
+              "description": "Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html",
               "items": {
                 "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
               },
               "required": [],
               "title": "options"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
+            }
+          },
+          "required": [],
+          "title": "abs"
+        },
+        "gcs": {
+          "additionalProperties": false,
+          "description": "Configure Google Cloud Storage as anonymous results location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable Google Cloud storage for anonymous results.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "gs://my-storage-location/path/to/dir",
+              "description": "The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
+            }
+          },
+          "required": [],
+          "title": "gcs"
+        },
+        "s3": {
+          "additionalProperties": false,
+          "description": "Configure AWS S3 storage as anonymous results location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable AWS S3 storage for anonymous results.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "s3://my-bucket/path/to/dir",
+              "description": "The entire S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
             }
           },
           "required": [],
           "title": "s3"
+        },
+        "temporaryStorage": {
+          "additionalProperties": false,
+          "description": "Configure using quick-start temporary storage server",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.",
+              "required": [],
+              "title": "enabled"
+            },
+            "presignDuration": {
+              "default": "8h",
+              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
+              "required": [],
+              "title": "presignDuration"
+            },
+            "presignEndpointUrl": {
+              "default": "http://localhost:8333",
+              "title": "presignEndpointUrl",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "temporaryStorage"
         }
       },
       "required": [],
@@ -22747,17 +22854,153 @@
     "license": {
       "additionalProperties": false,
       "properties": {
-        "secretName": {
-          "default": "",
-          "description": "the name containing your polars license key",
+        "onPrem": {
+          "additionalProperties": false,
+          "properties": {
+            "clientId": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "properties": {
+                    "valueFrom": {
+                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "valueFrom"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "default": "",
+              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+              "required": [],
+              "title": "clientId"
+            },
+            "clientSecret": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "properties": {
+                    "valueFrom": {
+                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "valueFrom"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "default": "",
+              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+              "required": [],
+              "title": "clientSecret"
+            },
+            "enabled": {
+              "default": false,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "licenseData": {
+              "additionalProperties": false,
+              "properties": {
+                "create": {
+                  "default": "true",
+                  "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
+                  "required": [],
+                  "title": "create"
+                },
+                "enabled": {
+                  "default": "false",
+                  "description": "Enable persistent volume claim for the license data.",
+                  "required": [],
+                  "title": "enabled"
+                },
+                "existingClaimName": {
+                  "default": "",
+                  "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-license-certificate\".",
+                  "required": [],
+                  "title": "existingClaimName"
+                },
+                "storageClassName": {
+                  "default": "",
+                  "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
+                  "required": [],
+                  "title": "storageClassName"
+                }
+              },
+              "required": [],
+              "title": "licenseData",
+              "type": "object"
+            },
+            "workspaceId": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "properties": {
+                    "valueFrom": {
+                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "valueFrom"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "default": "",
+              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
+              "required": [],
+              "title": "workspaceId"
+            }
+          },
           "required": [],
-          "title": "secretName"
+          "title": "onPrem",
+          "type": "object"
         },
-        "secretProperty": {
-          "default": "",
-          "description": "the property on the secret containing your license key",
+        "onPremEnterprise": {
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "secretName": {
+              "default": "",
+              "description": "the name containing your polars license key",
+              "required": [],
+              "title": "secretName"
+            },
+            "secretProperty": {
+              "default": "",
+              "description": "the property on the secret containing your license key",
+              "required": [],
+              "title": "secretProperty"
+            }
+          },
           "required": [],
-          "title": "secretProperty"
+          "title": "onPremEnterprise",
+          "type": "object"
         }
       },
       "required": [],
@@ -23358,22 +23601,22 @@
         },
         "s3": {
           "additionalProperties": false,
-          "description": "Configure S3 storage as shuffle data location.",
+          "description": "Configure AWS S3 storage as shuffle data location.",
           "properties": {
             "enabled": {
               "default": "false",
-              "description": "Enable S3 storage for shuffle data.",
+              "description": "Enable AWS S3 storage for shuffle data.",
               "required": [],
               "title": "enabled"
             },
             "endpoint": {
-              "default": "s3://my-bucket/path/to/dir",
-              "description": "The entire S3 URI. If the bucket requires authentication, make sure to provide the credentials in the options field.",
+              "default": "s3://my-storage-location/path/to/dir",
+              "description": "The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
               "required": [],
               "title": "endpoint"
             },
             "options": {
-              "description": "Storage options for the S3 bucket. These correspond to scan_parquet's `storage_options` parameter. We only support the AWS keys. More info: https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html",
+              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
               "items": {
                 "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
@@ -23474,6 +23717,209 @@
       },
       "required": [],
       "title": "temporaryData"
+    },
+    "temporaryStorage": {
+      "additionalProperties": false,
+      "description": "Configuration of the temporary storage deployment used for anonymous results",
+      "properties": {
+        "deployment": {
+          "additionalProperties": false,
+          "properties": {
+            "affinity": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.Affinity",
+              "description": "If specified, the pod's scheduling constraints",
+              "required": []
+            },
+            "container": {
+              "additionalProperties": false,
+              "properties": {
+                "image": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "pullPolicy": {
+                      "default": "IfNotPresent",
+                      "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
+                      "title": "pullPolicy",
+                      "type": "string"
+                    },
+                    "repository": {
+                      "default": "chrislusf/seaweedfs",
+                      "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
+                      "required": [],
+                      "title": "repository"
+                    },
+                    "tag": {
+                      "default": "4.23",
+                      "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
+                      "required": [],
+                      "title": "tag"
+                    }
+                  },
+                  "required": [],
+                  "title": "image",
+                  "type": "object"
+                },
+                "resources": {
+                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                  "required": []
+                },
+                "securityContext": {
+                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+                  "required": []
+                }
+              },
+              "required": [],
+              "title": "container",
+              "type": "object"
+            },
+            "dnsConfig": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.PodDNSConfig",
+              "description": "Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy.",
+              "required": []
+            },
+            "dnsPolicy": {
+              "default": "",
+              "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
+              "title": "dnsPolicy",
+              "type": "string"
+            },
+            "hostAliases": {
+              "description": "HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
+                "required": []
+              },
+              "title": "hostAliases",
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "ip"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "ip",
+              "x-kubernetes-patch-strategy": "merge"
+            },
+            "hostNetwork": {
+              "default": false,
+              "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
+              "title": "hostNetwork",
+              "type": "boolean"
+            },
+            "nodeSelector": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
+              "required": [],
+              "title": "nodeSelector",
+              "type": "object",
+              "x-kubernetes-map-type": "atomic"
+            },
+            "podAnnotations": {
+              "additionalProperties": true,
+              "description": "Additional annotations to add to the temporary storage pod.",
+              "required": [],
+              "title": "podAnnotations"
+            },
+            "podLabels": {
+              "additionalProperties": true,
+              "description": "Additional labels to add to the temporary storage pod.",
+              "required": [],
+              "title": "podLabels"
+            },
+            "podSecurityContext": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+              "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
+              "required": []
+            },
+            "priorityClassName": {
+              "default": "",
+              "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
+              "title": "priorityClassName",
+              "type": "string"
+            },
+            "revisionHistoryLimit": {
+              "default": 10,
+              "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 10.",
+              "title": "revisionHistoryLimit",
+              "type": "integer"
+            },
+            "runtimeClassName": {
+              "default": "",
+              "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
+              "title": "runtimeClassName",
+              "type": "string"
+            },
+            "schedulerName": {
+              "default": "",
+              "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
+              "title": "schedulerName",
+              "type": "string"
+            },
+            "tolerations": {
+              "description": "If specified, the pod's tolerations.",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
+                "required": []
+              },
+              "title": "tolerations",
+              "type": "array",
+              "x-kubernetes-list-type": "atomic"
+            },
+            "topologySpreadConstraints": {
+              "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
+                "required": []
+              },
+              "title": "topologySpreadConstraints",
+              "type": "array",
+              "x-kubernetes-list-map-keys": [
+                "topologyKey",
+                "whenUnsatisfiable"
+              ],
+              "x-kubernetes-list-type": "map",
+              "x-kubernetes-patch-merge-key": "topologyKey",
+              "x-kubernetes-patch-strategy": "merge"
+            }
+          },
+          "required": [],
+          "title": "deployment",
+          "type": "object"
+        },
+        "services": {
+          "additionalProperties": false,
+          "description": "Services",
+          "properties": {
+            "s3": {
+              "additionalProperties": false,
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
+                  "required": [],
+                  "title": "annotations"
+                },
+                "type": {
+                  "default": "ClusterIP",
+                  "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
+                  "title": "type",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "s3",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "services",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "temporaryStorage"
     },
     "tests": {
       "additionalProperties": false,

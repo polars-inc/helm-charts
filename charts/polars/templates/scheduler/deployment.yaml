@@ -21,9 +21,13 @@ spec:
     type: {{ .Values.scheduler.deployment.rollout.strategy }}
   template:
     metadata:
+      annotations:
+{{- if .Values.anonymousResults.temporaryStorage.enabled }}
+        # To restart this deployment on secret updates caused by Helm
+        checksum/secret: {{ include (print $.Template.BasePath "/temporary-storage/secret.yaml") . | sha256sum }}
+{{- end }}
 {{- $podAnnotations := merge .Values.scheduler.deployment.podAnnotations .Values.podAnnotations }}
 {{- with $podAnnotations }}
-      annotations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
       labels:
@@ -120,7 +124,7 @@ spec:
 {{- end }}
           env:
             - name: POLARS_EXTRAS
-              value: {{ .Values.runtime.composed.polarsExtras | default "" }}
+              value: {{ include "polars.runtimeComposedExtras" . | quote }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
 {{- if .Values.runtime.composed.enabled }}
@@ -135,9 +139,18 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-{{- if .Values.license }}
-            - name: PC_CUBLET__license
-              value: "/license/license.json"
+{{- if include "polars.isOnPremLicense" . }}
+            - name: PC_CUBLET__license__on_prem__client_id
+              {{ include "polars.envVarValue" .Values.license.onPrem.clientId | nindent 14 }}
+            - name: PC_CUBLET__license__on_prem__client_secret
+              {{ include "polars.envVarValue" .Values.license.onPrem.clientSecret | nindent 14 }}
+            - name: PC_CUBLET__license__on_prem__workspace_id
+              {{ include "polars.envVarValue" .Values.license.onPrem.workspaceId | nindent 14 }}
+            - name: PC_CUBLET__license__on_prem__cert_dir
+              value: /mnt/license_data
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
+            - name: PC_CUBLET__license__on_prem_enterprise__license_path
+              value: "/mnt/license/license.json"
 {{- end }}
             - name: PC_CUBLET__static_leader__leader_instance_id
               valueFrom:
@@ -177,15 +190,74 @@ spec:
             - name: PC_CUBLET__scheduler__enabled
               value: "true"
             - name: PC_CUBLET__scheduler__allow_local_sinks
-              value: {{ .Values.allowSharedDisk | quote }}
+              value: {{ .Values.allowLocalSinks | quote }}
+            - name: PC_CUBLET__scheduler__allow_local_scans
+              value: {{ .Values.allowLocalScans | quote }}
 {{ if .Values.anonymousResults.s3.enabled }}
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__url
               value: {{ .Values.anonymousResults.s3.endpoint | quote }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__presign_duration
+              value: {{ .Values.anonymousResults.s3.presignDuration | quote }}
   {{- range .Values.anonymousResults.s3.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.anonymousResults.s3.options Please use .Values.anonymousResults.s3.endpoint instead" }}
     {{- end }}
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__{{ .name | required "missing .Values.anonymousResults.s3.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{ else if .Values.anonymousResults.temporaryStorage.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__url
+              value: "s3://polars/"
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__presign_duration
+              value: {{ .Values.anonymousResults.temporaryStorage.presignDuration | quote }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_endpoint_url
+              value: http://{{ include "polars.temporaryStorage.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:8333
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_region
+              value: us-east-1
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_access_key_id
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "polars.temporaryStorage.fullname" . }}
+                  key: aws_access_key_id
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_secret_access_key
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "polars.temporaryStorage.fullname" . }}
+                  key: aws_secret_access_key
+            - name: PC_CUBLET__scheduler__anonymous_result_location__s3__external_endpoint
+              value: {{ .Values.anonymousResults.temporaryStorage.presignEndpointUrl }}
+{{- else if .Values.anonymousResults.abs.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__abs__url
+              value: {{ .Values.anonymousResults.abs.endpoint | quote }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__abs__presign_duration
+              value: {{ .Values.anonymousResults.abs.presignDuration | quote }}
+  {{- range .Values.anonymousResults.abs.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.abs.options Please use .Values.anonymousResults.abs.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__abs__{{ .name | required "missing .Values.anonymousResults.abs.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{- else if .Values.anonymousResults.gcs.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__gcs__url
+              value: {{ .Values.anonymousResults.gcs.endpoint | quote }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__gcs__presign_duration
+              value: {{ .Values.anonymousResults.gcs.presignDuration | quote }}
+  {{- range .Values.anonymousResults.gcs.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.anonymousResults.gcs.options Please use .Values.anonymousResults.gcs.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__gcs__{{ .name | required "missing .Values.anonymousResults.gcs.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -226,9 +298,13 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
-{{- with .Values.license }}
+
+{{- if include "polars.isOnPremLicense" . }}
+            - name: license-data
+              mountPath: /mnt/license_data
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
             - name: license
-              mountPath: /license/
+              mountPath: /mnt/license/
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
   {{- if .Values.runtime.composed.requirements }}
@@ -253,12 +329,20 @@ spec:
       runtimeClassName: {{ .Values.scheduler.deployment.runtimeClassName | quote }}
 {{- end }}
       volumes:
-{{- with .Values.license }}
+{{- if include "polars.isOnPremLicense" . }}
+        - name: license-data
+  {{- if .Values.license.onPrem.licenseData.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "polars.onPremLicenseCertificatePvcName" . }}
+  {{- else }}
+          emptyDir: {}
+  {{- end }}
+{{- else if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license
           secret:
-            secretName: {{ required ".Values.license.secretName is required" .secretName | quote }}
+            secretName: {{ required ".Values.license.onPremEnterprise.secretName is required" .Values.license.onPremEnterprise.secretName | quote }}
             items:
-              - key: {{ required ".Values.license.secretProperty is required" .secretProperty | quote }}
+              - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
                 path: license.json
 {{- end }}
 {{- if .Values.runtime.composed.enabled }}
@@ -297,8 +381,10 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
 {{- end }}
-{{- with .Values.scheduler.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
-        {{ toYaml . | nindent 8 }}
+{{- if .Values.scheduler.deployment.topologySpreadConstraints }}
+        {{ toYaml .Values.scheduler.deployment.topologySpreadConstraints | nindent 8 }}
+{{- else }}
+        {{ include "polars.defaultTopologySpreadConstraints" . | nindent 8 }}
 {{- end }}
       hostNetwork: {{ .Values.scheduler.deployment.hostNetwork }}
