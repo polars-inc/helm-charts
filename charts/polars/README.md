@@ -228,12 +228,11 @@ shuffleData:
 ```
 
 ```yaml
-anonymousResults:
+shuffleData:
   # Google Cloud Storage
   gcs:
     enabled: true
     endpoint: "gs://my-storage-location/path/to/dir"
-    presignDuration: "8h"
     options:
       - name: project
         value: "my-google-cloud-project"
@@ -241,12 +240,11 @@ anonymousResults:
 ```
 
 ```yaml
-anonymousResults:
+shuffleData:
   # Azure Blob Storage
   abs:
     enabled: true
     endpoint: "az://my-storage-location/path/to/dir"
-    presignDuration: "8h"
     options:
       - name: account_name
         value: "my-account-name"

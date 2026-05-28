@@ -187,7 +187,7 @@ anonymousResults:
     # @schema
     # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
     options: []
-#      - name: service_account
+#      - name: account_name
 #        valueFrom:
 #          secretKeyRef:
 #            name: my-account-name-secret
@@ -279,7 +279,7 @@ shuffleData:
     # @schema
     # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
     options: [ ]
-#      - name: service_account
+#      - name: account_name
 #        valueFrom:
 #          secretKeyRef:
 #            name: my-account-name-secret
