@@ -23573,6 +23573,35 @@
       "additionalProperties": false,
       "description": "Ephemeral storage for shuffle data.",
       "properties": {
+        "abs": {
+          "additionalProperties": false,
+          "description": "Configure Azure Blob Storage as shuffle data location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable Azure Blob Storage for shuffle data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "az://my-storage-location/path/to/dir",
+              "description": "The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            }
+          },
+          "required": [],
+          "title": "abs"
+        },
         "ephemeralVolumeClaim": {
           "additionalProperties": false,
           "description": "Configure ephemeral storage for shuffle data.",
@@ -23598,6 +23627,35 @@
           },
           "required": [],
           "title": "ephemeralVolumeClaim"
+        },
+        "gcs": {
+          "additionalProperties": false,
+          "description": "Configure Google Cloud Storage as shuffle data location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable Google Cloud storage for shuffle data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "gs://my-storage-location/path/to/dir",
+              "description": "The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            }
+          },
+          "required": [],
+          "title": "gcs"
         },
         "s3": {
           "additionalProperties": false,
