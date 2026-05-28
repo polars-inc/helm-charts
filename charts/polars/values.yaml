@@ -267,6 +267,43 @@ shuffleData:
 #            name: my-s3-secret
 #            key: accessKeyId
 
+  # -- Configure Azure Blob Storage as shuffle data location.
+  abs:
+    # -- Enable Azure Blob Storage for shuffle data.
+    enabled: false
+    # -- The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "az://my-storage-location/path/to/dir"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
+    options: [ ]
+#      - name: service_account
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-account-name-secret
+#            key: account_name
+
+  # -- Configure Google Cloud Storage as shuffle data location.
+  gcs:
+    # -- Enable Google Cloud storage for shuffle data.
+    enabled: false
+    # -- The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "gs://my-storage-location/path/to/dir"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html
+    options: [ ]
+#      - name: project
+#        valueFrom:
+#          secretKeyRef:
+#            name: my-project
+#            key: project-name
+
+
 # -- Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance.
 temporaryData:
   # -- Configure ephemeral storage for temporary data.
