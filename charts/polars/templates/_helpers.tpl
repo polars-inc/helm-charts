@@ -269,6 +269,13 @@ Whether anonymous results is enabled
 {{- end -}}
 
 {{/*
+Whether any remote shuffle is enabled
+*/}}
+{{- define "polars.isRemoteShuffleEnabled" -}}
+  {{- if or .Values.shuffleData.s3.enabled .Values.shuffleData.abs.enabled .Values.shuffleData.gcs.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/*
 Default topology spread
 */}}
 {{- define "polars.defaultTopologySpreadConstraints" -}}

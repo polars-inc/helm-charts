@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 2.0.1](https://img.shields.io/badge/Version-2.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.1](https://img.shields.io/badge/AppVersion-0.4.1-informational?style=flat-square)
+![Version: 2.0.2](https://img.shields.io/badge/Version-2.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.2](https://img.shields.io/badge/AppVersion-0.4.2-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -208,13 +208,14 @@ shuffleData:
     size: 125Gi
 ```
 
-You can also configure to shuffle to S3 instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`, `aws_region`). We currently only support the AWS keys of the `storage_options` dictionary, but note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+You can also configure to shuffle to AWS S3, Google Cloud Storage, or Azure Blob Storage instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 shuffleData:
+  # AWS S3 Storage
   s3:
     enabled: true
-    endpoint: "s3://my-bucket/path/to/dir"
+    endpoint: "s3://my-storage-location/path/to/dir"
     options:
       - name: aws_access_key_id
         valueFrom:
@@ -223,6 +224,30 @@ shuffleData:
             key: accessKeyId
       - name: aws_endpoint_url
         value: "http://localhost:9000"
+  # etc.
+```
+
+```yaml
+shuffleData:
+  # Google Cloud Storage
+  gcs:
+    enabled: true
+    endpoint: "gs://my-storage-location/path/to/dir"
+    options:
+      - name: project
+        value: "my-google-cloud-project"
+  # etc.
+```
+
+```yaml
+shuffleData:
+  # Azure Blob Storage
+  abs:
+    enabled: true
+    endpoint: "az://my-storage-location/path/to/dir"
+    options:
+      - name: account_name
+        value: "my-account-name"
   # etc.
 ```
 
@@ -491,7 +516,7 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | allowLocalSinks | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
 | allowLocalScans | bool | `false` | Disabling this option prevents the worker from reading from local disk. It is currently not possible to configure which scan locations are allowed. Users can alternatively configure scans that read from S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#reading-from-cloud-storage |
 | denyAnonymousUsers | bool | `false` | Enabling this option ensures that all queries must be sent with a set username. |
-| shuffleData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"s3":{"enabled":false,"endpoint":"s3://my-storage-location/path/to/dir","options":[]},"sharedPersistentVolumeClaim":{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
+| shuffleData | object | `{"abs":{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[]},"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"gcs":{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[]},"s3":{"enabled":false,"endpoint":"s3://my-storage-location/path/to/dir","options":[]},"sharedPersistentVolumeClaim":{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
@@ -506,6 +531,14 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | shuffleData.s3.enabled | bool | `false` | Enable AWS S3 storage for shuffle data. |
 | shuffleData.s3.endpoint | string | `"s3://my-storage-location/path/to/dir"` | The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field. |
 | shuffleData.s3.options | list | `[]` | Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html |
+| shuffleData.abs | object | `{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[]}` | Configure Azure Blob Storage as shuffle data location. |
+| shuffleData.abs.enabled | bool | `false` | Enable Azure Blob Storage for shuffle data. |
+| shuffleData.abs.endpoint | string | `"az://my-storage-location/path/to/dir"` | The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field. |
+| shuffleData.abs.options | list | `[]` | Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html |
+| shuffleData.gcs | object | `{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[]}` | Configure Google Cloud Storage as shuffle data location. |
+| shuffleData.gcs.enabled | bool | `false` | Enable Google Cloud storage for shuffle data. |
+| shuffleData.gcs.endpoint | string | `"gs://my-storage-location/path/to/dir"` | The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field. |
+| shuffleData.gcs.options | list | `[]` | Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html |
 | temporaryData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}}` | Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance. |
 | temporaryData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for temporary data. |
 | temporaryData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for temporary data. |
