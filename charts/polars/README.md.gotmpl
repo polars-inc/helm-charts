@@ -84,11 +84,17 @@ print(result.head)
 EOF
 ```
 
-Then view your query progress and node metrics by accessing the observatory service at `http://localhost:3001`:
+Then view your query progress and node metrics in the Observatory dashboard at [http://localhost:3001](http://localhost:3001):
 
 ```bash
 kubectl port-forward svc/polars-observatory 3001:3001
 ```
+
+The Observatory includes a **query profiler** that provides more insight into query execution:
+
+![Observatory stage graph](https://pola.rs/observatory-stage-graph.png)
+
+> For a walkthrough of how to use the profiler to optimise queries, see the [User Guide](https://docs.pola.rs/polars-cloud/run/query-profile/) or the [Query Profiler blog post](https://pola.rs/posts/query-profiler-instance-optimization/).
 
 ### Helm Tests
 
