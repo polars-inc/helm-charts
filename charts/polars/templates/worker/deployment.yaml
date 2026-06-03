@@ -52,7 +52,7 @@ spec:
       hostAliases:
         {{ toYaml . | nindent 8 }}
 {{- end }}
-{{ if .Values.runtime.composed.enabled }}
+{{- if include "polars.isRuntimeComposed" .}}
       initContainers:
         - name: release
   {{- with .Values.worker.deployment.distContainer.securityContext }}
@@ -81,7 +81,7 @@ spec:
           securityContext:
             {{ toYaml . | nindent 12 }}
 {{- end }}
-{{- if .Values.runtime.composed.enabled }}
+{{- if include "polars.isRuntimeComposed" .}}
           image: "{{ .Values.runtime.composed.runtime.repository }}:{{ .Values.runtime.composed.runtime.tag }}"
           imagePullPolicy: {{ .Values.runtime.composed.runtime.pullPolicy }}
           command:
@@ -90,8 +90,7 @@ spec:
             - /emptydir/bin/pc-cublet
             - service
           workingDir: /tmp
-{{- end }}
-{{- if .Values.runtime.prebuilt.enabled }}
+{{- else if include "polars.isRuntimePrebuilt" .}}
           image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
           imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
 {{- end }}
@@ -109,18 +108,18 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           env:
+{{- if include "polars.isRuntimeComposed" .}}
             - name: POLARS_EXTRAS
               value: {{ include "polars.runtimeComposedExtras" . | quote }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
-{{- if .Values.runtime.composed.enabled }}
   {{- if .Values.runtime.composed.requirements }}
             - name: PYTHON_REQUIREMENTS
               value: /requirements.txt
   {{- end }}
-{{- end }}
             - name: UV_PATH
               value: "/emptydir/bin/uv"
+{{- end }}
 {{- if .Values.telemetry.otlpEndpoint }}
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
@@ -252,7 +251,7 @@ spec:
             - name: license
               mountPath: /mnt/license/
 {{- end }}
-{{- if .Values.runtime.composed.enabled }}
+{{- if include "polars.isRuntimeComposed" .}}
   {{- if .Values.runtime.composed.requirements }}
             - name: requirements-txt
               mountPath: /requirements.txt
@@ -318,7 +317,7 @@ spec:
               - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
                 path: license.json
 {{- end }}
-{{- if .Values.runtime.composed.enabled }}
+{{- if include "polars.isRuntimeComposed" .}}
   {{- if .Values.runtime.composed.requirements }}
         - name: requirements-txt
           configMap:

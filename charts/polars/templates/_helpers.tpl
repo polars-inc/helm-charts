@@ -297,3 +297,31 @@ Verify that .Values.runtime.composed.polarsExtras contains cloudpickle and retur
   {{- end }}
 {{ .Values.runtime.composed.polarsExtras }}
 {{- end }}
+
+{{/*
+Validate runtime
+*/}}
+{{- define "polars.validateRuntime" -}}
+  {{- if and .Values.runtime.composed.enabled .Values.runtime.prebuilt.enabled }}
+    {{- fail "Runtime error: .Values.runtime.composed.enabled and .Values.runtime.prebuilt.enabled are mutually exclusive" }}
+  {{- end }}
+  {{- if and (not .Values.runtime.composed.enabled) (not .Values.runtime.prebuilt.enabled) }}
+    {{- fail "Runtime error: either .Values.runtime.composed.enabled or .Values.runtime.prebuilt.enabled is required" }}
+  {{- end }}
+{{- end }}
+
+{{/*
+Verify that we're using composed runtime
+*/}}
+{{- define "polars.isRuntimeComposed" -}}
+  {{- include "polars.validateRuntime" . -}}
+  {{- if .Values.runtime.composed.enabled -}}true{{- end -}}
+{{- end }}
+
+{{/*
+Verify that we're using prebuilt runtime
+*/}}
+{{- define "polars.isRuntimePrebuilt" -}}
+  {{- include "polars.validateRuntime" . -}}
+  {{- if .Values.runtime.prebuilt.enabled -}}true{{- end -}}
+{{- end }}
