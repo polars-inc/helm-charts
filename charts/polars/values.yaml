@@ -91,6 +91,24 @@ runtime:
   prebuilt:
     enabled: false
 
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/command
+    # @schema
+    # -- Entrypoint array. Not executed within a shell. The container image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+    command: []
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/args
+    # @schema
+    # -- Arguments to the entrypoint. The container image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+    args: []
+
+    # @schema
+    # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/workingDir
+    # @schema
+    # -- Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image. Cannot be updated.
+    workingDir: ""
+
     runtime:
       # -- Container image name. More info: https://kubernetes.io/docs/concepts/containers/images
       repository: "your-prebuilt-image"

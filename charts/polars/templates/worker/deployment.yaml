@@ -94,6 +94,18 @@ spec:
 {{- if .Values.runtime.prebuilt.enabled }}
           image: "{{ .Values.runtime.prebuilt.runtime.repository }}:{{ .Values.runtime.prebuilt.runtime.tag }}"
           imagePullPolicy: {{ .Values.runtime.prebuilt.runtime.pullPolicy }}
+  {{- with .Values.runtime.prebuilt.command }}
+          command:
+            {{ toYaml . | nindent 12 }}
+  {{- end }}
+  {{- with .Values.runtime.prebuilt.args }}
+          args:
+            {{ toYaml . | nindent 12 }}
+  {{- end }}
+  {{- with .Values.runtime.prebuilt.workingDir }}
+          workingDir:
+            {{ toYaml . | nindent 12 }}
+  {{- end }}
 {{- end }}
           ports:
 {{- if .Values.shuffleData.ephemeralVolumeClaim.enabled }}
