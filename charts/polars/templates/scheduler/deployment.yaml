@@ -343,7 +343,8 @@ spec:
             items:
               - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
                 path: license.json
-{{- else if include "polars.isRuntimeComposed" .}}
+{{- end }}
+{{- if include "polars.isRuntimeComposed" .}}
   {{- if .Values.runtime.composed.requirements }}
         - name: requirements-txt
           configMap:
