@@ -34,7 +34,7 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 
 <summary>Polars On-Prem Enterprise (offline)</summary>
 
-To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv) and the license file exists at `./license.json`.
+To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) and the license file exists at `./license.json`.
 
 ```console
 $ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
