@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 2.0.3](https://img.shields.io/badge/Version-2.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.3](https://img.shields.io/badge/AppVersion-0.4.3-informational?style=flat-square)
+![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.5.0](https://img.shields.io/badge/AppVersion-0.5.0-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -34,7 +34,7 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 
 <summary>Polars On-Prem Enterprise (offline)</summary>
 
-To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/zuoDgoMv) and the license file exists at `./license.json`.
+To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) and the license file exists at `./license.json`.
 
 ```console
 $ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
@@ -82,11 +82,17 @@ print(result.head)
 EOF
 ```
 
-Then view your query progress and node metrics by accessing the observatory service at `http://localhost:3001`:
+Then view your query progress and node metrics in the Observatory dashboard at [http://localhost:3001](http://localhost:3001):
 
 ```bash
 kubectl port-forward svc/polars-observatory 3001:3001
 ```
+
+The Observatory includes a **query profiler** that provides more insight into query execution:
+
+![Observatory stage graph](https://pola.rs/observatory-stage-graph.png)
+
+> For a walkthrough of how to use the profiler to optimise queries, see the [User Guide](https://docs.pola.rs/polars-cloud/run/query-profile/) or the [Query Profiler blog post](https://pola.rs/posts/query-profiler-instance-optimization/).
 
 ### Helm Tests
 
