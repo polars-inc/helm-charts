@@ -1,26 +1,34 @@
 1. Get the Polars Scheduler URL:
 {{- if contains "NodePort" .Values.scheduler.services.scheduler.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "polars.scheduler.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
+  ```bash
+  export SCHEDULER_NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "polars.scheduler.fullname" . }})
+  export SCHEDULER_NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$SCHEDULER_NODE_IP:$SCHEDULER_NODE_PORT
+  ```
 {{- else if contains "LoadBalancer" .Values.scheduler.services.scheduler.type }}
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "polars.scheduler.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "polars.scheduler.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:5051
+  ```bash
+  export SCHEDULER_SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "polars.scheduler.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SCHEDULER_SERVICE_IP:5051
+  ```
 {{- else if contains "ClusterIP" .Values.scheduler.services.scheduler.type }}
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.scheduler.fullname" . }} 5051:5051
 {{- end }}
 2. Get the Polars Observatory UI URL:
 {{- if contains "NodePort" .Values.scheduler.services.observatory.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "polars.observatory.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
+  ```bash
+  export OBSERVATORY_NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "polars.observatory.fullname" . }})
+  export OBSERVATORY_NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$OBSERVATORY_NODE_IP:$OBSERVATORY_NODE_PORT
+  ```
 {{- else if contains "LoadBalancer" .Values.scheduler.services.observatory.type }}
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "polars.observatory.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "polars.observatory.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:5051
+  ```bash
+  export OBSERVATORY_SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "polars.observatory.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$OBSERVATORY_SERVICE_IP:5051
+  ```
 {{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type }}
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.observatory.fullname" . }} 3001:3001
 {{- end }}
@@ -36,7 +44,7 @@ Use Polars on-premises with Python:
   import polars_cloud as pc
 
   # Directly connect to the cluster
-  ctx = pc.ClusterContext(compute_address={{- if contains "NodePort" .Values.scheduler.services.scheduler.type }}os.environ["NODE_IP"]{{- else if contains "LoadBalancer" .Values.scheduler.services.scheduler.type }}os.environ["SERVICE_IP"]{{- else if contains "ClusterIP" .Values.scheduler.services.scheduler.type }}"127.0.0.1"{{- end }}{{- if contains "NodePort" .Values.scheduler.services.scheduler.type }}, scheduler_port=int(os.environ["NODE_PORT"]){{- end }}, insecure=True)
+  {{ include "polars.notes.clusterContext" . }}
   result = (
     pl.LazyFrame(
       {
