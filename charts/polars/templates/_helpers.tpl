@@ -292,26 +292,26 @@ Default topology spread
 Python scheduler URI expression
 */}}
 {{- define "polars.notes.schedulerUri" -}}
-{{- if contains "NodePort" .Values.scheduler.services.scheduler.type -}}
+  {{- if contains "NodePort" .Values.scheduler.services.scheduler.type -}}
 "http://"+os.environ["SCHEDULER_NODE_IP"]+":"+os.environ["SCHEDULER_NODE_PORT"]
-{{- else if contains "LoadBalancer" .Values.scheduler.services.scheduler.type -}}
+  {{- else if contains "LoadBalancer" .Values.scheduler.services.scheduler.type -}}
 "http://"+os.environ["SCHEDULER_SERVICE_IP"]+":5051"
-{{- else if contains "ClusterIP" .Values.scheduler.services.scheduler.type -}}
+  {{- else if contains "ClusterIP" .Values.scheduler.services.scheduler.type -}}
 "http://127.0.0.1:5051"
-{{- end -}}
+  {{- end -}}
 {{- end }}
 
 {{/*
 Python observatory URI expression
 */}}
 {{- define "polars.notes.observatoryUri" -}}
-{{- if contains "NodePort" .Values.scheduler.services.observatory.type -}}
+  {{- if contains "NodePort" .Values.scheduler.services.observatory.type -}}
 "http://"+os.environ["OBSERVATORY_NODE_IP"]+":"+os.environ["OBSERVATORY_NODE_PORT"]
-{{- else if contains "LoadBalancer" .Values.scheduler.services.observatory.type -}}
+  {{- else if contains "LoadBalancer" .Values.scheduler.services.observatory.type -}}
 "http://"+os.environ["OBSERVATORY_SERVICE_IP"]+":5051"
-{{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type -}}
+  {{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type -}}
 "http://127.0.0.1:3001"
-{{- end -}}
+  {{- end -}}
 {{- end }}
 
 {{/*
