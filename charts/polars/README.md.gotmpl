@@ -64,7 +64,7 @@ uv run --isolated --with polars,polars_cloud - << 'EOF'
 import polars as pl
 import polars_cloud as pc
 
-ctx = pc.ClusterContext(compute_address="localhost")
+ctx = pc.ClusterContext(uri="http://localhost")
 
 result = (
     pl.LazyFrame(
