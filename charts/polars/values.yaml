@@ -243,6 +243,16 @@ allowLocalScans: false
 # -- Enabling this option ensures that all queries must be sent with a set username.
 denyAnonymousUsers: false
 
+# -- When scheduling the query, wait for a certain amount of workers to be free before starting execution.
+requireFreeWorkers:
+  enabled: true
+  # @schema
+  # type: [integer, "null"]
+  # minimum: 0
+  # @schema
+  # -- The number of workers to wait for. By default, takes the configured worker replica count from the current release.
+  count:
+
 # -- Ephemeral storage for shuffle data.
 shuffleData:
   # -- Configure ephemeral storage for shuffle data.
