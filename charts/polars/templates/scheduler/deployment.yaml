@@ -276,8 +276,19 @@ spec:
     {{- end }}
   {{- end }}
 {{ end }}
+{{- if .Values.requireFreeWorkers.enabled }}
             - name: PC_CUBLET__scheduler__n_workers
+  {{- if kindIs "string" .Values.requireFreeWorkers.count }}
+    {{- fail ".Values.requireFreeWorkers.count must be an integer" }}
+  {{- else if kindIs "invalid" .Values.requireFreeWorkers.count }}
               value: {{ .Values.worker.deployment.replicaCount | quote }}
+  {{- else }}
+    {{- if lt (.Values.requireFreeWorkers.count | int) 0 }}
+      {{- fail ".Values.requireFreeWorkers.count must be greater than or equal to 0" }}
+    {{- end }}
+              value: {{ .Values.requireFreeWorkers.count | quote }}
+  {{- end }}
+{{- end }}
             - name: PC_CUBLET__scheduler__deny_anonymous_users
               value: {{ .Values.denyAnonymousUsers | quote }}
 {{- if .Values.lineage.enabled }}

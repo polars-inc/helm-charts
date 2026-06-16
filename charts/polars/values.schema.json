@@ -23119,6 +23119,30 @@
       "required": [],
       "title": "podLabels"
     },
+    "requireFreeWorkers": {
+      "additionalProperties": false,
+      "description": "When scheduling the query, wait for a certain amount of workers to be free before starting execution.",
+      "properties": {
+        "count": {
+          "default": "",
+          "description": "The number of workers to wait for. By default, takes the configured worker replica count from the current release.",
+          "minimum": 0,
+          "required": [],
+          "title": "count",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "enabled": {
+          "default": true,
+          "title": "enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "requireFreeWorkers"
+    },
     "runtime": {
       "additionalProperties": false,
       "properties": {
