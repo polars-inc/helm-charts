@@ -4,6 +4,30 @@ entries:
   - annotations:
       category: Analytics
     apiVersion: v2
+    appVersion: 0.5.2
+    created: "2026-06-17T08:03:48.79180786Z"
+    description: Distributed query execution engine for Polars
+    digest: 6a58d485d4f94baf6e97442744f1548ff882e17d992049c7f1089c5d83c24bb0
+    home: https://pola.rs
+    keywords:
+    - polars
+    - distributed-computing
+    - query-engine
+    maintainers:
+    - email: developers@polars.tech
+      name: Polars
+      url: https://github.com/polars-inc
+    name: polars
+    sources:
+    - https://github.com/pola-rs/polars
+    - https://github.com/polars-inc/helm-charts
+    type: application
+    urls:
+    - https://github.com/polars-inc/helm-charts/releases/download/polars-2.1.2/polars-2.1.2.tgz
+    version: 2.1.2
+  - annotations:
+      category: Analytics
+    apiVersion: v2
     appVersion: 0.5.1
     created: "2026-06-03T11:52:28.134658183Z"
     description: Distributed query execution engine for Polars
@@ -577,4 +601,4 @@ entries:
     urls:
     - https://github.com/polars-inc/helm-charts/releases/download/polars-0.0.6/polars-0.0.6.tgz
     version: 0.0.6
-generated: "2026-06-03T11:52:28.134791027Z"
+generated: "2026-06-17T08:03:48.791988682Z"
