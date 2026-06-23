@@ -80,6 +80,12 @@ license:
     # -- the property on the secret containing your license key
     secretProperty: ""
 
+  licenseServer:
+    # -- Enable connecting to offline Polars license server.
+    enabled: false
+    # -- Address of the license server.
+    address: "https://pc-license-server:50051"
+
 # @schema
 # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/imagePullSecrets
 # @schema
