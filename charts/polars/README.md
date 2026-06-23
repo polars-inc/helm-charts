@@ -479,6 +479,7 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | podLabels | object | `{}` | Common labels for all resources |
 | podAnnotations | object | `{}` | Common annotations for all resources |
 | clusterId | uuid | `""` | Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
+| clusterDomain | string | `"cluster.local"` | Kubernetes cluster DNS domain (the suffix used in `<svc>.<ns>.svc.<domain>`). Override this if your cluster uses a non-default domain. |
 | acceptEula | bool | `false` | To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
 | license.onPrem.licenseData.enabled | bool | `false` | Enable persistent volume claim for the license data. |
 | license.onPrem.licenseData.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |

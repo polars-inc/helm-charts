@@ -254,6 +254,13 @@ Cluster ID
 {{- end }}
 
 {{/*
+Kubernetes cluster DNS domain
+*/}}
+{{- define "polars.clusterDomain" -}}
+{{- default "cluster.local" .Values.clusterDomain }}
+{{- end }}
+
+{{/*
 Create temporary storage fullname
 */}}
 {{- define "polars.temporaryStorage.fullname" -}}

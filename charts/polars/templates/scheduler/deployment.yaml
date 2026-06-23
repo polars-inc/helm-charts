@@ -226,7 +226,7 @@ spec:
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__presign_duration
               value: {{ .Values.anonymousResults.temporaryStorage.presignDuration | quote }}
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_endpoint_url
-              value: http://{{ include "polars.temporaryStorage.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:8333
+              value: http://{{ include "polars.temporaryStorage.fullname" . }}.{{ .Release.Namespace }}.svc.{{ include "polars.clusterDomain" . }}:8333
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_region
               value: us-east-1
             - name: PC_CUBLET__scheduler__anonymous_result_location__s3__aws_access_key_id

@@ -145,11 +145,11 @@ spec:
             - name: PC_CUBLET__static_leader__leader_instance_id
               value: "{{ include "polars.worker.fullname" . }}-0"
             - name: PC_CUBLET__static_leader__scheduler_service__public_addr__hostname
-              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.{{ include "polars.clusterDomain" . }}"
             - name: PC_CUBLET__static_leader__scheduler_service__public_addr__port
               value: "5050"
             - name: PC_CUBLET__static_leader__observatory_service__public_addr__hostname
-              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+              value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.{{ include "polars.clusterDomain" . }}"
             - name: PC_CUBLET__static_leader__observatory_service__public_addr__port
               value: "5049"
             - name: PC_CUBLET__cluster_id

@@ -17,6 +17,9 @@ podAnnotations: {}
 # -- (uuid) Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set.
 clusterId: ""
 
+# -- Kubernetes cluster DNS domain (the suffix used in `<svc>.<ns>.svc.<domain>`). Override this if your cluster uses a non-default domain.
+clusterDomain: "cluster.local"
+
 # @schema
 # required: true
 # @schema

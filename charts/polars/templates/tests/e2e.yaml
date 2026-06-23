@@ -95,7 +95,7 @@ spec:
         - name: POLARS_COMPUTE_PLANE_TESTS_DIR
           value: "/emptydir/tests"
         - name: SCHEDULER_ADDRESS
-          value: "{{ include "polars.scheduler.fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
+          value: "{{ include "polars.scheduler.fullname" $ }}.{{ $.Release.Namespace }}.svc.{{ include "polars.clusterDomain" $ }}"
         - name: PC_E2E_SINK
           value: {{ $E2E_SINK | quote }}
   {{- if gt (int $.Values.worker.deployment.replicaCount) 1 }}
