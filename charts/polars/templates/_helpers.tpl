@@ -194,14 +194,16 @@ Setting `license=null` removes the license check from the helm chart (still enfo
   {{- if not (kindIs "invalid" .Values.license) -}}
     {{- $hasOnPrem := .Values.license.onPrem.enabled -}}
     {{- $hasOnPremEnterprise := .Values.license.onPremEnterprise.enabled -}}
+    {{- $hasLicenseServer := ((.Values.license).licenseServer).enabled -}}
 
-    {{- if and $hasOnPrem $hasOnPremEnterprise -}}
-      {{- fail "License error: .Values.license.onPrem.enabled and .Values.license.onPremEnterprise.enabled are mutually exclusive" -}}
+    {{- $enabledCount := 0 -}}
+    {{- if $hasOnPrem }}{{- $enabledCount = add1 $enabledCount }}{{- end -}}
+    {{- if $hasOnPremEnterprise }}{{- $enabledCount = add1 $enabledCount }}{{- end -}}
+    {{- if $hasLicenseServer }}{{- $enabledCount = add1 $enabledCount }}{{- end -}}
+
+    {{- if ne $enabledCount 1 -}}
+      {{- fail "License error: exactly one of the `.Values.license` must be enabled" -}}
     {{- end -}}
-
-    {{- if and (not $hasOnPrem) (not $hasOnPremEnterprise) -}}
-      {{- fail "License error: either .Values.license.onPrem.enabled or .Values.license.onPremEnterprise.enabled is required" -}}
-    {{- end }}
 
     {{- if $hasOnPrem -}}
       {{- if not .Values.license.onPrem.clientId -}}
@@ -226,6 +228,12 @@ Setting `license=null` removes the license check from the helm chart (still enfo
         {{- fail "License error: .Values.license.onPremEnterprise.secretProperty is required when using Polars On-Prem Enterprise license" -}}
       {{- end -}}
     {{- end -}}
+
+    {{- if $hasLicenseServer -}}
+      {{- if not .Values.license.licenseServer.address -}}
+        {{- fail "License error: .Values.license.licenseServer.address is required when using the Polars license server" -}}
+      {{- end -}}
+    {{- end -}}
   {{- end }}
 {{- end -}}
 
@@ -239,6 +247,12 @@ Setting `license=null` removes the license check from the helm chart (still enfo
 {{- define "polars.isOnPremEnterpriseLicense" -}}
   {{- include "polars.validateLicense" . -}}
   {{- if ((.Values.license).onPremEnterprise).enabled -}}true{{- end -}}
+{{- end -}}
+
+
+{{- define "polars.isLicenseServerLicense" -}}
+  {{- include "polars.validateLicense" . -}}
+  {{- if ((.Values.license).licenseServer).enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*

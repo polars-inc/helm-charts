@@ -23047,6 +23047,26 @@
     "license": {
       "additionalProperties": false,
       "properties": {
+        "licenseServer": {
+          "additionalProperties": false,
+          "properties": {
+            "address": {
+              "default": "https://pc-license-server:50051",
+              "description": "Address of the license server.",
+              "required": [],
+              "title": "address"
+            },
+            "enabled": {
+              "default": "false",
+              "description": "Enable connecting to offline Polars license server.",
+              "required": [],
+              "title": "enabled"
+            }
+          },
+          "required": [],
+          "title": "licenseServer",
+          "type": "object"
+        },
         "onPrem": {
           "additionalProperties": false,
           "properties": {
