@@ -22777,6 +22777,26 @@
           "required": [],
           "title": "s3"
         },
+        "sharedFilesystem": {
+          "additionalProperties": false,
+          "description": "Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself using scheduler.deployment.volumes and scheduler.deployment.runtimeContainer.volumeMounts. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable shared filesystem for anonymous results.",
+              "required": [],
+              "title": "enabled"
+            },
+            "path": {
+              "default": "/mnt/nfs/anonymous-results",
+              "description": "The filesystem path where anonymous results will be stored. Must correspond to a mounted volume and match the path mounted on the client.",
+              "required": [],
+              "title": "path"
+            }
+          },
+          "required": [],
+          "title": "sharedFilesystem"
+        },
         "temporaryStorage": {
           "additionalProperties": false,
           "description": "Configure using quick-start temporary storage server",
@@ -23739,6 +23759,26 @@
           },
           "required": [],
           "title": "s3"
+        },
+        "sharedFilesystem": {
+          "additionalProperties": false,
+          "description": "Configure a shared filesystem path for shuffle data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable shared filesystem for shuffle data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "path": {
+              "default": "/mnt/nfs/shuffle-data",
+              "description": "The filesystem path where shuffle data will be stored. Must correspond to a mounted volume on a shared network filesystem.",
+              "required": [],
+              "title": "path"
+            }
+          },
+          "required": [],
+          "title": "sharedFilesystem"
         },
         "sharedPersistentVolumeClaim": {
           "additionalProperties": false,

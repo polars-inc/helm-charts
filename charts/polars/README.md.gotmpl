@@ -323,6 +323,56 @@ anonymousResults:
 
 If you wish to disable anonymous results, keep `anonymousResults.*.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
 
+#### Shared filesystem paths (e.g. NFS)
+
+For anonymous results and shuffle data, you can point Polars at a shared filesystem path instead of using S3 or ephemeral volumes. This is intended for shared network filesystems (e.g. mounted via an NFS or CSI driver volume), where all pods can access the same data through a common mount point. First, add the volume and mount it into the container via the `volumes` and `volumeMounts` values, then set the `sharedFilesystem` path to tell Polars to use that mount point.
+
+Because you define the volume yourself through `volumes`/`volumeMounts`, you can use any volume type Kubernetes supports — including CSI drivers — along with any companion volumes or environment variables your storage needs. You can also back both anonymous results and shuffle data with a single mounted volume by pointing each `sharedFilesystem.path` at a different subpath under the same mount.
+
+> **Note:** Shared filesystem paths are designed for shared network filesystems. For shuffle data in particular, all workers must be able to read and write to the same path — the `shared_filesystem` shuffle location is used under the hood. For anonymous results, the path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
+
+Example using NFS for shuffle data:
+
+```yaml
+shuffleData:
+  sharedFilesystem:
+    enabled: true
+    path: "/mnt/nfs/shuffle-data"
+
+worker:
+  deployment:
+    volumes:
+      - name: nfs-shuffle
+        nfs:
+          server: nfs-server.example.com
+          path: /exports/shuffle-data
+    runtimeContainer:
+      volumeMounts:
+        - name: nfs-shuffle
+          mountPath: /mnt/nfs/shuffle-data
+```
+
+Example using NFS for anonymous results:
+
+```yaml
+anonymousResults:
+  sharedFilesystem:
+    enabled: true
+    path: "/mnt/nfs/anonymous-results"
+
+scheduler:
+  deployment:
+    volumes:
+      - name: nfs-results
+        nfs:
+          server: nfs-server.example.com
+          path: /exports/anonymous-results
+    runtimeContainer:
+      volumeMounts:
+        - name: nfs-results
+          mountPath: /mnt/nfs/anonymous-results
+```
+
 #### Temporary data
 
 Polars itself uses some temporary storage location in the streaming engine and in some cases when downloading remote files. For most queries this is a relatively small volume and is not performance sensitive. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.

@@ -223,6 +223,9 @@ spec:
                 {{ toYaml .valueFrom | nindent 16 }}
     {{- end }}
   {{- end }}
+{{- else if .Values.shuffleData.sharedFilesystem.enabled }}
+            - name: PC_CUBLET__worker__shuffle_location__shared_filesystem__path
+              value: {{ .Values.shuffleData.sharedFilesystem.path | quote }}
 {{- else if .Values.shuffleData.sharedPersistentVolumeClaim.enabled }}
             - name: PC_CUBLET__worker__shuffle_location__shared_filesystem__path
               value: /app/shuffle_data/shuffle_data

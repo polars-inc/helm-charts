@@ -319,6 +319,56 @@ anonymousResults:
 
 If you wish to disable anonymous results, keep `anonymousResults.*.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
 
+#### Shared filesystem paths (e.g. NFS)
+
+For anonymous results and shuffle data, you can point Polars at a shared filesystem path instead of using S3 or ephemeral volumes. This is intended for shared network filesystems (e.g. mounted via an NFS or CSI driver volume), where all pods can access the same data through a common mount point. First, add the volume and mount it into the container via the `volumes` and `volumeMounts` values, then set the `sharedFilesystem` path to tell Polars to use that mount point.
+
+Because you define the volume yourself through `volumes`/`volumeMounts`, you can use any volume type Kubernetes supports — including CSI drivers — along with any companion volumes or environment variables your storage needs. You can also back both anonymous results and shuffle data with a single mounted volume by pointing each `sharedFilesystem.path` at a different subpath under the same mount.
+
+> **Note:** Shared filesystem paths are designed for shared network filesystems. For shuffle data in particular, all workers must be able to read and write to the same path — the `shared_filesystem` shuffle location is used under the hood. For anonymous results, the path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
+
+Example using NFS for shuffle data:
+
+```yaml
+shuffleData:
+  sharedFilesystem:
+    enabled: true
+    path: "/mnt/nfs/shuffle-data"
+
+worker:
+  deployment:
+    volumes:
+      - name: nfs-shuffle
+        nfs:
+          server: nfs-server.example.com
+          path: /exports/shuffle-data
+    runtimeContainer:
+      volumeMounts:
+        - name: nfs-shuffle
+          mountPath: /mnt/nfs/shuffle-data
+```
+
+Example using NFS for anonymous results:
+
+```yaml
+anonymousResults:
+  sharedFilesystem:
+    enabled: true
+    path: "/mnt/nfs/anonymous-results"
+
+scheduler:
+  deployment:
+    volumes:
+      - name: nfs-results
+        nfs:
+          server: nfs-server.example.com
+          path: /exports/anonymous-results
+    runtimeContainer:
+      volumeMounts:
+        - name: nfs-results
+          mountPath: /mnt/nfs/anonymous-results
+```
+
 #### Temporary data
 
 Polars itself uses some temporary storage location in the streaming engine and in some cases when downloading remote files. For most queries this is a relatively small volume and is not performance sensitive. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
@@ -504,7 +554,7 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | logLevel | string | `"info"` | One of "info", "debug", "trace". |
 | workerHeartbeatIntervalSecs | int | `5` | Heartbeat interval between polars workers and the scheduler in seconds. |
 | disableHostMetrics | bool | `false` | Disable host metrics collection for the dashboard |
-| anonymousResults | object | `{"abs":{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[],"presignDuration":"8h"},"gcs":{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[],"presignDuration":"8h"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[],"presignDuration":"8h"},"temporaryStorage":{"enabled":false,"presignDuration":"8h","presignEndpointUrl":"http://localhost:8333"}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
+| anonymousResults | object | `{"abs":{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[],"presignDuration":"8h"},"gcs":{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[],"presignDuration":"8h"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[],"presignDuration":"8h"},"sharedFilesystem":{"enabled":false,"path":"/mnt/nfs/anonymous-results"},"temporaryStorage":{"enabled":false,"presignDuration":"8h","presignEndpointUrl":"http://localhost:8333"}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
 | anonymousResults.s3 | object | `{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[],"presignDuration":"8h"}` | Configure AWS S3 storage as anonymous results location. |
 | anonymousResults.s3.enabled | bool | `false` | Enable AWS S3 storage for anonymous results. |
 | anonymousResults.s3.endpoint | string | `"s3://my-bucket/path/to/dir"` | The entire S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field. |
@@ -523,12 +573,15 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | anonymousResults.gcs.endpoint | string | `"gs://my-storage-location/path/to/dir"` | The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field. |
 | anonymousResults.gcs.presignDuration | string | `"8h"` | The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S. |
 | anonymousResults.gcs.options | list | `[]` | Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html |
+| anonymousResults.sharedFilesystem | object | `{"enabled":false,"path":"/mnt/nfs/anonymous-results"}` | Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself using scheduler.deployment.volumes and scheduler.deployment.runtimeContainer.volumeMounts. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client. |
+| anonymousResults.sharedFilesystem.enabled | bool | `false` | Enable shared filesystem for anonymous results. |
+| anonymousResults.sharedFilesystem.path | string | `"/mnt/nfs/anonymous-results"` | The filesystem path where anonymous results will be stored. Must correspond to a mounted volume and match the path mounted on the client. |
 | allowLocalSinks | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
 | allowLocalScans | bool | `false` | Disabling this option prevents the worker from reading from local disk. It is currently not possible to configure which scan locations are allowed. Users can alternatively configure scans that read from S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#reading-from-cloud-storage |
 | denyAnonymousUsers | bool | `false` | Enabling this option ensures that all queries must be sent with a set username. |
 | requireFreeWorkers | object | `{"count":null,"enabled":true}` | When scheduling the query, wait for a certain amount of workers to be free before starting execution. |
 | requireFreeWorkers.count | string | `nil` | The number of workers to wait for. By default, takes the configured worker replica count from the current release. |
-| shuffleData | object | `{"abs":{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[]},"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"gcs":{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[]},"s3":{"enabled":false,"endpoint":"s3://my-storage-location/path/to/dir","options":[]},"sharedPersistentVolumeClaim":{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
+| shuffleData | object | `{"abs":{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[]},"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"gcs":{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[]},"s3":{"enabled":false,"endpoint":"s3://my-storage-location/path/to/dir","options":[]},"sharedFilesystem":{"enabled":false,"path":"/mnt/nfs/shuffle-data"},"sharedPersistentVolumeClaim":{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
@@ -551,6 +604,9 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | shuffleData.gcs.enabled | bool | `false` | Enable Google Cloud storage for shuffle data. |
 | shuffleData.gcs.endpoint | string | `"gs://my-storage-location/path/to/dir"` | The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field. |
 | shuffleData.gcs.options | list | `[]` | Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html |
+| shuffleData.sharedFilesystem | object | `{"enabled":false,"path":"/mnt/nfs/shuffle-data"}` | Configure a shared filesystem path for shuffle data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts. |
+| shuffleData.sharedFilesystem.enabled | bool | `false` | Enable shared filesystem for shuffle data. |
+| shuffleData.sharedFilesystem.path | string | `"/mnt/nfs/shuffle-data"` | The filesystem path where shuffle data will be stored. Must correspond to a mounted volume on a shared network filesystem. |
 | temporaryData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}}` | Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance. |
 | temporaryData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for temporary data. |
 | temporaryData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for temporary data. |

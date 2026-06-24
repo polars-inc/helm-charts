@@ -275,6 +275,9 @@ spec:
                 {{ toYaml .valueFrom | nindent 16 }}
     {{- end }}
   {{- end }}
+{{- else if .Values.anonymousResults.sharedFilesystem.enabled }}
+            - name: PC_CUBLET__scheduler__anonymous_result_location__local__path
+              value: {{ .Values.anonymousResults.sharedFilesystem.path | quote }}
 {{ end }}
 {{- if .Values.requireFreeWorkers.enabled }}
             - name: PC_CUBLET__scheduler__n_workers
