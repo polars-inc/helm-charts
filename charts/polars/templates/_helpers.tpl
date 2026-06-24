@@ -254,6 +254,13 @@ Cluster ID
 {{- end }}
 
 {{/*
+Kubernetes cluster DNS domain
+*/}}
+{{- define "polars.clusterDomain" -}}
+{{- default "cluster.local" .Values.clusterDomain }}
+{{- end }}
+
+{{/*
 Create temporary storage fullname
 */}}
 {{- define "polars.temporaryStorage.fullname" -}}
@@ -272,7 +279,7 @@ Whether anonymous results is enabled
 Whether any remote shuffle is enabled
 */}}
 {{- define "polars.isRemoteShuffleEnabled" -}}
-  {{- if or .Values.shuffleData.s3.enabled .Values.shuffleData.abs.enabled .Values.shuffleData.gcs.enabled -}}true{{- end -}}
+  {{- if or .Values.shuffleData.s3.enabled .Values.shuffleData.abs.enabled .Values.shuffleData.gcs.enabled .Values.shuffleData.sharedFilesystem.enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*
