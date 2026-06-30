@@ -294,6 +294,12 @@ spec:
 {{- end }}
             - name: PC_CUBLET__scheduler__deny_anonymous_users
               value: {{ .Values.denyAnonymousUsers | quote }}
+{{- if include "polars.isCheckpointLocationEnabled" . }}
+            - name: PC_CUBLET__scheduler__checkpoint__enabled
+              value: "true"
+            - name: PC_CUBLET__scheduler__checkpoint__period
+              value: {{ .Values.checkpoint.period | quote }}
+{{- end }}
 {{- if .Values.lineage.enabled }}
             - name: PC_CUBLET__lineage__enabled
               value: "true"

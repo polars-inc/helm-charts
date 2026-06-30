@@ -233,6 +233,58 @@ spec:
             - name: PC_CUBLET__worker__shuffle_location__local__path
               value: /app/shuffle_data/shuffle_data
 {{- end }}
+{{- if .Values.checkpointData.s3.enabled }}
+            - name: PC_CUBLET__worker__checkpoint_location__s3__url
+              value: {{ .Values.checkpointData.s3.endpoint | quote }}
+  {{- range .Values.checkpointData.s3.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.checkpointData.s3.options Please use .Values.checkpointData.s3.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__worker__checkpoint_location__s3__{{ .name | required "missing .Values.checkpointData.s3.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{- else if .Values.checkpointData.abs.enabled }}
+            - name: PC_CUBLET__worker__checkpoint_location__abs__url
+              value: {{ .Values.checkpointData.abs.endpoint | quote }}
+  {{- range .Values.checkpointData.abs.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.checkpointData.abs.options Please use .Values.checkpointData.abs.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__worker__checkpoint_location__abs__{{ .name | required "missing .Values.checkpointData.abs.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{- else if .Values.checkpointData.gcs.enabled }}
+            - name: PC_CUBLET__worker__checkpoint_location__gcs__url
+              value: {{ .Values.checkpointData.gcs.endpoint | quote }}
+  {{- range .Values.checkpointData.gcs.options }}
+    {{- if eq .name "url" }}
+      {{ fail "Name 'url' found in .Values.checkpointData.gcs.options Please use .Values.checkpointData.gcs.endpoint instead" }}
+    {{- end }}
+            - name: PC_CUBLET__worker__checkpoint_location__gcs__{{ .name | required "missing .Values.checkpointData.gcs.options[x].name" }}
+    {{- if .value }}
+              value: {{ .value | quote }}
+    {{- else if .valueFrom }}
+              valueFrom:
+                {{ toYaml .valueFrom | nindent 16 }}
+    {{- end }}
+  {{- end }}
+{{- else if .Values.checkpointData.sharedFilesystem.enabled }}
+            - name: PC_CUBLET__worker__checkpoint_location__shared_filesystem__path
+              value: {{ .Values.checkpointData.sharedFilesystem.path | quote }}
+{{- else if .Values.checkpointData.sharedPersistentVolumeClaim.enabled }}
+            - name: PC_CUBLET__worker__checkpoint_location__shared_filesystem__path
+              value: /app/checkpoint_data/checkpoint_data
+{{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
@@ -282,6 +334,10 @@ spec:
             - name: shuffle-data
               mountPath: /app/shuffle_data
 {{- end }}
+{{- if .Values.checkpointData.sharedPersistentVolumeClaim.enabled }}
+            - name: checkpoint-data
+              mountPath: /app/checkpoint_data
+{{- end }}
 {{- with .Values.worker.deployment.runtimeContainer.volumeMounts }}
             {{ toYaml . | nindent 12 }}
 {{- end }}
@@ -322,6 +378,11 @@ spec:
   {{- else }}
           emptyDir: {}
   {{- end }}
+{{- end }}
+{{- if .Values.checkpointData.sharedPersistentVolumeClaim.enabled }}
+        - name: checkpoint-data
+          persistentVolumeClaim:
+            claimName: {{ include "polars.checkpointDataPvcName" . }}
 {{- end }}
 {{- if include "polars.isOnPremEnterpriseLicense" . }}
         - name: license

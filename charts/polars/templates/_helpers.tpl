@@ -151,6 +151,17 @@ Shuffle data shared PVC name
 {{- end }}
 
 {{/*
+Checkpoint data shared PVC name
+*/}}
+{{- define "polars.checkpointDataPvcName" -}}
+  {{- if .Values.checkpointData.sharedPersistentVolumeClaim.existingClaimName }}
+{{- .Values.checkpointData.sharedPersistentVolumeClaim.existingClaimName }}
+  {{- else }}
+    {{- printf "%s-polars-checkpoint-data" (include "polars.fullname" .) }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Observatory data PVC name
 */}}
 {{- define "polars.observatoryDataPvcName" -}}
@@ -280,6 +291,13 @@ Whether any remote shuffle is enabled
 */}}
 {{- define "polars.isRemoteShuffleEnabled" -}}
   {{- if or .Values.shuffleData.s3.enabled .Values.shuffleData.abs.enabled .Values.shuffleData.gcs.enabled .Values.shuffleData.sharedFilesystem.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+Whether a checkpoint location is configured
+*/}}
+{{- define "polars.isCheckpointLocationEnabled" -}}
+  {{- if or .Values.checkpointData.s3.enabled .Values.checkpointData.abs.enabled .Values.checkpointData.gcs.enabled .Values.checkpointData.sharedFilesystem.enabled .Values.checkpointData.sharedPersistentVolumeClaim.enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*

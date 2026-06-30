@@ -348,6 +348,85 @@ shuffleData:
     # -- The filesystem path where shuffle data will be stored. Must correspond to a mounted volume on a shared network filesystem.
     path: "/mnt/nfs/shuffle-data"
 
+# -- Checkpointing for queries. Checkpointing is enabled automatically whenever a checkpointData location is configured below; the scheduler then periodically checkpoints completed stages so queries can resume after failures.
+checkpoint:
+  # -- Period at which checkpoints will be created. If the period has passed after a stage has completed, a checkpoint will be created. Accepts either a jiff friendly duration (e.g. `5s`, see https://docs.rs/jiff/latest/jiff/fmt/friendly/) or an ISO 8601 duration (e.g. `PT5S`).
+  period: "20m"
+
+checkpointData:
+  # -- Shared persistent storage for checkpoint data.
+  sharedPersistentVolumeClaim:
+    # -- Enable shared persistent volume claim for checkpoint data.
+    enabled: false
+    # -- Create the PVC resource. Set to false if you want to use an existing PVC.
+    create: true
+    # -- Override the PVC name. Defaults to "{{ fullname }}-polars-checkpoint-data".
+    existingClaimName: ""
+    # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+    storageClassName: ""
+    # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
+    size: 125Gi
+
+  # -- Configure AWS S3 storage as checkpoint location.
+  s3:
+    # -- Enable AWS S3 storage for checkpoint data.
+    enabled: false
+    # -- The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "s3://my-storage-location/path/to/dir"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html
+    options: []
+  #      - name: aws_access_key_id
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-s3-secret
+  #            key: accessKeyId
+
+  # -- Configure Azure Blob Storage as checkpoint location.
+  abs:
+    # -- Enable Azure Blob Storage for checkpoint data.
+    enabled: false
+    # -- The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "az://my-storage-location/path/to/dir"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
+    options: [ ]
+  #      - name: account_name
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-account-name-secret
+  #            key: account_name
+
+  # -- Configure Google Cloud Storage as checkpoint location.
+  gcs:
+    # -- Enable Google Cloud storage for checkpoint data.
+    enabled: false
+    # -- The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.
+    endpoint: "gs://my-storage-location/path/to/dir"
+    # @schema
+    # items:
+    #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html
+    options: [ ]
+  #      - name: project
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-project
+  #            key: project-name
+
+  # -- Configure a shared filesystem path for checkpoint data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts.
+  sharedFilesystem:
+    # -- Enable shared filesystem for checkpoint data.
+    enabled: false
+    # -- The filesystem path where checkpoint data will be stored. Must correspond to a mounted volume on a shared network filesystem.
+    path: "/mnt/nfs/checkpoint-data"
 
 # -- Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance.
 temporaryData:
