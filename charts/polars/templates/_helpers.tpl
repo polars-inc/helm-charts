@@ -151,6 +151,17 @@ Shuffle data shared PVC name
 {{- end }}
 
 {{/*
+Checkpoint data shared PVC name
+*/}}
+{{- define "polars.checkpointDataPvcName" -}}
+  {{- if .Values.checkpointData.sharedPersistentVolumeClaim.existingClaimName }}
+{{- .Values.checkpointData.sharedPersistentVolumeClaim.existingClaimName }}
+  {{- else }}
+    {{- printf "%s-polars-checkpoint-data" (include "polars.fullname" .) }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Observatory data PVC name
 */}}
 {{- define "polars.observatoryDataPvcName" -}}
@@ -283,6 +294,13 @@ Whether any remote shuffle is enabled
 {{- end -}}
 
 {{/*
+Whether a checkpoint location is configured
+*/}}
+{{- define "polars.isCheckpointLocationEnabled" -}}
+  {{- if or .Values.checkpointData.s3.enabled .Values.checkpointData.abs.enabled .Values.checkpointData.gcs.enabled .Values.checkpointData.sharedFilesystem.enabled .Values.checkpointData.sharedPersistentVolumeClaim.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/*
 Default topology spread
 */}}
 {{- define "polars.defaultTopologySpreadConstraints" -}}
@@ -294,6 +312,39 @@ Default topology spread
       app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+
+{{/*
+Python scheduler URI expression
+*/}}
+{{- define "polars.notes.schedulerUri" -}}
+  {{- if contains "NodePort" .Values.scheduler.services.scheduler.type -}}
+"http://"+os.environ["SCHEDULER_NODE_IP"]+":"+os.environ["SCHEDULER_NODE_PORT"]
+  {{- else if contains "LoadBalancer" .Values.scheduler.services.scheduler.type -}}
+"http://"+os.environ["SCHEDULER_SERVICE_IP"]+":5051"
+  {{- else if contains "ClusterIP" .Values.scheduler.services.scheduler.type -}}
+"http://127.0.0.1:5051"
+  {{- end -}}
+{{- end }}
+
+{{/*
+Python observatory URI expression
+*/}}
+{{- define "polars.notes.observatoryUri" -}}
+  {{- if contains "NodePort" .Values.scheduler.services.observatory.type -}}
+"http://"+os.environ["OBSERVATORY_NODE_IP"]+":"+os.environ["OBSERVATORY_NODE_PORT"]
+  {{- else if contains "LoadBalancer" .Values.scheduler.services.observatory.type -}}
+"http://"+os.environ["OBSERVATORY_SERVICE_IP"]+":5051"
+  {{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type -}}
+"http://127.0.0.1:3001"
+  {{- end -}}
+{{- end }}
+
+{{/*
+Python ClusterContext line for NOTES.txt
+*/}}
+{{- define "polars.notes.clusterContext" -}}
+ctx = pc.ClusterContext(uri={{ include "polars.notes.schedulerUri" . }}, observatory=pc.ClientOptions(uri={{ include "polars.notes.observatoryUri" . }}))
+{{- end }}
 
 {{/*
 Verify that .Values.runtime.composed.polarsExtras contains cloudpickle and return the entire string

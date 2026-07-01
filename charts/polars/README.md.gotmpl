@@ -64,7 +64,7 @@ uv run --isolated --with polars,polars_cloud - << 'EOF'
 import polars as pl
 import polars_cloud as pc
 
-ctx = pc.ClusterContext(compute_address="localhost")
+ctx = pc.ClusterContext(uri="http://localhost")
 
 result = (
     pl.LazyFrame(
@@ -323,13 +323,77 @@ anonymousResults:
 
 If you wish to disable anonymous results, keep `anonymousResults.*.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
 
+#### Checkpoint data
+
+When a checkpoint location is configured, the scheduler periodically checkpoints completed query stages so that long-running queries can resume after a failure instead of restarting from scratch. Checkpointing is enabled automatically when you configure a `checkpointData` location. The location must be durable and accessible by all workers (S3-compatible, Azure Blob Storage, Google Cloud Storage, a `ReadWriteMany` persistent volume, or a shared filesystem path).
+
+You can tune how often checkpoints are taken with `checkpoint.period`. A checkpoint is created once this period has elapsed after a stage completes. It accepts a [jiff friendly duration](https://docs.rs/jiff/latest/jiff/fmt/friendly/) (e.g. `5s`) or an ISO 8601 duration (e.g. `PT5S`).
+
+```yaml
+checkpoint:
+  period: "5m"
+```
+
+The credentials are configured the same way as shuffle data — the key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+
+```yaml
+checkpointData:
+  # AWS S3 Storage
+  s3:
+    enabled: true
+    endpoint: "s3://my-storage-location/path/to/dir"
+    options:
+      - name: aws_access_key_id
+        valueFrom:
+          secretKeyRef:
+            name: my-s3-secret
+            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
+  # etc.
+```
+
+```yaml
+checkpointData:
+  # Google Cloud Storage
+  gcs:
+    enabled: true
+    endpoint: "gs://my-storage-location/path/to/dir"
+    options:
+      - name: project
+        value: "my-google-cloud-project"
+  # etc.
+```
+
+```yaml
+checkpointData:
+  # Azure Blob Storage
+  abs:
+    enabled: true
+    endpoint: "az://my-storage-location/path/to/dir"
+    options:
+      - name: account_name
+        value: "my-account-name"
+  # etc.
+```
+
+You may also back checkpoint data with a shared persistent volume. This is useful when you have a `ReadWriteMany` storage class available in your Kubernetes cluster. The chart creates and mounts the volume for you.
+
+```yaml
+checkpointData:
+  sharedPersistentVolumeClaim:
+    enabled: true
+    storageClassName: "cephfs" # As configured in your k8s cluster
+    size: 125Gi
+```
+
 #### Shared filesystem paths (e.g. NFS)
 
-For anonymous results and shuffle data, you can point Polars at a shared filesystem path instead of using S3 or ephemeral volumes. This is intended for shared network filesystems (e.g. mounted via an NFS or CSI driver volume), where all pods can access the same data through a common mount point. First, add the volume and mount it into the container via the `volumes` and `volumeMounts` values, then set the `sharedFilesystem` path to tell Polars to use that mount point.
+For anonymous results, shuffle data, and checkpoint data, you can point Polars at a shared filesystem path instead of using S3 or ephemeral volumes. This is intended for shared network filesystems (e.g. mounted via an NFS or CSI driver volume), where all pods can access the same data through a common mount point. First, add the volume and mount it into the container via the `volumes` and `volumeMounts` values, then set the `sharedFilesystem` path to tell Polars to use that mount point.
 
-Because you define the volume yourself through `volumes`/`volumeMounts`, you can use any volume type Kubernetes supports — including CSI drivers — along with any companion volumes or environment variables your storage needs. You can also back both anonymous results and shuffle data with a single mounted volume by pointing each `sharedFilesystem.path` at a different subpath under the same mount.
+Because you define the volume yourself through `volumes`/`volumeMounts`, you can use any volume type Kubernetes supports — including CSI drivers — along with any companion volumes or environment variables your storage needs. You can also back anonymous results, shuffle data, and checkpoint data with a single mounted volume by pointing each `sharedFilesystem.path` at a different subpath under the same mount.
 
-> **Note:** Shared filesystem paths are designed for shared network filesystems. For shuffle data in particular, all workers must be able to read and write to the same path — the `shared_filesystem` shuffle location is used under the hood. For anonymous results, the path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
+> **Note:** Shared filesystem paths are designed for shared network filesystems. For shuffle and checkpoint data in particular, all workers must be able to read and write to the same path — the `shared_filesystem` location is used under the hood. For anonymous results, the path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
 
 Example using NFS for shuffle data:
 
@@ -371,6 +435,27 @@ scheduler:
       volumeMounts:
         - name: nfs-results
           mountPath: /mnt/nfs/anonymous-results
+```
+
+Example using NFS for checkpoint data:
+
+```yaml
+checkpointData:
+  sharedFilesystem:
+    enabled: true
+    path: "/mnt/nfs/checkpoint-data"
+
+worker:
+  deployment:
+    volumes:
+      - name: nfs-checkpoint
+        nfs:
+          server: nfs-server.example.com
+          path: /exports/checkpoint-data
+    runtimeContainer:
+      volumeMounts:
+        - name: nfs-checkpoint
+          mountPath: /mnt/nfs/checkpoint-data
 ```
 
 #### Temporary data

@@ -22826,6 +22826,173 @@
       "required": [],
       "title": "anonymousResults"
     },
+    "checkpoint": {
+      "additionalProperties": false,
+      "description": "Checkpointing for queries. Checkpointing is enabled automatically whenever a checkpointData location is configured below; the scheduler then periodically checkpoints completed stages so queries can resume after failures.",
+      "properties": {
+        "period": {
+          "default": "20m",
+          "description": "Period at which checkpoints will be created. If the period has passed after a stage has completed, a checkpoint will be created. Accepts either a jiff friendly duration (e.g. `5s`, see https://docs.rs/jiff/latest/jiff/fmt/friendly/) or an ISO 8601 duration (e.g. `PT5S`).",
+          "required": [],
+          "title": "period"
+        }
+      },
+      "required": [],
+      "title": "checkpoint"
+    },
+    "checkpointData": {
+      "additionalProperties": false,
+      "properties": {
+        "abs": {
+          "additionalProperties": false,
+          "description": "Configure Azure Blob Storage as checkpoint location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable Azure Blob Storage for checkpoint data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "az://my-storage-location/path/to/dir",
+              "description": "The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            }
+          },
+          "required": [],
+          "title": "abs"
+        },
+        "gcs": {
+          "additionalProperties": false,
+          "description": "Configure Google Cloud Storage as checkpoint location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable Google Cloud storage for checkpoint data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "gs://my-storage-location/path/to/dir",
+              "description": "The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            }
+          },
+          "required": [],
+          "title": "gcs"
+        },
+        "s3": {
+          "additionalProperties": false,
+          "description": "Configure AWS S3 storage as checkpoint location.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable AWS S3 storage for checkpoint data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "endpoint": {
+              "default": "s3://my-storage-location/path/to/dir",
+              "description": "The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
+              "required": [],
+              "title": "endpoint"
+            },
+            "options": {
+              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
+              "items": {
+                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "options"
+            }
+          },
+          "required": [],
+          "title": "s3"
+        },
+        "sharedFilesystem": {
+          "additionalProperties": false,
+          "description": "Configure a shared filesystem path for checkpoint data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts.",
+          "properties": {
+            "enabled": {
+              "default": "false",
+              "description": "Enable shared filesystem for checkpoint data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "path": {
+              "default": "/mnt/nfs/checkpoint-data",
+              "description": "The filesystem path where checkpoint data will be stored. Must correspond to a mounted volume on a shared network filesystem.",
+              "required": [],
+              "title": "path"
+            }
+          },
+          "required": [],
+          "title": "sharedFilesystem"
+        },
+        "sharedPersistentVolumeClaim": {
+          "additionalProperties": false,
+          "description": "Shared persistent storage for checkpoint data.",
+          "properties": {
+            "create": {
+              "default": "true",
+              "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
+              "required": [],
+              "title": "create"
+            },
+            "enabled": {
+              "default": "false",
+              "description": "Enable shared persistent volume claim for checkpoint data.",
+              "required": [],
+              "title": "enabled"
+            },
+            "existingClaimName": {
+              "default": "",
+              "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-checkpoint-data\".",
+              "required": [],
+              "title": "existingClaimName"
+            },
+            "size": {
+              "default": "125Gi",
+              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
+              "required": [],
+              "title": "size"
+            },
+            "storageClassName": {
+              "default": "",
+              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
+              "required": [],
+              "title": "storageClassName"
+            }
+          },
+          "required": [],
+          "title": "sharedPersistentVolumeClaim"
+        }
+      },
+      "required": [],
+      "title": "checkpointData",
+      "type": "object"
+    },
     "clusterDomain": {
       "default": "cluster.local",
       "description": "Kubernetes cluster DNS domain (the suffix used in `<svc>.<ns>.svc.<domain>`). Override this if your cluster uses a non-default domain.",
@@ -24099,7 +24266,7 @@
                     "type": "string"
                   },
                   "tag": {
-                    "default": "0.8.0",
+                    "default": "0.9.0",
                     "title": "tag",
                     "type": "string"
                   }

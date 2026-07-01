@@ -8,7 +8,9 @@
 
 ![Release Charts](https://github.com/polars-inc/helm-charts/actions/workflows/release.yaml/badge.svg?branch=main) [![Releases downloads](https://img.shields.io/github/downloads/polars-inc/helm-charts/total.svg)](https://github.com/polars-inc/helm-charts/releases) ![Docker Pulls](https://img.shields.io/docker/pulls/polarscloud/polars-on-premises)
 
-Interested in running Polars on-premises? [Sign up here to apply](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo).
+Interested in running Polars on-premises? [Sign up here](https://cloud.pola.rs/api/redirects/register) and get started for free. Select Kubernetes as your deployment target during onboarding.
+
+Looking for an air-gapped deployment? [Contact the team here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) to discuss your setup.
 
 ## Usage
 

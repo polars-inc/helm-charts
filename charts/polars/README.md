@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 2.1.3](https://img.shields.io/badge/Version-2.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.5.2](https://img.shields.io/badge/AppVersion-0.5.2-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.6.3](https://img.shields.io/badge/AppVersion-0.6.3-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -62,7 +62,7 @@ uv run --isolated --with polars,polars_cloud - << 'EOF'
 import polars as pl
 import polars_cloud as pc
 
-ctx = pc.ClusterContext(compute_address="localhost")
+ctx = pc.ClusterContext(uri="http://localhost")
 
 result = (
     pl.LazyFrame(
@@ -319,13 +319,77 @@ anonymousResults:
 
 If you wish to disable anonymous results, keep `anonymousResults.*.enabled: false`. This will ensure that all query result output locations need to be explicitly set by users.
 
+#### Checkpoint data
+
+When a checkpoint location is configured, the scheduler periodically checkpoints completed query stages so that long-running queries can resume after a failure instead of restarting from scratch. Checkpointing is enabled automatically when you configure a `checkpointData` location. The location must be durable and accessible by all workers (S3-compatible, Azure Blob Storage, Google Cloud Storage, a `ReadWriteMany` persistent volume, or a shared filesystem path).
+
+You can tune how often checkpoints are taken with `checkpoint.period`. A checkpoint is created once this period has elapsed after a stage completes. It accepts a [jiff friendly duration](https://docs.rs/jiff/latest/jiff/fmt/friendly/) (e.g. `5s`) or an ISO 8601 duration (e.g. `PT5S`).
+
+```yaml
+checkpoint:
+  period: "5m"
+```
+
+The credentials are configured the same way as shuffle data — the key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+
+```yaml
+checkpointData:
+  # AWS S3 Storage
+  s3:
+    enabled: true
+    endpoint: "s3://my-storage-location/path/to/dir"
+    options:
+      - name: aws_access_key_id
+        valueFrom:
+          secretKeyRef:
+            name: my-s3-secret
+            key: accessKeyId
+      - name: aws_endpoint_url
+        value: "http://localhost:9000"
+  # etc.
+```
+
+```yaml
+checkpointData:
+  # Google Cloud Storage
+  gcs:
+    enabled: true
+    endpoint: "gs://my-storage-location/path/to/dir"
+    options:
+      - name: project
+        value: "my-google-cloud-project"
+  # etc.
+```
+
+```yaml
+checkpointData:
+  # Azure Blob Storage
+  abs:
+    enabled: true
+    endpoint: "az://my-storage-location/path/to/dir"
+    options:
+      - name: account_name
+        value: "my-account-name"
+  # etc.
+```
+
+You may also back checkpoint data with a shared persistent volume. This is useful when you have a `ReadWriteMany` storage class available in your Kubernetes cluster. The chart creates and mounts the volume for you.
+
+```yaml
+checkpointData:
+  sharedPersistentVolumeClaim:
+    enabled: true
+    storageClassName: "cephfs" # As configured in your k8s cluster
+    size: 125Gi
+```
+
 #### Shared filesystem paths (e.g. NFS)
 
-For anonymous results and shuffle data, you can point Polars at a shared filesystem path instead of using S3 or ephemeral volumes. This is intended for shared network filesystems (e.g. mounted via an NFS or CSI driver volume), where all pods can access the same data through a common mount point. First, add the volume and mount it into the container via the `volumes` and `volumeMounts` values, then set the `sharedFilesystem` path to tell Polars to use that mount point.
+For anonymous results, shuffle data, and checkpoint data, you can point Polars at a shared filesystem path instead of using S3 or ephemeral volumes. This is intended for shared network filesystems (e.g. mounted via an NFS or CSI driver volume), where all pods can access the same data through a common mount point. First, add the volume and mount it into the container via the `volumes` and `volumeMounts` values, then set the `sharedFilesystem` path to tell Polars to use that mount point.
 
-Because you define the volume yourself through `volumes`/`volumeMounts`, you can use any volume type Kubernetes supports — including CSI drivers — along with any companion volumes or environment variables your storage needs. You can also back both anonymous results and shuffle data with a single mounted volume by pointing each `sharedFilesystem.path` at a different subpath under the same mount.
+Because you define the volume yourself through `volumes`/`volumeMounts`, you can use any volume type Kubernetes supports — including CSI drivers — along with any companion volumes or environment variables your storage needs. You can also back anonymous results, shuffle data, and checkpoint data with a single mounted volume by pointing each `sharedFilesystem.path` at a different subpath under the same mount.
 
-> **Note:** Shared filesystem paths are designed for shared network filesystems. For shuffle data in particular, all workers must be able to read and write to the same path — the `shared_filesystem` shuffle location is used under the hood. For anonymous results, the path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
+> **Note:** Shared filesystem paths are designed for shared network filesystems. For shuffle and checkpoint data in particular, all workers must be able to read and write to the same path — the `shared_filesystem` location is used under the hood. For anonymous results, the path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
 
 Example using NFS for shuffle data:
 
@@ -367,6 +431,27 @@ scheduler:
       volumeMounts:
         - name: nfs-results
           mountPath: /mnt/nfs/anonymous-results
+```
+
+Example using NFS for checkpoint data:
+
+```yaml
+checkpointData:
+  sharedFilesystem:
+    enabled: true
+    path: "/mnt/nfs/checkpoint-data"
+
+worker:
+  deployment:
+    volumes:
+      - name: nfs-checkpoint
+        nfs:
+          server: nfs-server.example.com
+          path: /exports/checkpoint-data
+    runtimeContainer:
+      volumeMounts:
+        - name: nfs-checkpoint
+          mountPath: /mnt/nfs/checkpoint-data
 ```
 
 #### Temporary data
@@ -607,6 +692,29 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | shuffleData.sharedFilesystem | object | `{"enabled":false,"path":"/mnt/nfs/shuffle-data"}` | Configure a shared filesystem path for shuffle data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts. |
 | shuffleData.sharedFilesystem.enabled | bool | `false` | Enable shared filesystem for shuffle data. |
 | shuffleData.sharedFilesystem.path | string | `"/mnt/nfs/shuffle-data"` | The filesystem path where shuffle data will be stored. Must correspond to a mounted volume on a shared network filesystem. |
+| checkpoint | object | `{"period":"20m"}` | Checkpointing for queries. Checkpointing is enabled automatically whenever a checkpointData location is configured below; the scheduler then periodically checkpoints completed stages so queries can resume after failures. |
+| checkpoint.period | string | `"20m"` | Period at which checkpoints will be created. If the period has passed after a stage has completed, a checkpoint will be created. Accepts either a jiff friendly duration (e.g. `5s`, see https://docs.rs/jiff/latest/jiff/fmt/friendly/) or an ISO 8601 duration (e.g. `PT5S`). |
+| checkpointData.sharedPersistentVolumeClaim | object | `{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}` | Shared persistent storage for checkpoint data. |
+| checkpointData.sharedPersistentVolumeClaim.enabled | bool | `false` | Enable shared persistent volume claim for checkpoint data. |
+| checkpointData.sharedPersistentVolumeClaim.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |
+| checkpointData.sharedPersistentVolumeClaim.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-checkpoint-data". |
+| checkpointData.sharedPersistentVolumeClaim.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
+| checkpointData.sharedPersistentVolumeClaim.size | string | `"125Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| checkpointData.s3 | object | `{"enabled":false,"endpoint":"s3://my-storage-location/path/to/dir","options":[]}` | Configure AWS S3 storage as checkpoint location. |
+| checkpointData.s3.enabled | bool | `false` | Enable AWS S3 storage for checkpoint data. |
+| checkpointData.s3.endpoint | string | `"s3://my-storage-location/path/to/dir"` | The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field. |
+| checkpointData.s3.options | list | `[]` | Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html |
+| checkpointData.abs | object | `{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[]}` | Configure Azure Blob Storage as checkpoint location. |
+| checkpointData.abs.enabled | bool | `false` | Enable Azure Blob Storage for checkpoint data. |
+| checkpointData.abs.endpoint | string | `"az://my-storage-location/path/to/dir"` | The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field. |
+| checkpointData.abs.options | list | `[]` | Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html |
+| checkpointData.gcs | object | `{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[]}` | Configure Google Cloud Storage as checkpoint location. |
+| checkpointData.gcs.enabled | bool | `false` | Enable Google Cloud storage for checkpoint data. |
+| checkpointData.gcs.endpoint | string | `"gs://my-storage-location/path/to/dir"` | The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field. |
+| checkpointData.gcs.options | list | `[]` | Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html |
+| checkpointData.sharedFilesystem | object | `{"enabled":false,"path":"/mnt/nfs/checkpoint-data"}` | Configure a shared filesystem path for checkpoint data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts. |
+| checkpointData.sharedFilesystem.enabled | bool | `false` | Enable shared filesystem for checkpoint data. |
+| checkpointData.sharedFilesystem.path | string | `"/mnt/nfs/checkpoint-data"` | The filesystem path where checkpoint data will be stored. Must correspond to a mounted volume on a shared network filesystem. |
 | temporaryData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}}` | Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance. |
 | temporaryData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for temporary data. |
 | temporaryData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for temporary data. |
