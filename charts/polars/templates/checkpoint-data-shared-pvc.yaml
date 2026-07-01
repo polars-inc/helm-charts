@@ -1,0 +1,18 @@
+{{- if .Values.checkpointData.sharedPersistentVolumeClaim.enabled }}
+  {{- if .Values.checkpointData.sharedPersistentVolumeClaim.create }}
+    {{- if .Values.checkpointData.sharedPersistentVolumeClaim.existingClaimName }}
+      {{ fail ".Values.checkpointData.sharedPersistentVolumeClaim.create checkpointData.sharedPersistentVolumeClaim.existingClaimName are mutually exclusive"}}
+    {{- end }}
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "polars.checkpointDataPvcName" . }}
+spec:
+  accessModes: [ "ReadWriteMany" ]
+  storageClassName: {{ .Values.checkpointData.sharedPersistentVolumeClaim.storageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.checkpointData.sharedPersistentVolumeClaim.size }}
+  {{- end }}
+{{- end }}
