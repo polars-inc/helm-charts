@@ -299,6 +299,8 @@ spec:
             - name: PC_CUBLET__cpu_reserved
               value: {{ . | quote }}
 {{- end }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ include "polars.worker.fullname" . }}
 {{- with .Values.worker.deployment.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
 {{- end }}

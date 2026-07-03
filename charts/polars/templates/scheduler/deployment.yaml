@@ -314,6 +314,8 @@ spec:
             - name: POLARS_EULA_ACCEPTED
               value: "yes"
 {{- end }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ include "polars.scheduler.fullname" . }}
 {{- with .Values.scheduler.deployment.runtimeContainer.env }}
             {{ toYaml . | nindent 12 }}
 {{- end }}
