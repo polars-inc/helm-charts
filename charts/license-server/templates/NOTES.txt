@@ -2,14 +2,14 @@
 
 The offline license server is reachable in-cluster over HTTPS at:
 
-  https://{{ .Values.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+  https://{{ .Values.name }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
 
 Point the Polars scheduler at it by setting, in the polars chart values:
 
   license:
     licenseServer:
       enabled: true
-      address: "https://{{ .Values.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+      uri: "https://{{ .Values.name }}.{{ .Release.Namespace }}:{{ .Values.service.port }}"
 
 Check status:
 
