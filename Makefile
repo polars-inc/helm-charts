@@ -37,7 +37,10 @@ docs:
 	helm-docs --chart-search-root="$(CHARTS_DIR)" --sort-values-order=file --ignore-non-descriptions
 
 fmt:
-	helmfmt charts/polars --disable-indent=tpl
+	for chart in "$(CHARTS_DIR)"/*; do \
+		echo "Formatting $$chart"; \
+		helmfmt "$$chart" --disable-indent=tpl; \
+	done
 
 clean:
 	rm -f "$(DEFINITIONS_LINK)" _definitions-v*.json

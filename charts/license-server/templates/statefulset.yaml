@@ -1,0 +1,137 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    {{- include "license-server.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ .Values.name }}
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "license-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "license-server.selectorLabels" . | nindent 8 }}
+{{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+{{- end }}
+      annotations:
+{{- if or .Values.licenseContent .Values.bundleContent }}
+        # To restart this deployment on secret updates caused by Helm
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+{{- end }}
+{{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ include "license-server.serviceAccountName" . }}
+{{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+{{- end }}
+{{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+{{- end }}
+      containers:
+      - name: {{ .Values.name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- with .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+{{- end }}
+        env:
+        - name: PC_LICENSE_SERVER_BIND
+          value: "0.0.0.0:{{ .Values.service.port }}"
+        - name: PC_LICENSE_SERVER_HEALTH_BIND
+          value: "0.0.0.0:{{ .Values.service.httpPort }}"
+        - name: PC_LICENSE_SERVER_REPORT_DIR
+          value: {{ .Values.report.mountPath | quote }}
+        - name: PC_LICENSE_SERVER_LICENSE
+          value: {{ .Values.license.mountPath | quote }}
+        - name: PC_LICENSE_SERVER_TLS_BUNDLE_PATH
+          value: {{ .Values.tlsBundle.mountPath | quote }}
+        ports:
+        - name: grpc
+          containerPort: {{ .Values.service.port }}
+        - name: http
+          containerPort: {{ .Values.service.httpPort }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+        volumeMounts:
+        - name: report
+          mountPath: {{ .Values.report.mountPath }}
+        - name: license
+          mountPath: {{ .Values.license.mountPath }}
+          subPath: {{ .Values.license.key }}
+          readOnly: true
+        - name: tls-bundle
+          mountPath: {{ .Values.tlsBundle.mountPath }}
+          subPath: {{ .Values.tlsBundle.key }}
+          readOnly: true
+{{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+{{- end }}
+{{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+{{- end }}
+{{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+{{- end }}
+      volumes:
+      - name: report
+        persistentVolumeClaim:
+          claimName: {{ .Values.name }}-report
+      - name: license
+        secret:
+          secretName: {{ .Values.license.secretName }}
+          items:
+          - key: {{ .Values.license.key }}
+            path: {{ .Values.license.key }}
+      - name: tls-bundle
+        secret:
+          secretName: {{ .Values.tlsBundle.secretName }}
+          items:
+          - key: {{ .Values.tlsBundle.key }}
+            path: {{ .Values.tlsBundle.key }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    {{- include "license-server.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    {{- include "license-server.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: grpc
+      port: {{ .Values.service.port }}
+      protocol: TCP
+      targetPort: grpc
+    - name: http
+      port: {{ .Values.service.httpPort }}
+      protocol: TCP
+      targetPort: http

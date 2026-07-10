@@ -1,0 +1,28 @@
+{{ .Values.name }} deployed.
+
+The offline license server is reachable in-cluster over HTTPS at:
+
+  https://{{ .Values.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+Point the Polars scheduler at it by setting, in the polars chart values:
+
+  license:
+    licenseServer:
+      enabled: true
+      address: "https://{{ .Values.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+
+Check status:
+
+  kubectl -n {{ .Release.Namespace }} rollout status statefulset/{{ .Values.name }}
+  kubectl -n {{ .Release.Namespace }} logs statefulset/{{ .Values.name }}
+
+{{- if not .Values.licenseContent }}
+
+WARNING: licenseContent was not set. The server expects Secret
+"{{ .Values.license.secretName }}" (key {{ .Values.license.key }}) to already exist.
+{{- end }}
+{{- if not .Values.bundleContent }}
+
+WARNING: bundleContent was not set. The server expects Secret
+"{{ .Values.tlsBundle.secretName }}" (key {{ .Values.tlsBundle.key }}) to already exist.
+{{- end }}

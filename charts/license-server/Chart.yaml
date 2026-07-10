@@ -1,0 +1,25 @@
+apiVersion: v2
+name: license-server
+description: Polars License Server
+
+type: application
+
+version: 0.1.0
+appVersion: "0.1.0"
+deprecated: false
+
+dependencies: []
+
+home: https://cloud.pola.rs
+sources:
+  - https://github.com/polars-inc/helm-charts
+keywords:
+  - polars
+  - distributed-computing
+annotations:
+  category: Analytics
+
+maintainers:
+  - name: Polars
+    email: developers@polars.tech
+    url: https://github.com/polars-inc

@@ -1,0 +1,84 @@
+# Polars License Server
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+Validates Polars licenses inside your own network, for clusters that don't have
+access to the Polars cloud. Run one instance and point your Polars deployments at
+it.
+
+## Prerequisites
+
+- Kubernetes 1.22+ (uses the `ReadWriteOncePod` PVC access mode)
+- Helm 3.x
+- A default StorageClass, or set `report.storageClass`
+- Two credentials from Polars:
+  - a **license file** (JSON)
+  - a **TLS bundle** (PEM: server cert + key + CA) used to serve HTTPS
+
+## Install
+
+Provide the license and TLS bundle inline with `--set-file`. The chart creates
+the backing Secrets from these values:
+
+```console
+$ helm upgrade --install license-server . \
+    --namespace polars --create-namespace \
+    --set-file licenseContent=license.json \
+    --set-file bundleContent=bundle.pem
+```
+
+### Using pre-existing Secrets
+
+Leave `licenseContent` / `bundleContent` empty and reference Secrets you manage
+out of band (recommended for GitOps — keeps secrets out of Helm values):
+
+```console
+$ kubectl -n polars create secret generic license-server-license \
+    --from-file=license.json=license.json
+$ kubectl -n polars create secret generic license-server-tls-bundle \
+    --from-file=bundle.pem=bundle.pem
+$ helm upgrade --install license-server . --namespace polars
+```
+
+## Connecting a Polars cluster
+
+Point the [`polars`](../polars) chart's scheduler at the server:
+
+```yaml
+license:
+  licenseServer:
+    enabled: true
+    address: "https://license-server.polars.svc.cluster.local:50051"
+```
+
+## Metrics
+
+The server exposes Prometheus metrics at `/metrics` on the HTTP port
+(`service.httpPort`, default `8081`). Point your scraper at:
+
+```
+http://license-server.polars.svc.cluster.local:8081/metrics
+```
+
+The same port also serves health checks at `/healthz` and `/readyz`.
+
+## Notes
+
+- Run a single instance — don't scale it up.
+- Its data is kept even if you uninstall the chart, so licenses stay valid across
+  upgrades. To reclaim space, delete only already-submitted usage reports from the
+  volume — never the volume or its state, which would reset the server.
+- Updating the license or TLS bundle restarts the server automatically.
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}

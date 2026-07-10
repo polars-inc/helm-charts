@@ -1,0 +1,95 @@
+# -- Base name for all resources. Also the Service DNS name clients dial, so keep
+# it stable (referenced by the polars chart `license.licenseServer.address`).
+name: license-server
+
+image:
+  # -- Image repository
+  repository: "polarscloud/license-server"
+  # -- Image tag. Defaults to `latest` when left empty.
+  tag: ""
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+
+# -- Secrets for pulling the image from a private registry
+imagePullSecrets: []
+
+resources:
+  requests:
+    # -- CPU request
+    cpu: 100m
+    # -- Memory request
+    memory: 128Mi
+  limits:
+    # -- Memory limit (no CPU limit, to avoid throttling)
+    memory: 128Mi
+
+service:
+  # -- gRPC/HTTPS port the server listens on
+  port: 50051
+  # -- HTTP port serving health probes (`/healthz`, `/readyz`) and Prometheus metrics (`/metrics`)
+  httpPort: 8081
+
+serviceAccount:
+  # -- Create a dedicated ServiceAccount
+  create: true
+  # -- ServiceAccount name. Defaults to `name` when empty.
+  name: ""
+  # -- Annotations to add to the ServiceAccount
+  annotations: {}
+
+# -- Pod-level security context. Hardened defaults; the server needs no elevated privileges.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container-level security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# -- Extra annotations for the pod
+podAnnotations: {}
+# -- Extra labels for the pod
+podLabels: {}
+# -- Node selector for pod scheduling
+nodeSelector: {}
+# -- Tolerations for pod scheduling
+tolerations: []
+# -- Affinity rules for pod scheduling
+affinity: {}
+
+# Persistent volume holding the SQLite state DB + signed report ledger
+report:
+  # -- Mount path for the state DB + report ledger
+  mountPath: /data
+  # -- StorageClass for the report PVC. Uses the cluster default when empty.
+  storageClass:
+  # -- Size of the report PVC
+  size: 1Gi
+
+license:
+  # -- Name of the Secret holding the license JSON
+  secretName: license-server-license
+  # -- Key within the license Secret
+  key: license.json
+  # -- Path the license file is mounted at inside the container
+  mountPath: /config/license-server-license.json
+
+tlsBundle:
+  # -- Name of the Secret holding the TLS bundle (PEM: cert + key + CA)
+  secretName: license-server-tls-bundle
+  # -- Key within the TLS bundle Secret
+  key: bundle.pem
+  # -- Path the TLS bundle is mounted at inside the container
+  mountPath: /config/license-server-bundle.pem
+
+# -- Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this.
+licenseContent: ""
+# -- Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this.
+bundleContent: ""
