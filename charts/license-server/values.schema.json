@@ -22679,7 +22679,7 @@
         },
         "tag": {
           "default": "",
-          "description": "Image tag. Defaults to `latest` when left empty.",
+          "description": "Image tag. Defaults to the chart appVersion when left empty.",
           "required": [],
           "title": "tag"
         }

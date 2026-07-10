@@ -34,7 +34,7 @@ tlsBundle:
 image:
   # -- Image repository
   repository: "polarscloud/license-server"
-  # -- Image tag. Defaults to `latest` when left empty.
+  # -- Image tag. Defaults to the chart appVersion when left empty.
   tag: ""
   # -- Image pull policy
   pullPolicy: IfNotPresent

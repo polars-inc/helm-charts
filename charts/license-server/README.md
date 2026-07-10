@@ -104,7 +104,7 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 | tlsBundle.mountPath | string | `"/config/license-server-bundle.pem"` | Path the TLS bundle is mounted at inside the container |
 | tlsBundle.content | string | `""` | Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this. |
 | image.repository | string | `"polarscloud/license-server"` | Image repository |
-| image.tag | string | `""` | Image tag. Defaults to `latest` when left empty. |
+| image.tag | string | `""` | Image tag. Defaults to the chart appVersion when left empty. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | imagePullSecrets | list | `[]` | Secrets for pulling the image from a private registry |
 | resources.requests.cpu | string | `"100m"` | CPU request |
