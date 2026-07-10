@@ -22656,12 +22656,6 @@
       "required": [],
       "title": "affinity"
     },
-    "bundleContent": {
-      "default": "",
-      "description": "Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this.",
-      "required": [],
-      "title": "bundleContent"
-    },
     "global": {
       "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
       "required": [],
@@ -22705,6 +22699,12 @@
     "license": {
       "additionalProperties": false,
       "properties": {
+        "content": {
+          "default": "",
+          "description": "Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this.",
+          "required": [],
+          "title": "content"
+        },
         "key": {
           "default": "license.json",
           "description": "Key within the license Secret",
@@ -22727,12 +22727,6 @@
       "required": [],
       "title": "license",
       "type": "object"
-    },
-    "licenseContent": {
-      "default": "",
-      "description": "Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this.",
-      "required": [],
-      "title": "licenseContent"
     },
     "name": {
       "default": "license-server",
@@ -22947,9 +22941,35 @@
       "title": "serviceAccount",
       "type": "object"
     },
+    "serviceMonitor": {
+      "additionalProperties": false,
+      "description": "ServiceMonitor for scraping /metrics. Requires the Prometheus Operator CRDs.",
+      "properties": {
+        "enabled": {
+          "default": "false",
+          "description": "Create a ServiceMonitor for the Prometheus Operator",
+          "required": [],
+          "title": "enabled"
+        },
+        "interval": {
+          "default": "30s",
+          "description": "Scrape interval",
+          "required": [],
+          "title": "interval"
+        }
+      },
+      "required": [],
+      "title": "serviceMonitor"
+    },
     "tlsBundle": {
       "additionalProperties": false,
       "properties": {
+        "content": {
+          "default": "",
+          "description": "Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this.",
+          "required": [],
+          "title": "content"
+        },
         "key": {
           "default": "bundle.pem",
           "description": "Key within the TLS bundle Secret",

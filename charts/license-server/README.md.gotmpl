@@ -28,13 +28,13 @@ the backing Secrets from these values:
 ```console
 $ helm upgrade --install license-server . \
     --namespace polars --create-namespace \
-    --set-file licenseContent=license.json \
-    --set-file bundleContent=bundle.pem
+    --set-file license.content=license.json \
+    --set-file tlsBundle.content=bundle.pem
 ```
 
 ### Using pre-existing Secrets
 
-Leave `licenseContent` / `bundleContent` empty and reference Secrets you manage
+Leave `license.content` / `tlsBundle.content` empty and reference Secrets you manage
 out of band (recommended for GitOps — keeps secrets out of Helm values):
 
 ```console
@@ -66,6 +66,9 @@ http://license-server.polars.svc.cluster.local:8081/metrics
 ```
 
 The same port also serves health checks at `/healthz` and `/readyz`.
+
+If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
+`/metrics` automatically.
 
 ## Notes
 

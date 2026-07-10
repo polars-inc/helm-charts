@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
 {{- end }}
       annotations:
-{{- if or .Values.licenseContent .Values.bundleContent }}
+{{- if or .Values.license.content .Values.tlsBundle.content }}
         # To restart this deployment on secret updates caused by Helm
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
 {{- end }}

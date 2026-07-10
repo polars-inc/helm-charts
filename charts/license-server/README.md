@@ -27,13 +27,13 @@ the backing Secrets from these values:
 ```console
 $ helm upgrade --install license-server . \
     --namespace polars --create-namespace \
-    --set-file licenseContent=license.json \
-    --set-file bundleContent=bundle.pem
+    --set-file license.content=license.json \
+    --set-file tlsBundle.content=bundle.pem
 ```
 
 ### Using pre-existing Secrets
 
-Leave `licenseContent` / `bundleContent` empty and reference Secrets you manage
+Leave `license.content` / `tlsBundle.content` empty and reference Secrets you manage
 out of band (recommended for GitOps — keeps secrets out of Helm values):
 
 ```console
@@ -66,6 +66,9 @@ http://license-server.polars.svc.cluster.local:8081/metrics
 
 The same port also serves health checks at `/healthz` and `/readyz`.
 
+If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
+`/metrics` automatically.
+
 ## Notes
 
 - Run a single instance — don't scale it up.
@@ -89,6 +92,17 @@ The same port also serves health checks at `/healthz` and `/readyz`.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | name | string | `"license-server"` | Base name for all resources. Also the Service DNS name clients dial, so keep it stable (referenced by the polars chart `license.licenseServer.address`). |
+| report.mountPath | string | `"/data"` | Mount path for the state DB + report ledger |
+| report.storageClass | string | `nil` | StorageClass for the report PVC. Uses the cluster default when empty. |
+| report.size | string | `"1Gi"` | Size of the report PVC |
+| license.secretName | string | `"license-server-license"` | Name of the Secret holding the license JSON |
+| license.key | string | `"license.json"` | Key within the license Secret |
+| license.mountPath | string | `"/config/license-server-license.json"` | Path the license file is mounted at inside the container |
+| license.content | string | `""` | Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this. |
+| tlsBundle.secretName | string | `"license-server-tls-bundle"` | Name of the Secret holding the TLS bundle (PEM: cert + key + CA) |
+| tlsBundle.key | string | `"bundle.pem"` | Key within the TLS bundle Secret |
+| tlsBundle.mountPath | string | `"/config/license-server-bundle.pem"` | Path the TLS bundle is mounted at inside the container |
+| tlsBundle.content | string | `""` | Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this. |
 | image.repository | string | `"polarscloud/license-server"` | Image repository |
 | image.tag | string | `""` | Image tag. Defaults to `latest` when left empty. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
@@ -98,6 +112,9 @@ The same port also serves health checks at `/healthz` and `/readyz`.
 | resources.limits.memory | string | `"128Mi"` | Memory limit (no CPU limit, to avoid throttling) |
 | service.port | int | `50051` | gRPC/HTTPS port the server listens on |
 | service.httpPort | int | `8081` | HTTP port serving health probes (`/healthz`, `/readyz`) and Prometheus metrics (`/metrics`) |
+| serviceMonitor | object | `{"enabled":false,"interval":"30s"}` | ServiceMonitor for scraping /metrics. Requires the Prometheus Operator CRDs. |
+| serviceMonitor.enabled | bool | `false` | Create a ServiceMonitor for the Prometheus Operator |
+| serviceMonitor.interval | string | `"30s"` | Scrape interval |
 | serviceAccount.create | bool | `true` | Create a dedicated ServiceAccount |
 | serviceAccount.name | string | `""` | ServiceAccount name. Defaults to `name` when empty. |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
@@ -108,14 +125,3 @@ The same port also serves health checks at `/healthz` and `/readyz`.
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
 | tolerations | list | `[]` | Tolerations for pod scheduling |
 | affinity | object | `{}` | Affinity rules for pod scheduling |
-| report.mountPath | string | `"/data"` | Mount path for the state DB + report ledger |
-| report.storageClass | string | `nil` | StorageClass for the report PVC. Uses the cluster default when empty. |
-| report.size | string | `"1Gi"` | Size of the report PVC |
-| license.secretName | string | `"license-server-license"` | Name of the Secret holding the license JSON |
-| license.key | string | `"license.json"` | Key within the license Secret |
-| license.mountPath | string | `"/config/license-server-license.json"` | Path the license file is mounted at inside the container |
-| tlsBundle.secretName | string | `"license-server-tls-bundle"` | Name of the Secret holding the TLS bundle (PEM: cert + key + CA) |
-| tlsBundle.key | string | `"bundle.pem"` | Key within the TLS bundle Secret |
-| tlsBundle.mountPath | string | `"/config/license-server-bundle.pem"` | Path the TLS bundle is mounted at inside the container |
-| licenseContent | string | `""` | Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this. |
-| bundleContent | string | `""` | Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this. |

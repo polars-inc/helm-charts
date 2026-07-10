@@ -16,13 +16,13 @@ Check status:
   kubectl -n {{ .Release.Namespace }} rollout status statefulset/{{ .Values.name }}
   kubectl -n {{ .Release.Namespace }} logs statefulset/{{ .Values.name }}
 
-{{- if not .Values.licenseContent }}
+{{- if not .Values.license.content }}
 
-WARNING: licenseContent was not set. The server expects Secret
+WARNING: license.content was not set. The server expects Secret
 "{{ .Values.license.secretName }}" (key {{ .Values.license.key }}) to already exist.
 {{- end }}
-{{- if not .Values.bundleContent }}
+{{- if not .Values.tlsBundle.content }}
 
-WARNING: bundleContent was not set. The server expects Secret
+WARNING: tlsBundle.content was not set. The server expects Secret
 "{{ .Values.tlsBundle.secretName }}" (key {{ .Values.tlsBundle.key }}) to already exist.
 {{- end }}
