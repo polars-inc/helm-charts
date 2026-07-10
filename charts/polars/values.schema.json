@@ -23050,17 +23050,17 @@
         "licenseServer": {
           "additionalProperties": false,
           "properties": {
-            "address": {
-              "default": "https://pc-license-server:50051",
-              "description": "Address of the license server.",
-              "required": [],
-              "title": "address"
-            },
             "enabled": {
               "default": "false",
               "description": "Enable connecting to offline Polars license server.",
               "required": [],
               "title": "enabled"
+            },
+            "uri": {
+              "default": "https://license-server.polars.svc.cluster.local:50051",
+              "description": "URI of the license server.",
+              "required": [],
+              "title": "uri"
             }
           },
           "required": [],

@@ -86,8 +86,8 @@ license:
   licenseServer:
     # -- Enable connecting to offline Polars license server.
     enabled: false
-    # -- Address of the license server.
-    address: "https://pc-license-server:50051"
+    # -- URI of the license server.
+    uri: "https://license-server.polars.svc.cluster.local:50051"
 
 # @schema
 # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/imagePullSecrets

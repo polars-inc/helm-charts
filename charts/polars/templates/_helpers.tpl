@@ -194,7 +194,7 @@ Setting `license=null` removes the license check from the helm chart (still enfo
   {{- if not (kindIs "invalid" .Values.license) -}}
     {{- $hasOnPrem := .Values.license.onPrem.enabled -}}
     {{- $hasOnPremEnterprise := .Values.license.onPremEnterprise.enabled -}}
-    {{- $hasLicenseServer := ((.Values.license).licenseServer).enabled -}}
+    {{- $hasLicenseServer := .Values.license.licenseServer.enabled -}}
 
     {{- $enabledCount := 0 -}}
     {{- if $hasOnPrem }}{{- $enabledCount = add1 $enabledCount }}{{- end -}}
@@ -230,8 +230,8 @@ Setting `license=null` removes the license check from the helm chart (still enfo
     {{- end -}}
 
     {{- if $hasLicenseServer -}}
-      {{- if not .Values.license.licenseServer.address -}}
-        {{- fail "License error: .Values.license.licenseServer.address is required when using the Polars license server" -}}
+      {{- if not .Values.license.licenseServer.uri -}}
+        {{- fail "License error: .Values.license.licenseServer.uri is required when using the Polars license server" -}}
       {{- end -}}
     {{- end -}}
   {{- end }}

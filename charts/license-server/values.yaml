@@ -1,5 +1,5 @@
 # -- Base name for all resources. Also the Service DNS name clients dial, so keep
-# it stable (referenced by the polars chart `license.licenseServer.address`).
+# it stable (referenced by the polars chart `license.licenseServer.uri`).
 name: license-server
 
 # Persistent volume holding the SQLite state DB + signed report ledger

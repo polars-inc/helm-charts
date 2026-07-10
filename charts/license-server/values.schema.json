@@ -22730,7 +22730,7 @@
     },
     "name": {
       "default": "license-server",
-      "description": "Base name for all resources. Also the Service DNS name clients dial, so keep it stable (referenced by the polars chart `license.licenseServer.address`).",
+      "description": "Base name for all resources. Also the Service DNS name clients dial, so keep it stable (referenced by the polars chart `license.licenseServer.uri`).",
       "required": [],
       "title": "name"
     },

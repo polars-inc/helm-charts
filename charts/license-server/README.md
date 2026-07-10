@@ -52,7 +52,7 @@ Point the [`polars`](../polars) chart's scheduler at the server:
 license:
   licenseServer:
     enabled: true
-    address: "https://license-server.polars.svc.cluster.local:50051"
+    uri: "https://license-server.polars.svc.cluster.local:50051"
 ```
 
 ## Metrics
@@ -91,7 +91,7 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| name | string | `"license-server"` | Base name for all resources. Also the Service DNS name clients dial, so keep it stable (referenced by the polars chart `license.licenseServer.address`). |
+| name | string | `"license-server"` | Base name for all resources. Also the Service DNS name clients dial, so keep it stable (referenced by the polars chart `license.licenseServer.uri`). |
 | report.mountPath | string | `"/data"` | Mount path for the state DB + report ledger |
 | report.storageClass | string | `nil` | StorageClass for the report PVC. Uses the cluster default when empty. |
 | report.size | string | `"1Gi"` | Size of the report PVC |
