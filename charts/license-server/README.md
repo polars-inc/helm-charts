@@ -105,8 +105,9 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 | tlsBundle.content | string | `""` | Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this. |
 | image.repository | string | `"polarscloud/license-server"` | Image repository |
 | image.tag | string | `""` | Image tag. Defaults to the chart appVersion when left empty. |
-| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| imagePullSecrets | list | `[]` | Secrets for pulling the image from a private registry |
+| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
+| imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |
+| resources | object | `{"limits":{"memory":"128Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | resources.requests.cpu | string | `"100m"` | CPU request |
 | resources.requests.memory | string | `"128Mi"` | Memory request |
 | resources.limits.memory | string | `"128Mi"` | Memory limit (no CPU limit, to avoid throttling) |
@@ -118,10 +119,10 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 | serviceAccount.create | bool | `true` | Create a dedicated ServiceAccount |
 | serviceAccount.name | string | `""` | ServiceAccount name. Defaults to `name` when empty. |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
-| podSecurityContext | object | `{"fsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod-level security context. Hardened defaults; the server needs no elevated privileges. |
-| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}` | Container-level security context |
-| podAnnotations | object | `{}` | Extra annotations for the pod |
-| podLabels | object | `{}` | Extra labels for the pod |
-| nodeSelector | object | `{}` | Node selector for pod scheduling |
-| tolerations | list | `[]` | Tolerations for pod scheduling |
-| affinity | object | `{}` | Affinity rules for pod scheduling |
+| podSecurityContext | object | `{"fsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | SecurityContext holds pod-level security attributes and common container settings. |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
+| podAnnotations | object | `{}` | Common annotations for all resources |
+| podLabels | object | `{}` | Common labels for all resources |
+| nodeSelector | object | `{}` | NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ |
+| tolerations | list | `[]` | If specified, the pod's tolerations. |
+| affinity | object | `{}` | If specified, the pod's scheduling constraints |
