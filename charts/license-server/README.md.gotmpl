@@ -1,0 +1,92 @@
+# Polars License Server
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+Validates Polars licenses inside your own network, for clusters that don't have
+access to the Polars cloud. Run one instance and point your Polars deployments at
+it.
+
+## Prerequisites
+
+- Kubernetes 1.22+ (uses the `ReadWriteOncePod` PVC access mode)
+- Helm 3.x
+- A default StorageClass, or set `report.storageClass`
+- Two credentials from Polars ([request here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo)):
+  - a **license file** (JSON)
+  - a **TLS bundle** (PEM: server cert + key) used to serve HTTPS
+
+## Install
+
+Provide the license and TLS bundle inline with `--set-file`. The chart creates
+the backing Secrets from these values:
+
+```console
+$ helm upgrade --install license-server . \
+    --namespace polars --create-namespace \
+    --set-file license.content=license.json \
+    --set-file tlsBundle.content=bundle.pem
+```
+
+### Using pre-existing Secrets
+
+Leave `license.content` / `tlsBundle.content` empty and reference Secrets you manage
+out of band (recommended for GitOps — keeps secrets out of Helm values):
+
+```console
+$ kubectl -n polars create secret generic license-server-license \
+    --from-file=license.json=license.json
+$ kubectl -n polars create secret generic license-server-tls-bundle \
+    --from-file=bundle.pem=bundle.pem
+$ helm upgrade --install license-server . --namespace polars
+```
+
+## Connecting a Polars cluster
+
+Point the [`polars`](../polars) chart's scheduler at the server:
+
+```yaml
+license:
+  licenseServer:
+    enabled: true
+    uri: "https://license-server.polars.svc.cluster.local:50051"
+```
+
+## Metrics
+
+The server exposes Prometheus metrics at `/metrics` on the HTTP port
+(`service.httpPort`, default `8081`). Point your scraper at:
+
+```
+http://license-server.polars.svc.cluster.local:8081/metrics
+```
+
+The same port also serves health checks at `/healthz` and `/readyz`.
+
+If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
+`/metrics` automatically.
+
+## Notes
+
+- Run a single instance — don't scale it up.
+- Its data is kept even if you uninstall the chart, so licenses stay valid across
+  upgrades. To reclaim space, delete only already-submitted usage reports from the
+  volume — never the volume or its state, which would reset the server.
+- Updating `license.content`/`tlsBundle.content` restarts the server automatically;
+  with pre-existing Secrets, you must trigger the rollout yourself.
+- Resource names default to `license-server` (installing under that release name, as
+  shown above, keeps the DNS name the polars chart's `license.licenseServer.uri`
+  expects). Installing under a different release name prefixes resources with it
+  instead; set `fullnameOverride` to pin the name explicitly.
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}

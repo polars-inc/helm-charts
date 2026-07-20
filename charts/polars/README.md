@@ -51,6 +51,24 @@ $ kubectl port-forward svc/polars-temporary-storage 8333:8333
 
 </details>
 
+<details name="quickstart">
+
+<summary>Polars License Server (offline)</summary>
+
+To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
+
+```console
+$ helm repo add polars-inc https://polars-inc.github.io/helm-charts
+$ helm upgrade --install polars polars-inc/polars \
+    --set license.licenseServer.enabled=true \
+    --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051" \
+    --set anonymousResults.temporaryStorage.enabled=true
+$ kubectl port-forward svc/polars-scheduler 5051:5051
+$ kubectl port-forward svc/polars-observatory 3001:3001
+```
+
+</details>
+
 Then connect to the cluster from Python as follows:
 
 ```shell
@@ -622,6 +640,8 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | license.onPrem.licenseData.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | license.onPremEnterprise.secretName | string | `""` | the name containing your polars license key |
 | license.onPremEnterprise.secretProperty | string | `""` | the property on the secret containing your license key |
+| license.licenseServer.enabled | bool | `false` | Enable connecting to offline Polars license server. |
+| license.licenseServer.uri | string | `"https://license-server.polars.svc.cluster.local:50051"` | URI of the license server. |
 | imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |
 | runtime.prebuilt.command | list | `[]` | Entrypoint array. Not executed within a shell. The container image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell |
 | runtime.prebuilt.args | list | `[]` | Arguments to the entrypoint. The container image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell |
