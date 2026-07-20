@@ -17,7 +17,7 @@ it.
 - A default StorageClass, or set `report.storageClass`
 - Two credentials from Polars ([request here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo)):
   - a **license file** (JSON)
-  - a **TLS bundle** (PEM: server cert + key + CA) used to serve HTTPS
+  - a **TLS bundle** (PEM: server cert + key) used to serve HTTPS
 
 ## Install
 
