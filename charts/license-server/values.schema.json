@@ -22655,6 +22655,12 @@
       "description": "If specified, the pod's scheduling constraints",
       "required": []
     },
+    "fullnameOverride": {
+      "default": "",
+      "description": "Override the full name of the chart",
+      "required": [],
+      "title": "fullnameOverride"
+    },
     "global": {
       "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
       "required": [],
@@ -22736,7 +22742,7 @@
     },
     "name": {
       "default": "license-server",
-      "description": "Base name for all resources. Also the Service DNS name clients dial, so keep it stable (referenced by the polars chart `license.licenseServer.uri`).",
+      "description": "Base name of the chart",
       "required": [],
       "title": "name"
     },
@@ -22833,6 +22839,12 @@
           "required": [],
           "title": "annotations"
         },
+        "automount": {
+          "default": "false",
+          "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
+          "required": [],
+          "title": "automount"
+        },
         "create": {
           "default": "true",
           "description": "Create a dedicated ServiceAccount",
@@ -22861,7 +22873,7 @@
           "title": "enabled"
         },
         "interval": {
-          "default": "30s",
+          "default": "5m",
           "description": "Scrape interval",
           "required": [],
           "title": "interval"

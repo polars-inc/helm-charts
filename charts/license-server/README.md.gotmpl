@@ -16,7 +16,7 @@ it.
 - Kubernetes 1.22+ (uses the `ReadWriteOncePod` PVC access mode)
 - Helm 3.x
 - A default StorageClass, or set `report.storageClass`
-- Two credentials from Polars:
+- Two credentials from Polars ([request here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo)):
   - a **license file** (JSON)
   - a **TLS bundle** (PEM: server cert + key + CA) used to serve HTTPS
 
@@ -76,7 +76,12 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 - Its data is kept even if you uninstall the chart, so licenses stay valid across
   upgrades. To reclaim space, delete only already-submitted usage reports from the
   volume — never the volume or its state, which would reset the server.
-- Updating the license or TLS bundle restarts the server automatically.
+- Updating `license.content`/`tlsBundle.content` restarts the server automatically;
+  with pre-existing Secrets, you must trigger the rollout yourself.
+- Resource names default to `license-server` (installing under that release name, as
+  shown above, keeps the DNS name the polars chart's `license.licenseServer.uri`
+  expects). Installing under a different release name prefixes resources with it
+  instead; set `fullnameOverride` to pin the name explicitly.
 
 {{ template "chart.maintainersSection" . }}
 

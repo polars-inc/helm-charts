@@ -1,20 +1,20 @@
-{{ .Values.name }} deployed.
+{{ include "license-server.fullname" . }} deployed.
 
 The offline license server is reachable in-cluster over HTTPS at:
 
-  https://{{ .Values.name }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
+  https://{{ include "license-server.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
 
 Point the Polars scheduler at it by setting, in the polars chart values:
 
   license:
     licenseServer:
       enabled: true
-      uri: "https://{{ .Values.name }}.{{ .Release.Namespace }}:{{ .Values.service.port }}"
+      uri: "https://{{ include "license-server.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}"
 
 Check status:
 
-  kubectl -n {{ .Release.Namespace }} rollout status statefulset/{{ .Values.name }}
-  kubectl -n {{ .Release.Namespace }} logs statefulset/{{ .Values.name }}
+  kubectl -n {{ .Release.Namespace }} rollout status statefulset/{{ include "license-server.fullname" . }}
+  kubectl -n {{ .Release.Namespace }} logs statefulset/{{ include "license-server.fullname" . }}
 
 {{- if not .Values.license.content }}
 

@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ .Values.name }}
+  name: {{ include "license-server.fullname" . }}
   labels:
     {{- include "license-server.labels" . | nindent 4 }}
 spec:

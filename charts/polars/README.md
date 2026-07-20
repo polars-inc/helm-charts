@@ -51,6 +51,24 @@ $ kubectl port-forward svc/polars-temporary-storage 8333:8333
 
 </details>
 
+<details name="quickstart">
+
+<summary>Polars License Server (offline)</summary>
+
+To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
+
+```console
+$ helm repo add polars-inc https://polars-inc.github.io/helm-charts
+$ helm upgrade --install polars polars-inc/polars \
+    --set license.licenseServer.enabled=true \
+    --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051" \
+    --set anonymousResults.temporaryStorage.enabled=true
+$ kubectl port-forward svc/polars-scheduler 5051:5051
+$ kubectl port-forward svc/polars-observatory 3001:3001
+```
+
+</details>
+
 Then connect to the cluster from Python as follows:
 
 ```shell

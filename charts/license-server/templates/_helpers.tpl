@@ -1,4 +1,21 @@
 {{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains the base name it will be used as a full name.
+*/}}
+{{- define "license-server.fullname" -}}
+  {{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+  {{- else }}
+    {{- if contains .Values.name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+    {{- else }}
+      {{- printf "%s-%s" .Release.Name .Values.name | trunc 63 | trimSuffix "-" }}
+    {{- end }}
+  {{- end }}
+{{- end -}}
+
+{{/*
 Chart name and version as used by the chart label.
 */}}
 {{- define "license-server.chart" -}}
@@ -31,7 +48,7 @@ Name of the service account to use
 */}}
 {{- define "license-server.serviceAccountName" -}}
   {{- if .Values.serviceAccount.create -}}
-{{- default .Values.name .Values.serviceAccount.name }}
+{{- default (include "license-server.fullname" .) .Values.serviceAccount.name }}
   {{- else -}}
 {{- default "default" .Values.serviceAccount.name }}
   {{- end -}}

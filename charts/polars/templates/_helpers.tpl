@@ -202,7 +202,7 @@ Setting `license=null` removes the license check from the helm chart (still enfo
     {{- if $hasLicenseServer }}{{- $enabledCount = add1 $enabledCount }}{{- end -}}
 
     {{- if ne $enabledCount 1 -}}
-      {{- fail "License error: exactly one of the `.Values.license` must be enabled" -}}
+      {{- fail "License error: exactly one of .Values.license.onPrem.enabled, .Values.license.onPremEnterprise.enabled or .Values.license.licenseServer.enabled must be true" -}}
     {{- end -}}
 
     {{- if $hasOnPrem -}}

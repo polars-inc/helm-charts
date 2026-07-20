@@ -1,12 +1,11 @@
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Values.name }}
+  name: {{ include "license-server.fullname" . }}
   labels:
     {{- include "license-server.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ .Values.name }}
+  serviceName: {{ include "license-server.fullname" . }}
   replicas: 1
   updateStrategy:
     type: RollingUpdate
@@ -102,7 +101,7 @@ spec:
       volumes:
       - name: report
         persistentVolumeClaim:
-          claimName: {{ .Values.name }}-report
+          claimName: {{ include "license-server.fullname" . }}-report
       - name: license
         secret:
           secretName: {{ .Values.license.secretName }}
@@ -115,23 +114,3 @@ spec:
           items:
           - key: {{ .Values.tlsBundle.key }}
             path: {{ .Values.tlsBundle.key }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Values.name }}
-  labels:
-    {{- include "license-server.labels" . | nindent 4 }}
-spec:
-  clusterIP: None
-  selector:
-    {{- include "license-server.selectorLabels" . | nindent 4 }}
-  ports:
-    - name: grpc
-      port: {{ .Values.service.port }}
-      protocol: TCP
-      targetPort: grpc
-    - name: http
-      port: {{ .Values.service.httpPort }}
-      protocol: TCP
-      targetPort: http

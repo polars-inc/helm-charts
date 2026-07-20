@@ -1,6 +1,8 @@
-# -- Base name for all resources. Also the Service DNS name clients dial, so keep
-# it stable (referenced by the polars chart `license.licenseServer.uri`).
+# -- Base name of the chart
 name: license-server
+
+# -- Override the full name of the chart
+fullnameOverride: ""
 
 # Persistent volume holding the SQLite state DB + signed report ledger
 report:
@@ -73,7 +75,7 @@ serviceMonitor:
   # -- Create a ServiceMonitor for the Prometheus Operator
   enabled: false
   # -- Scrape interval
-  interval: 30s
+  interval: 5m
 
 serviceAccount:
   # -- Create a dedicated ServiceAccount
@@ -85,6 +87,8 @@ serviceAccount:
   # @schema
   # -- Annotations to add to the ServiceAccount
   annotations: {}
+  # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
+  automount: false
 
 # @schema
 # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext

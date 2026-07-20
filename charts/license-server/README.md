@@ -15,7 +15,7 @@ it.
 - Kubernetes 1.22+ (uses the `ReadWriteOncePod` PVC access mode)
 - Helm 3.x
 - A default StorageClass, or set `report.storageClass`
-- Two credentials from Polars:
+- Two credentials from Polars ([request here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo)):
   - a **license file** (JSON)
   - a **TLS bundle** (PEM: server cert + key + CA) used to serve HTTPS
 
@@ -75,7 +75,12 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 - Its data is kept even if you uninstall the chart, so licenses stay valid across
   upgrades. To reclaim space, delete only already-submitted usage reports from the
   volume — never the volume or its state, which would reset the server.
-- Updating the license or TLS bundle restarts the server automatically.
+- Updating `license.content`/`tlsBundle.content` restarts the server automatically;
+  with pre-existing Secrets, you must trigger the rollout yourself.
+- Resource names default to `license-server` (installing under that release name, as
+  shown above, keeps the DNS name the polars chart's `license.licenseServer.uri`
+  expects). Installing under a different release name prefixes resources with it
+  instead; set `fullnameOverride` to pin the name explicitly.
 
 ## Maintainers
 
@@ -91,7 +96,8 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| name | string | `"license-server"` | Base name for all resources. Also the Service DNS name clients dial, so keep it stable (referenced by the polars chart `license.licenseServer.uri`). |
+| name | string | `"license-server"` | Base name of the chart |
+| fullnameOverride | string | `""` | Override the full name of the chart |
 | report.mountPath | string | `"/data"` | Mount path for the state DB + report ledger |
 | report.storageClass | string | `nil` | StorageClass for the report PVC. Uses the cluster default when empty. |
 | report.size | string | `"1Gi"` | Size of the report PVC |
@@ -113,12 +119,13 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 | resources.limits.memory | string | `"128Mi"` | Memory limit (no CPU limit, to avoid throttling) |
 | service.port | int | `50051` | gRPC/HTTPS port the server listens on |
 | service.httpPort | int | `8081` | HTTP port serving health probes (`/healthz`, `/readyz`) and Prometheus metrics (`/metrics`) |
-| serviceMonitor | object | `{"enabled":false,"interval":"30s"}` | ServiceMonitor for scraping /metrics. Requires the Prometheus Operator CRDs. |
+| serviceMonitor | object | `{"enabled":false,"interval":"5m"}` | ServiceMonitor for scraping /metrics. Requires the Prometheus Operator CRDs. |
 | serviceMonitor.enabled | bool | `false` | Create a ServiceMonitor for the Prometheus Operator |
-| serviceMonitor.interval | string | `"30s"` | Scrape interval |
+| serviceMonitor.interval | string | `"5m"` | Scrape interval |
 | serviceAccount.create | bool | `true` | Create a dedicated ServiceAccount |
 | serviceAccount.name | string | `""` | ServiceAccount name. Defaults to `name` when empty. |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
+| serviceAccount.automount | bool | `false` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
 | podSecurityContext | object | `{"fsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | SecurityContext holds pod-level security attributes and common container settings. |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
 | podAnnotations | object | `{}` | Common annotations for all resources |
