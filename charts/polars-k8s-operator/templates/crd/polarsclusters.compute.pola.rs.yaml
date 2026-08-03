@@ -10388,6 +10388,26 @@ spec:
                         - containers
                         type: object
                     type: object
+                  serviceAccount:
+                    description: |-
+                      ServiceAccount configures the ServiceAccount the scheduler pod runs
+                      as. Defaults to the namespace's default ServiceAccount when unset.
+                    properties:
+                      create:
+                        description: |-
+                          Create indicates whether the operator should create and own this
+                          ServiceAccount. When false, Name must reference a ServiceAccount that
+                          already exists in the cluster's namespace; the operator will not
+                          create or manage it.
+                        type: boolean
+                      name:
+                        description: |-
+                          Name of the ServiceAccount. When Create is true and Name is empty, it
+                          defaults to "<cluster>-scheduler" / "<cluster>-worker". When Create is
+                          false and Name is empty, it defaults to "default" (the namespace's
+                          default ServiceAccount).
+                        type: string
+                    type: object
                   services:
                     description: Services configures the Services exposing the scheduler's
                       ports.
@@ -19160,6 +19180,26 @@ spec:
                     format: int32
                     minimum: 0
                     type: integer
+                  serviceAccount:
+                    description: |-
+                      ServiceAccount configures the ServiceAccount the worker pods run as.
+                      Defaults to the namespace's default ServiceAccount when unset.
+                    properties:
+                      create:
+                        description: |-
+                          Create indicates whether the operator should create and own this
+                          ServiceAccount. When false, Name must reference a ServiceAccount that
+                          already exists in the cluster's namespace; the operator will not
+                          create or manage it.
+                        type: boolean
+                      name:
+                        description: |-
+                          Name of the ServiceAccount. When Create is true and Name is empty, it
+                          defaults to "<cluster>-scheduler" / "<cluster>-worker". When Create is
+                          false and Name is empty, it defaults to "default" (the namespace's
+                          default ServiceAccount).
+                        type: string
+                    type: object
                   shuffleData:
                     description: ShuffleData is the ephemeral storage for shuffle
                       data.
