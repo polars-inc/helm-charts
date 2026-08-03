@@ -19,7 +19,7 @@ manager:
     repository: polarscloud/polars-k8s-operator
     ## Image tag (defaults to Chart.appVersion if not set)
     ##
-    tag: "0.1.0-alpha.1"
+    tag: "0.1.0-alpha.2"
     pullPolicy: IfNotPresent
 
   ## Arguments
