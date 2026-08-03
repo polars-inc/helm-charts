@@ -14,9 +14,9 @@ jobs:
         with:
           repo: digitalstudium/helmfmt
 
-      - name: Run helmfmt
+      - name: Run make fmt
         run: |
-          helmfmt charts/polars --disable-indent=tpl
+          make fmt
         shell: bash
 
       - name: Files changed
