@@ -17,6 +17,12 @@ DEFINITIONS_FILE := _definitions-v$(DEFINITIONS_VERSION).json
 DEFINITIONS_LINK := _definitions.json
 CHARTS_DIR := charts
 
+# Space separated, e.g. IGNORE_CHARTS := polars-k8s-operator license-server
+IGNORE_CHARTS := polars-k8s-operator
+
+CHARTS := $(filter-out $(addprefix $(CHARTS_DIR)/,$(IGNORE_CHARTS)), \
+	$(patsubst %/,%,$(wildcard $(CHARTS_DIR)/*/)))
+
 all: schema docs fmt
 
 schema:
@@ -26,18 +32,24 @@ schema:
 		jq 'del(.. | .format?)' "$(DEFINITIONS_FILE)" | sponge "$(DEFINITIONS_FILE)"; \
 	fi
 	ln -sf "$(DEFINITIONS_FILE)" "$(DEFINITIONS_LINK)"
-	helm schema --chart-search-root="$(CHARTS_DIR)" --helm-docs-compatibility-mode --log-level=debug --skip-auto-generation required
-	for chart in "$(CHARTS_DIR)"/*; do \
+	for chart in $(CHARTS); do \
 		echo "Updating $$chart"; \
+		helm schema --chart-search-root="$$chart" --helm-docs-compatibility-mode --log-level=debug --skip-auto-generation required; \
 		jq '. + input' "$(DEFINITIONS_LINK)" "$$chart/values.schema.json" | sponge "$$chart/values.schema.json"; \
 		sed -i 's|../../_definitions.json||g' "$$chart/values.schema.json"; \
 	done
 
 docs:
-	helm-docs --chart-search-root="$(CHARTS_DIR)" --sort-values-order=file --ignore-non-descriptions
+	for chart in $(CHARTS); do \
+		echo "Documenting $$chart"; \
+		helm-docs --chart-search-root="$$chart" --sort-values-order=file --ignore-non-descriptions; \
+	done
 
 fmt:
-	helmfmt charts/polars --disable-indent=tpl
+	for chart in $(CHARTS); do \
+		echo "Formatting $$chart"; \
+		helmfmt "$$chart" --disable-indent=tpl; \
+	done
 
 clean:
 	rm -f "$(DEFINITIONS_LINK)" _definitions-v*.json
