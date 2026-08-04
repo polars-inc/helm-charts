@@ -24755,6 +24755,42 @@
           "title": "deployment",
           "type": "object"
         },
+        "extras": {
+          "additionalProperties": false,
+          "properties": {
+            "hdfs": {
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "default": "false",
+                  "description": "Whether to enable support for HDFS",
+                  "required": [],
+                  "title": "enabled"
+                }
+              },
+              "required": [],
+              "title": "hdfs",
+              "type": "object"
+            },
+            "pyiceberg": {
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "default": "false",
+                  "description": "Whether to enable support for pyiceberg. For metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements.",
+                  "required": [],
+                  "title": "enabled"
+                }
+              },
+              "required": [],
+              "title": "pyiceberg",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "extras",
+          "type": "object"
+        },
         "serviceAccount": {
           "additionalProperties": false,
           "properties": {

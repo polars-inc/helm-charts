@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.7.1](https://img.shields.io/badge/AppVersion-0.7.1-informational?style=flat-square)
+![Version: 2.3.1](https://img.shields.io/badge/Version-2.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.7.1](https://img.shields.io/badge/AppVersion-0.7.1-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -110,7 +110,7 @@ The Observatory includes a **query profiler** that provides more insight into qu
 
 ![Observatory stage graph](https://pola.rs/observatory-stage-graph.png)
 
-> For a walkthrough of how to use the profiler to optimise queries, see the [User Guide](https://docs.pola.rs/polars-cloud/run/query-profile/) or the [Query Profiler blog post](https://pola.rs/posts/query-profiler-instance-optimization/).
+> For a walkthrough of how to use the profiler to optimise queries, see the [User Guide](https://docs.cloud.pola.rs/polars-cloud/run/query-profile/) or the [Query Profiler blog post](https://pola.rs/posts/query-profiler-instance-optimization/).
 
 ### Helm Tests
 
@@ -232,7 +232,7 @@ shuffleData:
     size: 125Gi
 ```
 
-You can also configure to shuffle to AWS S3, Google Cloud Storage, or Azure Blob Storage instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+You can also configure to shuffle to AWS S3, Google Cloud Storage, or Azure Blob Storage instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.cloud.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 shuffleData:
@@ -287,7 +287,7 @@ shuffleData:
 
 #### Anonymous results data
 
-For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are can be backed by S3-compatible storage, Azure Blob Storage, and Google Cloud Storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are can be backed by S3-compatible storage, Azure Blob Storage, and Google Cloud Storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.cloud.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 Note that Anonymous Users and Anonymous Results are different. Anonymous Users refer to queries that are submitted without a username, while Anonymous Results refer to queries without an explicit output sink.
 
@@ -348,7 +348,7 @@ checkpoint:
   period: "5m"
 ```
 
-The credentials are configured the same way as shuffle data — the key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+The credentials are configured the same way as shuffle data — the key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.cloud.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 checkpointData:
@@ -598,7 +598,7 @@ Polars On-Prem uses OpenTelemetry as its telemetry framework. To receive OTLP me
 
 ## Lineage
 
-OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
 
 The cluster must be configured with a lineage transport endpoint, pointing at the collector. HTTP(S) is the only supported transport protocol. The following example points at an instance of Marquez deployed in the default namespace:
 
@@ -610,7 +610,30 @@ lineage:
       endpoint: "http://marquez.default.svc.cluster.local:5000"
 ```
 
-See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+See [OpenLineage Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+
+## HDFS
+
+Polars on-premises provides experimental support for using HDFS (Hadoop Distributed Filesystem) as a storage back-end, from a polars cluster. Accessing HDFS directly from the client is not included. This functionality is considered unstable.
+
+Polars HDFS support provides pure-Rust access to the data, no JVM required on the cluster. When Iceberg is used, HDFS support also provides Rust-based native access to the metadata.
+
+Support for accessing data and/or metadata requires explicit configuration, and may require additional infrastructure to function.
+
+Once enabled, HDFS storage is accessible through the standard polars API, using the hdfs://host:port/ URI syntax, in combination with the use of storage_options.
+
+```yaml
+worker:
+  extras:
+    hdfs:
+      enabled: true
+    pyiceberg:
+      enabled: true
+```
+
+In addition, for metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements.
+
+See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/hdfs/) for more information on how to write queries to read and write from HDFS.
 
 ## Maintainers
 
@@ -748,6 +771,8 @@ See [OpenLineage Integration](https://docs.pola.rs/polars-on-premises/integratio
 | observatory.persistentVolumeClaim.size | string | `"1Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
 | lineage.enabled | bool | `false` | Enable support for lineage exporting to a specific endpoint |
 | lineage.transport.http.endpoint | string | `"http://marquez.default.svc.cluster.local:5000"` | Transport protocol to use for lineage export |
+| worker.extras.hdfs.enabled | bool | `false` | Whether to enable support for HDFS |
+| worker.extras.pyiceberg.enabled | bool | `false` | Whether to enable support for pyiceberg. For metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements. |
 | worker.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | worker.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | worker.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |

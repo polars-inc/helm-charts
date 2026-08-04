@@ -278,6 +278,14 @@ spec:
             - name: PC_CUBLET__worker__checkpoint_location__shared_filesystem__path
               value: /app/checkpoint_data/checkpoint_data
 {{- end }}
+{{- if .Values.worker.extras.hdfs.enabled }}
+            - name: PC_CUBLET__worker__extras__pyiceberg__enabled
+              value: "true"
+{{- end }}
+{{- if .Values.worker.extras.pyiceberg.enabled }}
+            - name: PC_CUBLET__worker__extras__pyiceberg__enabled
+              value: "true"
+{{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
