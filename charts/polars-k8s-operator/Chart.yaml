@@ -2,8 +2,8 @@ apiVersion: v2
 name: polars-k8s-operator
 description: A Helm chart to distribute polars-k8s-operator
 type: application
-version: 0.1.0-alpha.2
-appVersion: "0.1.0-alpha.2"
+version: 0.1.0-alpha.3
+appVersion: "0.1.0-alpha.3"
 keywords:
   - kubernetes
   - operator
