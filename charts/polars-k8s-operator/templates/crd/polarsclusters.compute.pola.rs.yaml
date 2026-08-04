@@ -10624,7 +10624,7 @@ spec:
                 - otlpEndpoint
                 type: object
               version:
-                default: 0.6.3
+                default: 0.7.1
                 description: |-
                   Version is the Polars on-premises release to run, as a semantic
                   version. The operator enforces its minimum supported release at
@@ -10637,6 +10637,21 @@ spec:
               workerPool:
                 description: WorkerPool declares the cluster's pool of worker pods.
                 properties:
+                  extras:
+                    description: ExtrasSpec configures additional features for the
+                      worker pool.
+                    properties:
+                      hdfs:
+                        description: HDFS configures HDFS support for the worker pool.
+                        type: object
+                      pyiceberg:
+                        description: PyIceberg configures PyIceberg support for the
+                          worker pool. For metadata access, two python packages must
+                          be installed on the worker virtual environment, i.e. hdfs-native
+                          and pyiceberg. Note, the python dependencies are not required
+                          for direct data access.
+                        type: object
+                    type: object
                   heartBeatInterval:
                     description: HeartBeatInterval between workers and the scheduler.
                       Defaults to 5s.
