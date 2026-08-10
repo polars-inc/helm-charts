@@ -34,7 +34,7 @@ schema:
 	ln -sf "$(DEFINITIONS_FILE)" "$(DEFINITIONS_LINK)"
 	for chart in $(CHARTS); do \
 		echo "Updating $$chart"; \
-		helm schema --chart-search-root="$$chart" --helm-docs-compatibility-mode --log-level=debug --skip-auto-generation required; \
+		helm schema --chart-search-root="$$chart" --helm-docs-compatibility-mode --log-level=debug --skip-auto-generation required --no-dependencies; \
 		jq '. + input' "$(DEFINITIONS_LINK)" "$$chart/values.schema.json" | sponge "$$chart/values.schema.json"; \
 		sed -i 's|../../_definitions.json||g' "$$chart/values.schema.json"; \
 	done

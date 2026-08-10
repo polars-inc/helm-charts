@@ -397,3 +397,61 @@ Verify that we're using prebuilt runtime
   {{- include "polars.validateRuntime" . -}}
   {{- if .Values.runtime.prebuilt.enabled -}}true{{- end -}}
 {{- end }}
+
+{{/*
+JWKS keys URL: explicit value or derived from the enabled Dex dependency's issuer.
+*/}}
+{{- define "polars.authJwksUrl" -}}
+  {{- if .Values.auth.jwks.url -}}
+    {{- .Values.auth.jwks.url -}}
+  {{- else if and .Values.dex.enabled .Values.dex.config.issuer -}}
+    {{- printf "%s/keys" (.Values.dex.config.issuer | trimSuffix "/") -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+JWKS issuer claim: explicit value or derived from the enabled Dex dependency's issuer.
+*/}}
+{{- define "polars.authJwksIssuer" -}}
+  {{- if .Values.auth.jwks.issuer -}}
+    {{- .Values.auth.jwks.issuer -}}
+  {{- else if and .Values.dex.enabled .Values.dex.config.issuer -}}
+    {{- .Values.dex.config.issuer -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+JWKS audience claim: explicit value or, when Dex is enabled, the chart's default Dex static client
+ID. Deliberately a literal rather than read from dex.config.staticClients: a list is not a stable
+key, since admins may reorder it or add their own entries ahead of it. Anyone who renames or
+removes the default `polars` static client must set `auth.jwks.audience` explicitly.
+*/}}
+{{- define "polars.authJwksAudience" -}}
+  {{- if .Values.auth.jwks.audience -}}
+    {{- .Values.auth.jwks.audience -}}
+  {{- else if .Values.dex.enabled -}}
+    polars
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Validates JWKS auth config.
+*/}}
+{{- define "polars.validateAuthJwks" -}}
+  {{- if .Values.auth.jwks.enabled -}}
+    {{- if not (include "polars.authJwksUrl" .) -}}
+      {{- fail "Auth error: .Values.auth.jwks.url is required when .Values.auth.jwks.enabled is true (or set dex.enabled and dex.config.issuer to derive it automatically)" -}}
+    {{- end -}}
+    {{- if not (include "polars.authJwksIssuer" .) -}}
+      {{- fail "Auth error: .Values.auth.jwks.issuer is required when .Values.auth.jwks.enabled is true (or set dex.enabled and dex.config.issuer to derive it automatically)" -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Whether JWKS auth is enabled.
+*/}}
+{{- define "polars.isAuthJwksEnabled" -}}
+  {{- include "polars.validateAuthJwks" . -}}
+  {{- if .Values.auth.jwks.enabled -}}true{{- end -}}
+{{- end -}}

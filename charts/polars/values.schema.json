@@ -22826,6 +22826,58 @@
       "required": [],
       "title": "anonymousResults"
     },
+    "auth": {
+      "additionalProperties": false,
+      "description": "Require the scheduler and observatory REST API to validate an OIDC JWT bearer token (via JWKS) before serving a request. This is native to the compute plane (no proxy involved): both endpoints run in the same pod as the `scheduler` container and are validated by the same code path. Pair this with `dex` below, or with any other OIDC provider that can issue tokens for your own identity backend.",
+      "properties": {
+        "jwks": {
+          "additionalProperties": false,
+          "properties": {
+            "audience": {
+              "default": "",
+              "description": "Expected `aud` (audience) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `polars`. If you rename or remove that static client in the Dex config, or a single Dex instance ever fronts more than one cluster, set this explicitly to match the audience your OIDC client (`ClusterContext`) requests.",
+              "required": [],
+              "title": "audience"
+            },
+            "enabled": {
+              "default": "false",
+              "description": "Enable JWKS validation on the scheduler and observatory REST API.",
+              "required": [],
+              "title": "enabled"
+            },
+            "issuer": {
+              "default": "",
+              "description": "Expected `iss` (issuer) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true and `dex.config.issuer` is set, in which case it defaults to `dex.config.issuer`.",
+              "required": [],
+              "title": "issuer"
+            },
+            "requiredClaim": {
+              "default": "",
+              "description": "Name of a claim that must be present on the token with a matching value (see `auth.jwks.requiredClaimValue`), checked case-sensitively either as an exact match (string claim) or as membership (array claim, like in `groups`). Leave empty (default) to not enforce any additional claim beyond the standard `aud`/`iss`/`exp` checks.",
+              "required": [],
+              "title": "requiredClaim"
+            },
+            "requiredClaimValue": {
+              "default": "",
+              "description": "Value `auth.jwks.requiredClaim` must equal (or for an array claim, contain). For example, `requiredClaim: \"groups\"` with `requiredClaimValue: \"data-team\"` only allows tokens carrying `data-team` in their `groups` claim.",
+              "required": [],
+              "title": "requiredClaimValue"
+            },
+            "url": {
+              "default": "",
+              "description": "URL the compute plane fetches signing keys from (OIDC provider `/keys` endpoint). Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true and `dex.config.issuer` is set, in which case it defaults to `{dex.config.issuer}/keys`.",
+              "required": [],
+              "title": "url"
+            }
+          },
+          "required": [],
+          "title": "jwks",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "auth"
+    },
     "checkpoint": {
       "additionalProperties": false,
       "description": "Checkpointing for queries. Checkpointing is enabled automatically whenever a checkpointData location is configured below; the scheduler then periodically checkpoints completed stages so queries can resume after failures.",
@@ -23001,7 +23053,7 @@
     },
     "clusterId": {
       "default": "",
-      "description": "Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to \"helm namespace/helm release name\" if not set.",
+      "description": "Unique identifier for the Polars cluster. This ID is used to identify the cluster in a multi-tenant environment. Defaults to \"helm namespace/helm release name\" if not set.",
       "required": [],
       "title": "clusterId"
     },
@@ -23010,6 +23062,103 @@
       "description": "Enabling this option ensures that all queries must be sent with a set username.",
       "required": [],
       "title": "denyAnonymousUsers"
+    },
+    "dex": {
+      "additionalProperties": true,
+      "description": "Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks` above validates natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `polars` static client below. Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key.",
+      "properties": {
+        "config": {
+          "additionalProperties": true,
+          "description": "Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable both from inside the cluster (for the compute plane to fetch signing keys, unless `auth.jwks.url` is set explicitly) and from wherever `pc.ClusterContext` users run their login flow. The default `staticClients` entry (id `polars`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client.",
+          "properties": {
+            "connectors": {
+              "items": {
+                "required": []
+              },
+              "title": "connectors",
+              "type": "array"
+            },
+            "issuer": {
+              "default": "",
+              "title": "issuer",
+              "type": "string"
+            },
+            "staticClients": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "default": "polars",
+                        "title": "id",
+                        "type": "string"
+                      },
+                      "name": {
+                        "default": "Polars ClusterContext",
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "public": {
+                        "default": true,
+                        "title": "public",
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "title": "staticClients",
+              "type": "array"
+            },
+            "storage": {
+              "additionalProperties": false,
+              "properties": {
+                "config": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "file": {
+                      "default": "/var/dex/dex.db",
+                      "title": "file",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "config",
+                  "type": "object"
+                },
+                "type": {
+                  "default": "sqlite3",
+                  "title": "type",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "storage",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "config"
+        },
+        "enabled": {
+          "default": "false",
+          "description": "Enable the Dex dependency. See https://github.com/dexidp/helm-charts/tree/master/charts/dex for the full set of values available under `dex.*` beyond `dex.config` (image, resources, ingress, persistence, ...).",
+          "required": [],
+          "title": "enabled"
+        },
+        "fullnameOverride": {
+          "default": "",
+          "description": "Override the Dex release name, so its in-cluster address (used to build `dex.config.issuer`) is predictable. If unset, Dex's own chart derives it from the release name.",
+          "required": [],
+          "title": "fullnameOverride"
+        }
+      },
+      "required": [],
+      "title": "dex"
     },
     "disableHostMetrics": {
       "default": "false",

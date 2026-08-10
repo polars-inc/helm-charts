@@ -8,7 +8,11 @@ version: 2.3.1
 appVersion: 0.7.1
 deprecated: false
 
-dependencies: []
+dependencies:
+  - name: dex
+    version: "0.24.1"
+    repository: "https://charts.dexidp.io"
+    condition: dex.enabled
 
 home: https://pola.rs
 sources:

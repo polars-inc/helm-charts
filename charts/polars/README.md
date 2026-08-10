@@ -11,8 +11,8 @@ Distributed query execution engine for Polars
 Get started right away with Polars On-Prem.
 
 <details open="true" name="quickstart">
-
-<summary>Polars On-Prem</summary>
+<summary><strong>Polars On-Prem</strong></summary>
+<br/>
 
 To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret. For the purpose of this quick start, we deploy Seaweed as an anonymous results destination. This allows you to run queries without specifying a results destination. To configure a different anonymous results destination, see [Anonymous results data](#Anonymous-results-data)
 
@@ -31,8 +31,8 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 </details>
 
 <details name="quickstart">
-
-<summary>Polars On-Prem Enterprise (offline)</summary>
+<summary><strong>Polars On-Prem Enterprise (offline)</strong></summary>
+<br/>
 
 To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) and the license file exists at `./license.json`.
 
@@ -52,8 +52,8 @@ $ kubectl port-forward svc/polars-temporary-storage 8333:8333
 </details>
 
 <details name="quickstart">
-
-<summary>Polars License Server (offline)</summary>
+<summary><strong>Polars License Server (offline)</strong></summary>
+<br/>
 
 To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
 
@@ -526,7 +526,7 @@ worker:
         requests:
           cpu: 3770m
           memory: 14.31GiB
-   
+
         limits:
           cpu: 3770m
           memory: 14.31GiB
@@ -646,6 +646,12 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 * <https://github.com/pola-rs/polars>
 * <https://github.com/polars-inc/helm-charts>
 
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://charts.dexidp.io | dex | 0.24.1 |
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -654,7 +660,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | fullnameOverride | string | `""` | Override the full name of the chart |
 | podLabels | object | `{}` | Common labels for all resources |
 | podAnnotations | object | `{}` | Common annotations for all resources |
-| clusterId | uuid | `""` | Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
+| clusterId | string | `""` | Unique identifier for the Polars cluster. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
 | clusterDomain | string | `"cluster.local"` | Kubernetes cluster DNS domain (the suffix used in `<svc>.<ns>.svc.<domain>`). Override this if your cluster uses a non-default domain. |
 | acceptEula | bool | `false` | To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
 | license.onPrem.licenseData.enabled | bool | `false` | Enable persistent volume claim for the license data. |
@@ -790,6 +796,17 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | scheduler.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
 | scheduler.deployment.podAnnotations | object | `{}` | Additional annotations to add to the scheduler pod. |
 | scheduler.deployment.podLabels | object | `{}` | Additional labels to add to the scheduler pod. |
+| auth | object | `{"jwks":{"audience":"","enabled":false,"issuer":"","requiredClaim":"","requiredClaimValue":"","url":""}}` | Require the scheduler and observatory REST API to validate an OIDC JWT bearer token (via JWKS) before serving a request. This is native to the compute plane (no proxy involved): both endpoints run in the same pod as the `scheduler` container and are validated by the same code path. Pair this with `dex` below, or with any other OIDC provider that can issue tokens for your own identity backend. |
+| auth.jwks.enabled | bool | `false` | Enable JWKS validation on the scheduler and observatory REST API. |
+| auth.jwks.url | string | `""` | URL the compute plane fetches signing keys from (OIDC provider `/keys` endpoint). Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true and `dex.config.issuer` is set, in which case it defaults to `{dex.config.issuer}/keys`. |
+| auth.jwks.issuer | string | `""` | Expected `iss` (issuer) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true and `dex.config.issuer` is set, in which case it defaults to `dex.config.issuer`. |
+| auth.jwks.audience | string | `""` | Expected `aud` (audience) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `polars`. If you rename or remove that static client in the Dex config, or a single Dex instance ever fronts more than one cluster, set this explicitly to match the audience your OIDC client (`ClusterContext`) requests. |
+| auth.jwks.requiredClaim | string | `""` | Name of a claim that must be present on the token with a matching value (see `auth.jwks.requiredClaimValue`), checked case-sensitively either as an exact match (string claim) or as membership (array claim, like in `groups`). Leave empty (default) to not enforce any additional claim beyond the standard `aud`/`iss`/`exp` checks. |
+| auth.jwks.requiredClaimValue | string | `""` | Value `auth.jwks.requiredClaim` must equal (or for an array claim, contain). For example, `requiredClaim: "groups"` with `requiredClaimValue: "data-team"` only allows tokens carrying `data-team` in their `groups` claim. |
+| dex | object | `{"config":{"connectors":[],"issuer":"","staticClients":[{"id":"polars","name":"Polars ClusterContext","public":true}],"storage":{"config":{"file":"/var/dex/dex.db"},"type":"sqlite3"}},"enabled":false,"fullnameOverride":""}` | Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks` above validates natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `polars` static client below. Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key. |
+| dex.enabled | bool | `false` | Enable the Dex dependency. See https://github.com/dexidp/helm-charts/tree/master/charts/dex for the full set of values available under `dex.*` beyond `dex.config` (image, resources, ingress, persistence, ...). |
+| dex.fullnameOverride | string | `""` | Override the Dex release name, so its in-cluster address (used to build `dex.config.issuer`) is predictable. If unset, Dex's own chart derives it from the release name. |
+| dex.config | object | `{"connectors":[],"issuer":"","staticClients":[{"id":"polars","name":"Polars ClusterContext","public":true}],"storage":{"config":{"file":"/var/dex/dex.db"},"type":"sqlite3"}}` | Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable both from inside the cluster (for the compute plane to fetch signing keys, unless `auth.jwks.url` is set explicitly) and from wherever `pc.ClusterContext` users run their login flow. The default `staticClients` entry (id `polars`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client. |
 | tests.helmHookDeletePolicy | string | `"hook-succeeded"` | Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies |
 | tests.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | tests.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |

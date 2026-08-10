@@ -13,8 +13,8 @@
 Get started right away with Polars On-Prem.
 
 <details open="true" name="quickstart">
-
-<summary>Polars On-Prem</summary>
+<summary><strong>Polars On-Prem</strong></summary>
+<br/>
 
 To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret. For the purpose of this quick start, we deploy Seaweed as an anonymous results destination. This allows you to run queries without specifying a results destination. To configure a different anonymous results destination, see [Anonymous results data](#Anonymous-results-data)
 
@@ -33,8 +33,8 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 </details>
 
 <details name="quickstart">
-
-<summary>Polars On-Prem Enterprise (offline)</summary>
+<summary><strong>Polars On-Prem Enterprise (offline)</strong></summary>
+<br/>
 
 To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) and the license file exists at `./license.json`.
 
@@ -54,8 +54,8 @@ $ kubectl port-forward svc/polars-temporary-storage 8333:8333
 </details>
 
 <details name="quickstart">
-
-<summary>Polars License Server (offline)</summary>
+<summary><strong>Polars License Server (offline)</strong></summary>
+<br/>
 
 To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
 
@@ -530,7 +530,7 @@ worker:
         requests:
           cpu: 3770m
           memory: 14.31GiB
-    
+
         limits:
           cpu: 3770m
           memory: 14.31GiB
