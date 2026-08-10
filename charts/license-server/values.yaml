@@ -1,0 +1,139 @@
+# -- Base name of the chart
+name: license-server
+
+# -- Override the full name of the chart
+fullnameOverride: ""
+
+# Persistent volume holding the SQLite state DB + signed report ledger
+report:
+  # -- Mount path for the state DB + report ledger
+  mountPath: /data
+  # -- StorageClass for the report PVC. Uses the cluster default when empty.
+  storageClass:
+  # -- Size of the report PVC
+  size: 1Gi
+
+license:
+  # -- Name of the Secret holding the license JSON
+  secretName: license-server-license
+  # -- Key within the license Secret
+  key: license.json
+  # -- Path the license file is mounted at inside the container
+  mountPath: /config/license-server-license.json
+  # -- Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this.
+  content: ""
+
+tlsBundle:
+  # -- Name of the Secret holding the TLS bundle (PEM: cert + key + CA)
+  secretName: license-server-tls-bundle
+  # -- Key within the TLS bundle Secret
+  key: bundle.pem
+  # -- Path the TLS bundle is mounted at inside the container
+  mountPath: /config/license-server-bundle.pem
+  # -- Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this.
+  content: ""
+
+image:
+  # -- Image repository
+  repository: "polarscloud/license-server"
+  # -- Image tag. Defaults to the chart appVersion when left empty.
+  tag: ""
+  # @schema
+  # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/imagePullPolicy
+  # @schema
+  # -- Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
+  pullPolicy: IfNotPresent
+
+# @schema
+# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/imagePullSecrets
+# @schema
+# -- ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+imagePullSecrets: []
+
+# @schema
+# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
+# @schema
+# -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources:
+  requests:
+    # -- CPU request
+    cpu: 100m
+    # -- Memory request
+    memory: 128Mi
+  limits:
+    # -- Memory limit (no CPU limit, to avoid throttling)
+    memory: 128Mi
+
+service:
+  # -- gRPC/HTTPS port the server listens on
+  port: 50051
+  # -- HTTP port serving health probes (`/healthz`, `/readyz`) and Prometheus metrics (`/metrics`)
+  httpPort: 8081
+
+# -- ServiceMonitor for scraping /metrics. Requires the Prometheus Operator CRDs.
+serviceMonitor:
+  # -- Create a ServiceMonitor for the Prometheus Operator
+  enabled: false
+  # -- Scrape interval
+  interval: 5m
+
+serviceAccount:
+  # -- Create a dedicated ServiceAccount
+  create: true
+  # -- ServiceAccount name. Defaults to `name` when empty.
+  name: ""
+  # @schema
+  # additionalProperties: true
+  # @schema
+  # -- Annotations to add to the ServiceAccount
+  annotations: {}
+  # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
+  automount: false
+
+# @schema
+# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext
+# @schema
+# -- SecurityContext holds pod-level security attributes and common container settings.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# @schema
+# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
+# @schema
+# -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# @schema
+# additionalProperties: true
+# @schema
+# -- Common annotations for all resources
+podAnnotations: {}
+# @schema
+# additionalProperties: true
+# @schema
+# -- Common labels for all resources
+podLabels: {}
+# @schema
+# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector
+# @schema
+# -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+nodeSelector: {}
+# @schema
+# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/tolerations
+# @schema
+# -- If specified, the pod's tolerations.
+tolerations: []
+# @schema
+# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/affinity
+# @schema
+# -- If specified, the pod's scheduling constraints
+affinity: {}

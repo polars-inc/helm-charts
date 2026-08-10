@@ -22650,372 +22650,10 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
-    "acceptEula": {
-      "default": "false",
-      "description": "To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.",
-      "required": [],
-      "title": "acceptEula"
-    },
-    "allowLocalScans": {
-      "default": "false",
-      "description": "Disabling this option prevents the worker from reading from local disk. It is currently not possible to configure which scan locations are allowed. Users can alternatively configure scans that read from S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#reading-from-cloud-storage",
-      "required": [],
-      "title": "allowLocalScans"
-    },
-    "allowLocalSinks": {
-      "default": "true",
-      "description": "Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage",
-      "required": [],
-      "title": "allowLocalSinks"
-    },
-    "anonymousResults": {
-      "additionalProperties": false,
-      "description": "Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results.",
-      "properties": {
-        "abs": {
-          "additionalProperties": false,
-          "description": "Configure Azure Blob Storage as anonymous results location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable Azure Blob Storage for anonymous results.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "az://my-storage-location/path/to/dir",
-              "description": "The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            },
-            "presignDuration": {
-              "default": "8h",
-              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
-              "required": [],
-              "title": "presignDuration"
-            }
-          },
-          "required": [],
-          "title": "abs"
-        },
-        "gcs": {
-          "additionalProperties": false,
-          "description": "Configure Google Cloud Storage as anonymous results location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable Google Cloud storage for anonymous results.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "gs://my-storage-location/path/to/dir",
-              "description": "The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            },
-            "presignDuration": {
-              "default": "8h",
-              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
-              "required": [],
-              "title": "presignDuration"
-            }
-          },
-          "required": [],
-          "title": "gcs"
-        },
-        "s3": {
-          "additionalProperties": false,
-          "description": "Configure AWS S3 storage as anonymous results location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable AWS S3 storage for anonymous results.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "s3://my-bucket/path/to/dir",
-              "description": "The entire S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            },
-            "presignDuration": {
-              "default": "8h",
-              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
-              "required": [],
-              "title": "presignDuration"
-            }
-          },
-          "required": [],
-          "title": "s3"
-        },
-        "sharedFilesystem": {
-          "additionalProperties": false,
-          "description": "Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself using scheduler.deployment.volumes and scheduler.deployment.runtimeContainer.volumeMounts. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable shared filesystem for anonymous results.",
-              "required": [],
-              "title": "enabled"
-            },
-            "path": {
-              "default": "/mnt/nfs/anonymous-results",
-              "description": "The filesystem path where anonymous results will be stored. Must correspond to a mounted volume and match the path mounted on the client.",
-              "required": [],
-              "title": "path"
-            }
-          },
-          "required": [],
-          "title": "sharedFilesystem"
-        },
-        "temporaryStorage": {
-          "additionalProperties": false,
-          "description": "Configure using quick-start temporary storage server",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.",
-              "required": [],
-              "title": "enabled"
-            },
-            "presignDuration": {
-              "default": "8h",
-              "description": "The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.",
-              "required": [],
-              "title": "presignDuration"
-            },
-            "presignEndpointUrl": {
-              "default": "http://localhost:8333",
-              "title": "presignEndpointUrl",
-              "type": "string"
-            }
-          },
-          "required": [],
-          "title": "temporaryStorage"
-        }
-      },
-      "required": [],
-      "title": "anonymousResults"
-    },
-    "checkpoint": {
-      "additionalProperties": false,
-      "description": "Checkpointing for queries. Checkpointing is enabled automatically whenever a checkpointData location is configured below; the scheduler then periodically checkpoints completed stages so queries can resume after failures.",
-      "properties": {
-        "period": {
-          "default": "20m",
-          "description": "Period at which checkpoints will be created. If the period has passed after a stage has completed, a checkpoint will be created. Accepts either a jiff friendly duration (e.g. `5s`, see https://docs.rs/jiff/latest/jiff/fmt/friendly/) or an ISO 8601 duration (e.g. `PT5S`).",
-          "required": [],
-          "title": "period"
-        }
-      },
-      "required": [],
-      "title": "checkpoint"
-    },
-    "checkpointData": {
-      "additionalProperties": false,
-      "properties": {
-        "abs": {
-          "additionalProperties": false,
-          "description": "Configure Azure Blob Storage as checkpoint location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable Azure Blob Storage for checkpoint data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "az://my-storage-location/path/to/dir",
-              "description": "The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            }
-          },
-          "required": [],
-          "title": "abs"
-        },
-        "gcs": {
-          "additionalProperties": false,
-          "description": "Configure Google Cloud Storage as checkpoint location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable Google Cloud storage for checkpoint data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "gs://my-storage-location/path/to/dir",
-              "description": "The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            }
-          },
-          "required": [],
-          "title": "gcs"
-        },
-        "s3": {
-          "additionalProperties": false,
-          "description": "Configure AWS S3 storage as checkpoint location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable AWS S3 storage for checkpoint data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "s3://my-storage-location/path/to/dir",
-              "description": "The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            }
-          },
-          "required": [],
-          "title": "s3"
-        },
-        "sharedFilesystem": {
-          "additionalProperties": false,
-          "description": "Configure a shared filesystem path for checkpoint data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable shared filesystem for checkpoint data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "path": {
-              "default": "/mnt/nfs/checkpoint-data",
-              "description": "The filesystem path where checkpoint data will be stored. Must correspond to a mounted volume on a shared network filesystem.",
-              "required": [],
-              "title": "path"
-            }
-          },
-          "required": [],
-          "title": "sharedFilesystem"
-        },
-        "sharedPersistentVolumeClaim": {
-          "additionalProperties": false,
-          "description": "Shared persistent storage for checkpoint data.",
-          "properties": {
-            "create": {
-              "default": "true",
-              "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
-              "required": [],
-              "title": "create"
-            },
-            "enabled": {
-              "default": "false",
-              "description": "Enable shared persistent volume claim for checkpoint data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "existingClaimName": {
-              "default": "",
-              "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-checkpoint-data\".",
-              "required": [],
-              "title": "existingClaimName"
-            },
-            "size": {
-              "default": "125Gi",
-              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
-              "required": [],
-              "title": "size"
-            },
-            "storageClassName": {
-              "default": "",
-              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-              "required": [],
-              "title": "storageClassName"
-            }
-          },
-          "required": [],
-          "title": "sharedPersistentVolumeClaim"
-        }
-      },
-      "required": [],
-      "title": "checkpointData",
-      "type": "object"
-    },
-    "clusterDomain": {
-      "default": "cluster.local",
-      "description": "Kubernetes cluster DNS domain (the suffix used in `<svc>.<ns>.svc.<domain>`). Override this if your cluster uses a non-default domain.",
-      "required": [],
-      "title": "clusterDomain"
-    },
-    "clusterId": {
-      "default": "",
-      "description": "Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to \"helm namespace/helm release name\" if not set.",
-      "required": [],
-      "title": "clusterId"
-    },
-    "denyAnonymousUsers": {
-      "default": "false",
-      "description": "Enabling this option ensures that all queries must be sent with a set username.",
-      "required": [],
-      "title": "denyAnonymousUsers"
-    },
-    "disableHostMetrics": {
-      "default": "false",
-      "description": "Disable host metrics collection for the dashboard",
-      "required": [],
-      "title": "disableHostMetrics"
+    "affinity": {
+      "$ref": "#/definitions/io.k8s.api.core.v1.Affinity",
+      "description": "If specified, the pod's scheduling constraints",
+      "required": []
     },
     "fullnameOverride": {
       "default": "",
@@ -23027,6 +22665,32 @@
       "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
       "required": [],
       "title": "global",
+      "type": "object"
+    },
+    "image": {
+      "additionalProperties": false,
+      "properties": {
+        "pullPolicy": {
+          "default": "IfNotPresent",
+          "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
+          "title": "pullPolicy",
+          "type": "string"
+        },
+        "repository": {
+          "default": "polarscloud/license-server",
+          "description": "Image repository",
+          "required": [],
+          "title": "repository"
+        },
+        "tag": {
+          "default": "",
+          "description": "Image tag. Defaults to the chart appVersion when left empty.",
+          "required": [],
+          "title": "tag"
+        }
+      },
+      "required": [],
+      "title": "image",
       "type": "object"
     },
     "imagePullSecrets": {
@@ -23047,278 +22711,50 @@
     "license": {
       "additionalProperties": false,
       "properties": {
-        "licenseServer": {
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable connecting to offline Polars license server.",
-              "required": [],
-              "title": "enabled"
-            },
-            "uri": {
-              "default": "https://license-server.polars.svc.cluster.local:50051",
-              "description": "URI of the license server.",
-              "required": [],
-              "title": "uri"
-            }
-          },
+        "content": {
+          "default": "",
+          "description": "Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this.",
           "required": [],
-          "title": "licenseServer",
-          "type": "object"
+          "title": "content"
         },
-        "onPrem": {
-          "additionalProperties": false,
-          "properties": {
-            "clientId": {
-              "anyOf": [
-                {
-                  "type": "null"
-                },
-                {
-                  "type": "string"
-                },
-                {
-                  "properties": {
-                    "valueFrom": {
-                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
-                      "required": []
-                    }
-                  },
-                  "required": [
-                    "valueFrom"
-                  ],
-                  "type": "object"
-                }
-              ],
-              "default": "",
-              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
-              "required": [],
-              "title": "clientId"
-            },
-            "clientSecret": {
-              "anyOf": [
-                {
-                  "type": "null"
-                },
-                {
-                  "type": "string"
-                },
-                {
-                  "properties": {
-                    "valueFrom": {
-                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
-                      "required": []
-                    }
-                  },
-                  "required": [
-                    "valueFrom"
-                  ],
-                  "type": "object"
-                }
-              ],
-              "default": "",
-              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
-              "required": [],
-              "title": "clientSecret"
-            },
-            "enabled": {
-              "default": false,
-              "title": "enabled",
-              "type": "boolean"
-            },
-            "licenseData": {
-              "additionalProperties": false,
-              "properties": {
-                "create": {
-                  "default": "true",
-                  "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
-                  "required": [],
-                  "title": "create"
-                },
-                "enabled": {
-                  "default": "false",
-                  "description": "Enable persistent volume claim for the license data.",
-                  "required": [],
-                  "title": "enabled"
-                },
-                "existingClaimName": {
-                  "default": "",
-                  "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-license-certificate\".",
-                  "required": [],
-                  "title": "existingClaimName"
-                },
-                "storageClassName": {
-                  "default": "",
-                  "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-                  "required": [],
-                  "title": "storageClassName"
-                }
-              },
-              "required": [],
-              "title": "licenseData",
-              "type": "object"
-            },
-            "workspaceId": {
-              "anyOf": [
-                {
-                  "type": "null"
-                },
-                {
-                  "type": "string"
-                },
-                {
-                  "properties": {
-                    "valueFrom": {
-                      "$ref": "#/definitions/io.k8s.api.core.v1.EnvVarSource",
-                      "required": []
-                    }
-                  },
-                  "required": [
-                    "valueFrom"
-                  ],
-                  "type": "object"
-                }
-              ],
-              "default": "",
-              "description": " anyOf:   - type: \"null\"   - type: string   - type: object     required:       - valueFrom     properties:       valueFrom:         $ref: #/definitions/io.k8s.api.core.v1.EnvVarSource @schema",
-              "required": [],
-              "title": "workspaceId"
-            }
-          },
+        "key": {
+          "default": "license.json",
+          "description": "Key within the license Secret",
           "required": [],
-          "title": "onPrem",
-          "type": "object"
+          "title": "key"
         },
-        "onPremEnterprise": {
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "default": false,
-              "title": "enabled",
-              "type": "boolean"
-            },
-            "secretName": {
-              "default": "",
-              "description": "the name containing your polars license key",
-              "required": [],
-              "title": "secretName"
-            },
-            "secretProperty": {
-              "default": "",
-              "description": "the property on the secret containing your license key",
-              "required": [],
-              "title": "secretProperty"
-            }
-          },
+        "mountPath": {
+          "default": "/config/license-server-license.json",
+          "description": "Path the license file is mounted at inside the container",
           "required": [],
-          "title": "onPremEnterprise",
-          "type": "object"
+          "title": "mountPath"
+        },
+        "secretName": {
+          "default": "license-server-license",
+          "description": "Name of the Secret holding the license JSON",
+          "required": [],
+          "title": "secretName"
         }
       },
       "required": [],
       "title": "license",
       "type": "object"
     },
-    "lineage": {
-      "additionalProperties": false,
-      "properties": {
-        "enabled": {
-          "default": "false",
-          "description": "Enable support for lineage exporting to a specific endpoint",
-          "required": [],
-          "title": "enabled"
-        },
-        "transport": {
-          "additionalProperties": false,
-          "properties": {
-            "http": {
-              "additionalProperties": false,
-              "properties": {
-                "endpoint": {
-                  "default": "http://marquez.default.svc.cluster.local:5000",
-                  "description": "Transport protocol to use for lineage export",
-                  "required": [],
-                  "title": "endpoint"
-                }
-              },
-              "required": [],
-              "title": "http",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "transport",
-          "type": "object"
-        }
+    "name": {
+      "default": "license-server",
+      "description": "Base name of the chart",
+      "required": [],
+      "title": "name"
+    },
+    "nodeSelector": {
+      "additionalProperties": {
+        "type": "string"
       },
+      "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
       "required": [],
-      "title": "lineage",
-      "type": "object"
-    },
-    "logLevel": {
-      "default": "info",
-      "description": "One of \"info\", \"debug\", \"trace\".",
-      "required": [],
-      "title": "logLevel"
-    },
-    "nameOverride": {
-      "default": "",
-      "description": "Override the name of the chart",
-      "required": [],
-      "title": "nameOverride"
-    },
-    "observatory": {
-      "additionalProperties": false,
-      "properties": {
-        "maxMetricsBytesTotal": {
-          "default": "104857600",
-          "description": "Maximum number of bytes for host metrics storage",
-          "required": [],
-          "title": "maxMetricsBytesTotal"
-        },
-        "persistentVolumeClaim": {
-          "additionalProperties": false,
-          "properties": {
-            "create": {
-              "default": "true",
-              "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
-              "required": [],
-              "title": "create"
-            },
-            "enabled": {
-              "default": "false",
-              "description": "Enable a persistent volume claim",
-              "required": [],
-              "title": "enabled"
-            },
-            "existingClaimName": {
-              "default": "",
-              "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-observatory-data\".",
-              "required": [],
-              "title": "existingClaimName"
-            },
-            "size": {
-              "default": "1Gi",
-              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
-              "required": [],
-              "title": "size"
-            },
-            "storageClassName": {
-              "default": "",
-              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-              "required": [],
-              "title": "storageClassName"
-            }
-          },
-          "required": [],
-          "title": "persistentVolumeClaim",
-          "type": "object"
-        }
-      },
-      "required": [],
-      "title": "observatory",
-      "type": "object"
+      "title": "nodeSelector",
+      "type": "object",
+      "x-kubernetes-map-type": "atomic"
     },
     "podAnnotations": {
       "additionalProperties": true,
@@ -23332,1505 +22768,163 @@
       "required": [],
       "title": "podLabels"
     },
-    "requireFreeWorkers": {
+    "podSecurityContext": {
+      "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+      "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
+      "required": []
+    },
+    "report": {
       "additionalProperties": false,
-      "description": "When scheduling the query, wait for a certain amount of workers to be free before starting execution.",
+      "description": "Persistent volume holding the SQLite state DB + signed report ledger",
       "properties": {
-        "count": {
-          "default": "",
-          "description": "The number of workers to wait for. By default, takes the configured worker replica count from the current release.",
-          "minimum": 0,
+        "mountPath": {
+          "default": "/data",
+          "description": "Mount path for the state DB + report ledger",
           "required": [],
-          "title": "count",
-          "type": [
-            "integer",
-            "null"
-          ]
+          "title": "mountPath"
         },
+        "size": {
+          "default": "1Gi",
+          "description": "Size of the report PVC",
+          "required": [],
+          "title": "size"
+        },
+        "storageClass": {
+          "default": "",
+          "description": "StorageClass for the report PVC. Uses the cluster default when empty.",
+          "required": [],
+          "title": "storageClass"
+        }
+      },
+      "required": [],
+      "title": "report",
+      "type": "object"
+    },
+    "resources": {
+      "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+      "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+      "required": []
+    },
+    "securityContext": {
+      "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+      "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "required": []
+    },
+    "service": {
+      "additionalProperties": false,
+      "properties": {
+        "httpPort": {
+          "default": "8081",
+          "description": "HTTP port serving health probes (`/healthz`, `/readyz`) and Prometheus metrics (`/metrics`)",
+          "required": [],
+          "title": "httpPort"
+        },
+        "port": {
+          "default": "50051",
+          "description": "gRPC/HTTPS port the server listens on",
+          "required": [],
+          "title": "port"
+        }
+      },
+      "required": [],
+      "title": "service",
+      "type": "object"
+    },
+    "serviceAccount": {
+      "additionalProperties": false,
+      "properties": {
+        "annotations": {
+          "additionalProperties": true,
+          "description": "Annotations to add to the ServiceAccount",
+          "required": [],
+          "title": "annotations"
+        },
+        "automount": {
+          "default": "false",
+          "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
+          "required": [],
+          "title": "automount"
+        },
+        "create": {
+          "default": "true",
+          "description": "Create a dedicated ServiceAccount",
+          "required": [],
+          "title": "create"
+        },
+        "name": {
+          "default": "",
+          "description": "ServiceAccount name. Defaults to `name` when empty.",
+          "required": [],
+          "title": "name"
+        }
+      },
+      "required": [],
+      "title": "serviceAccount",
+      "type": "object"
+    },
+    "serviceMonitor": {
+      "additionalProperties": false,
+      "description": "ServiceMonitor for scraping /metrics. Requires the Prometheus Operator CRDs.",
+      "properties": {
         "enabled": {
-          "default": true,
-          "title": "enabled",
-          "type": "boolean"
+          "default": "false",
+          "description": "Create a ServiceMonitor for the Prometheus Operator",
+          "required": [],
+          "title": "enabled"
+        },
+        "interval": {
+          "default": "5m",
+          "description": "Scrape interval",
+          "required": [],
+          "title": "interval"
         }
       },
       "required": [],
-      "title": "requireFreeWorkers"
+      "title": "serviceMonitor"
     },
-    "runtime": {
+    "tlsBundle": {
       "additionalProperties": false,
       "properties": {
-        "composed": {
-          "additionalProperties": false,
-          "properties": {
-            "dist": {
-              "additionalProperties": false,
-              "properties": {
-                "pullPolicy": {
-                  "default": "IfNotPresent",
-                  "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
-                  "title": "pullPolicy",
-                  "type": "string"
-                },
-                "repository": {
-                  "default": "polarscloud/polars-on-premises",
-                  "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "",
-                  "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "dist",
-              "type": "object"
-            },
-            "enabled": {
-              "default": true,
-              "title": "enabled",
-              "type": "boolean"
-            },
-            "polarsExtras": {
-              "default": "async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone",
-              "title": "polarsExtras",
-              "type": "string"
-            },
-            "requirements": {
-              "default": "",
-              "title": "requirements",
-              "type": "string"
-            },
-            "runtime": {
-              "additionalProperties": false,
-              "properties": {
-                "pullPolicy": {
-                  "default": "",
-                  "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
-                  "title": "pullPolicy",
-                  "type": "string"
-                },
-                "repository": {
-                  "default": "python",
-                  "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "3.13.9-slim-bookworm",
-                  "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "runtime",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "composed",
-          "type": "object"
-        },
-        "prebuilt": {
-          "additionalProperties": false,
-          "properties": {
-            "args": {
-              "description": "Arguments to the entrypoint. The container image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will produce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell",
-              "items": {
-                "type": "string"
-              },
-              "title": "args",
-              "type": "array",
-              "x-kubernetes-list-type": "atomic"
-            },
-            "command": {
-              "description": "Entrypoint array. Not executed within a shell. The container image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will produce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell",
-              "items": {
-                "type": "string"
-              },
-              "title": "command",
-              "type": "array",
-              "x-kubernetes-list-type": "atomic"
-            },
-            "enabled": {
-              "default": false,
-              "title": "enabled",
-              "type": "boolean"
-            },
-            "runtime": {
-              "additionalProperties": false,
-              "properties": {
-                "pullPolicy": {
-                  "default": "",
-                  "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
-                  "title": "pullPolicy",
-                  "type": "string"
-                },
-                "repository": {
-                  "default": "your-prebuilt-image",
-                  "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "",
-                  "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "runtime",
-              "type": "object"
-            },
-            "workingDir": {
-              "default": "",
-              "description": "Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image. Cannot be updated.",
-              "title": "workingDir",
-              "type": "string"
-            }
-          },
-          "required": [],
-          "title": "prebuilt",
-          "type": "object"
-        }
-      },
-      "required": [],
-      "title": "runtime",
-      "type": "object"
-    },
-    "scheduler": {
-      "additionalProperties": false,
-      "properties": {
-        "deployment": {
-          "additionalProperties": false,
-          "properties": {
-            "affinity": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.Affinity",
-              "description": "If specified, the pod's scheduling constraints",
-              "required": []
-            },
-            "automountServiceAccountToken": {
-              "default": true,
-              "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.",
-              "title": "automountServiceAccountToken",
-              "type": "boolean"
-            },
-            "distContainer": {
-              "additionalProperties": false,
-              "properties": {
-                "resources": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                  "required": []
-                },
-                "securityContext": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
-                  "required": []
-                }
-              },
-              "required": [],
-              "title": "distContainer",
-              "type": "object"
-            },
-            "dnsConfig": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodDNSConfig",
-              "description": "Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy.",
-              "required": []
-            },
-            "dnsPolicy": {
-              "default": "",
-              "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
-              "title": "dnsPolicy",
-              "type": "string"
-            },
-            "hostAliases": {
-              "description": "HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
-                "required": []
-              },
-              "title": "hostAliases",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "ip"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "ip",
-              "x-kubernetes-patch-strategy": "merge"
-            },
-            "hostNetwork": {
-              "default": false,
-              "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
-              "title": "hostNetwork",
-              "type": "boolean"
-            },
-            "nodeSelector": {
-              "additionalProperties": {
-                "type": "string"
-              },
-              "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
-              "required": [],
-              "title": "nodeSelector",
-              "type": "object",
-              "x-kubernetes-map-type": "atomic"
-            },
-            "podAnnotations": {
-              "additionalProperties": true,
-              "description": "Additional annotations to add to the scheduler pod.",
-              "required": [],
-              "title": "podAnnotations"
-            },
-            "podLabels": {
-              "additionalProperties": true,
-              "description": "Additional labels to add to the scheduler pod.",
-              "required": [],
-              "title": "podLabels"
-            },
-            "podSecurityContext": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
-              "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
-              "required": []
-            },
-            "priorityClassName": {
-              "default": "",
-              "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
-              "title": "priorityClassName",
-              "type": "string"
-            },
-            "revisionHistoryLimit": {
-              "default": 10,
-              "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 10.",
-              "title": "revisionHistoryLimit",
-              "type": "integer"
-            },
-            "rollout": {
-              "$ref": "#/definitions/io.k8s.api.apps.v1.DeploymentStrategy",
-              "description": "The deployment strategy to use to replace existing pods with new ones.",
-              "required": [],
-              "x-kubernetes-patch-strategy": "retainKeys"
-            },
-            "runtimeClassName": {
-              "default": "",
-              "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
-              "title": "runtimeClassName",
-              "type": "string"
-            },
-            "runtimeContainer": {
-              "additionalProperties": false,
-              "properties": {
-                "env": {
-                  "description": "List of environment variables to set in the container. Cannot be updated.",
-                  "items": {
-                    "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                    "required": []
-                  },
-                  "title": "env",
-                  "type": "array",
-                  "x-kubernetes-list-map-keys": [
-                    "name"
-                  ],
-                  "x-kubernetes-list-type": "map",
-                  "x-kubernetes-patch-merge-key": "name",
-                  "x-kubernetes-patch-strategy": "merge"
-                },
-                "lifecycleHooks": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.Lifecycle",
-                  "description": "Actions that the management system should take in response to container lifecycle events. Cannot be updated.",
-                  "required": []
-                },
-                "readinessProbe": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.Probe",
-                  "description": "Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes",
-                  "required": []
-                },
-                "resources": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                  "required": []
-                },
-                "securityContext": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
-                  "required": []
-                },
-                "volumeMounts": {
-                  "description": "Pod volumes to mount into the container's filesystem. Cannot be updated.",
-                  "items": {
-                    "$ref": "#/definitions/io.k8s.api.core.v1.VolumeMount",
-                    "required": []
-                  },
-                  "title": "volumeMounts",
-                  "type": "array",
-                  "x-kubernetes-list-map-keys": [
-                    "mountPath"
-                  ],
-                  "x-kubernetes-list-type": "map",
-                  "x-kubernetes-patch-merge-key": "mountPath",
-                  "x-kubernetes-patch-strategy": "merge"
-                }
-              },
-              "required": [],
-              "title": "runtimeContainer",
-              "type": "object"
-            },
-            "schedulerName": {
-              "default": "",
-              "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
-              "title": "schedulerName",
-              "type": "string"
-            },
-            "tolerations": {
-              "description": "If specified, the pod's tolerations.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
-                "required": []
-              },
-              "title": "tolerations",
-              "type": "array",
-              "x-kubernetes-list-type": "atomic"
-            },
-            "topologySpreadConstraints": {
-              "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-                "required": []
-              },
-              "title": "topologySpreadConstraints",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "topologyKey",
-                "whenUnsatisfiable"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "topologyKey",
-              "x-kubernetes-patch-strategy": "merge"
-            },
-            "volumes": {
-              "description": "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.Volume",
-                "required": []
-              },
-              "title": "volumes",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "name"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "name",
-              "x-kubernetes-patch-strategy": "merge,retainKeys"
-            }
-          },
-          "required": [],
-          "title": "deployment",
-          "type": "object"
-        },
-        "serviceAccount": {
-          "additionalProperties": false,
-          "properties": {
-            "automount": {
-              "default": "true",
-              "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
-              "required": [],
-              "title": "automount"
-            },
-            "create": {
-              "default": "false",
-              "description": "Whether to create a service account for the scheduler.",
-              "required": [],
-              "title": "create"
-            },
-            "name": {
-              "default": "",
-              "description": "The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to \"default\" if not set.",
-              "required": [],
-              "title": "name"
-            }
-          },
-          "required": [],
-          "title": "serviceAccount",
-          "type": "object"
-        },
-        "services": {
-          "additionalProperties": false,
-          "description": "Services",
-          "properties": {
-            "internal": {
-              "additionalProperties": false,
-              "properties": {
-                "annotations": {
-                  "additionalProperties": true,
-                  "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
-                  "required": [],
-                  "title": "annotations"
-                },
-                "type": {
-                  "default": "ClusterIP",
-                  "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
-                  "title": "type",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "internal",
-              "type": "object"
-            },
-            "observatory": {
-              "additionalProperties": false,
-              "properties": {
-                "annotations": {
-                  "additionalProperties": true,
-                  "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
-                  "required": [],
-                  "title": "annotations"
-                },
-                "type": {
-                  "default": "ClusterIP",
-                  "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
-                  "title": "type",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "observatory",
-              "type": "object"
-            },
-            "scheduler": {
-              "additionalProperties": false,
-              "properties": {
-                "annotations": {
-                  "additionalProperties": true,
-                  "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
-                  "required": [],
-                  "title": "annotations"
-                },
-                "type": {
-                  "default": "ClusterIP",
-                  "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
-                  "title": "type",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "scheduler",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "services",
-          "type": "object"
-        }
-      },
-      "required": [],
-      "title": "scheduler",
-      "type": "object"
-    },
-    "shuffleData": {
-      "additionalProperties": false,
-      "description": "Ephemeral storage for shuffle data.",
-      "properties": {
-        "abs": {
-          "additionalProperties": false,
-          "description": "Configure Azure Blob Storage as shuffle data location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable Azure Blob Storage for shuffle data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "az://my-storage-location/path/to/dir",
-              "description": "The entire Azure Blob Storage URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            }
-          },
-          "required": [],
-          "title": "abs"
-        },
-        "ephemeralVolumeClaim": {
-          "additionalProperties": false,
-          "description": "Configure ephemeral storage for shuffle data.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable ephemeral volume claim for shuffle data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "size": {
-              "default": "125Gi",
-              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
-              "required": [],
-              "title": "size"
-            },
-            "storageClassName": {
-              "default": "hostpath",
-              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-              "required": [],
-              "title": "storageClassName"
-            }
-          },
-          "required": [],
-          "title": "ephemeralVolumeClaim"
-        },
-        "gcs": {
-          "additionalProperties": false,
-          "description": "Configure Google Cloud Storage as shuffle data location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable Google Cloud storage for shuffle data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "gs://my-storage-location/path/to/dir",
-              "description": "The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            }
-          },
-          "required": [],
-          "title": "gcs"
-        },
-        "s3": {
-          "additionalProperties": false,
-          "description": "Configure AWS S3 storage as shuffle data location.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable AWS S3 storage for shuffle data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "endpoint": {
-              "default": "s3://my-storage-location/path/to/dir",
-              "description": "The entire AWS S3 URI. If the storage location requires authentication, make sure to provide the credentials in the options field.",
-              "required": [],
-              "title": "endpoint"
-            },
-            "options": {
-              "description": "Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "options"
-            }
-          },
-          "required": [],
-          "title": "s3"
-        },
-        "sharedFilesystem": {
-          "additionalProperties": false,
-          "description": "Configure a shared filesystem path for shuffle data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable shared filesystem for shuffle data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "path": {
-              "default": "/mnt/nfs/shuffle-data",
-              "description": "The filesystem path where shuffle data will be stored. Must correspond to a mounted volume on a shared network filesystem.",
-              "required": [],
-              "title": "path"
-            }
-          },
-          "required": [],
-          "title": "sharedFilesystem"
-        },
-        "sharedPersistentVolumeClaim": {
-          "additionalProperties": false,
-          "description": "Shared persistent storage for shuffle data.",
-          "properties": {
-            "create": {
-              "default": "true",
-              "description": "Create the PVC resource. Set to false if you want to use an existing PVC.",
-              "required": [],
-              "title": "create"
-            },
-            "enabled": {
-              "default": "false",
-              "description": "Enable shared persistent volume claim for shuffle data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "existingClaimName": {
-              "default": "",
-              "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-shuffle-data\".",
-              "required": [],
-              "title": "existingClaimName"
-            },
-            "size": {
-              "default": "125Gi",
-              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
-              "required": [],
-              "title": "size"
-            },
-            "storageClassName": {
-              "default": "",
-              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-              "required": [],
-              "title": "storageClassName"
-            }
-          },
-          "required": [],
-          "title": "sharedPersistentVolumeClaim"
-        }
-      },
-      "required": [],
-      "title": "shuffleData"
-    },
-    "telemetry": {
-      "additionalProperties": false,
-      "properties": {
-        "otlpEndpoint": {
+        "content": {
           "default": "",
-          "description": "Endpoint to send OTLP traces and metrics to.",
+          "description": "Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this.",
           "required": [],
-          "title": "otlpEndpoint"
+          "title": "content"
+        },
+        "key": {
+          "default": "bundle.pem",
+          "description": "Key within the TLS bundle Secret",
+          "required": [],
+          "title": "key"
+        },
+        "mountPath": {
+          "default": "/config/license-server-bundle.pem",
+          "description": "Path the TLS bundle is mounted at inside the container",
+          "required": [],
+          "title": "mountPath"
+        },
+        "secretName": {
+          "default": "license-server-tls-bundle",
+          "description": "Name of the Secret holding the TLS bundle (PEM: cert + key + CA)",
+          "required": [],
+          "title": "secretName"
         }
       },
       "required": [],
-      "title": "telemetry",
+      "title": "tlsBundle",
       "type": "object"
     },
-    "temporaryData": {
-      "additionalProperties": false,
-      "description": "Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance.",
-      "properties": {
-        "ephemeralVolumeClaim": {
-          "additionalProperties": false,
-          "description": "Configure ephemeral storage for temporary data.",
-          "properties": {
-            "enabled": {
-              "default": "false",
-              "description": "Enable ephemeral volume claim for temporary data.",
-              "required": [],
-              "title": "enabled"
-            },
-            "size": {
-              "default": "125Gi",
-              "description": "Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity",
-              "required": [],
-              "title": "size"
-            },
-            "storageClassName": {
-              "default": "hostpath",
-              "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-              "required": [],
-              "title": "storageClassName"
-            }
-          },
-          "required": [],
-          "title": "ephemeralVolumeClaim"
-        }
+    "tolerations": {
+      "description": "If specified, the pod's tolerations.",
+      "items": {
+        "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
+        "required": []
       },
-      "required": [],
-      "title": "temporaryData"
-    },
-    "temporaryStorage": {
-      "additionalProperties": false,
-      "description": "Configuration of the temporary storage deployment used for anonymous results",
-      "properties": {
-        "deployment": {
-          "additionalProperties": false,
-          "properties": {
-            "affinity": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.Affinity",
-              "description": "If specified, the pod's scheduling constraints",
-              "required": []
-            },
-            "container": {
-              "additionalProperties": false,
-              "properties": {
-                "image": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "pullPolicy": {
-                      "default": "IfNotPresent",
-                      "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
-                      "title": "pullPolicy",
-                      "type": "string"
-                    },
-                    "repository": {
-                      "default": "chrislusf/seaweedfs",
-                      "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
-                      "required": [],
-                      "title": "repository"
-                    },
-                    "tag": {
-                      "default": "4.23",
-                      "description": "Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images",
-                      "required": [],
-                      "title": "tag"
-                    }
-                  },
-                  "required": [],
-                  "title": "image",
-                  "type": "object"
-                },
-                "resources": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                  "required": []
-                },
-                "securityContext": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
-                  "required": []
-                }
-              },
-              "required": [],
-              "title": "container",
-              "type": "object"
-            },
-            "dnsConfig": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodDNSConfig",
-              "description": "Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy.",
-              "required": []
-            },
-            "dnsPolicy": {
-              "default": "",
-              "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
-              "title": "dnsPolicy",
-              "type": "string"
-            },
-            "hostAliases": {
-              "description": "HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
-                "required": []
-              },
-              "title": "hostAliases",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "ip"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "ip",
-              "x-kubernetes-patch-strategy": "merge"
-            },
-            "hostNetwork": {
-              "default": false,
-              "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
-              "title": "hostNetwork",
-              "type": "boolean"
-            },
-            "nodeSelector": {
-              "additionalProperties": {
-                "type": "string"
-              },
-              "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
-              "required": [],
-              "title": "nodeSelector",
-              "type": "object",
-              "x-kubernetes-map-type": "atomic"
-            },
-            "podAnnotations": {
-              "additionalProperties": true,
-              "description": "Additional annotations to add to the temporary storage pod.",
-              "required": [],
-              "title": "podAnnotations"
-            },
-            "podLabels": {
-              "additionalProperties": true,
-              "description": "Additional labels to add to the temporary storage pod.",
-              "required": [],
-              "title": "podLabels"
-            },
-            "podSecurityContext": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
-              "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
-              "required": []
-            },
-            "priorityClassName": {
-              "default": "",
-              "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
-              "title": "priorityClassName",
-              "type": "string"
-            },
-            "revisionHistoryLimit": {
-              "default": 10,
-              "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 10.",
-              "title": "revisionHistoryLimit",
-              "type": "integer"
-            },
-            "runtimeClassName": {
-              "default": "",
-              "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
-              "title": "runtimeClassName",
-              "type": "string"
-            },
-            "schedulerName": {
-              "default": "",
-              "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
-              "title": "schedulerName",
-              "type": "string"
-            },
-            "tolerations": {
-              "description": "If specified, the pod's tolerations.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
-                "required": []
-              },
-              "title": "tolerations",
-              "type": "array",
-              "x-kubernetes-list-type": "atomic"
-            },
-            "topologySpreadConstraints": {
-              "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-                "required": []
-              },
-              "title": "topologySpreadConstraints",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "topologyKey",
-                "whenUnsatisfiable"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "topologyKey",
-              "x-kubernetes-patch-strategy": "merge"
-            }
-          },
-          "required": [],
-          "title": "deployment",
-          "type": "object"
-        },
-        "services": {
-          "additionalProperties": false,
-          "description": "Services",
-          "properties": {
-            "s3": {
-              "additionalProperties": false,
-              "properties": {
-                "annotations": {
-                  "additionalProperties": true,
-                  "description": "Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.",
-                  "required": [],
-                  "title": "annotations"
-                },
-                "type": {
-                  "default": "ClusterIP",
-                  "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. \"ExternalName\" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
-                  "title": "type",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "s3",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "services",
-          "type": "object"
-        }
-      },
-      "required": [],
-      "title": "temporaryStorage"
-    },
-    "tests": {
-      "additionalProperties": false,
-      "properties": {
-        "helmHookDeletePolicy": {
-          "default": "hook-succeeded",
-          "description": "Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies",
-          "required": [],
-          "title": "helmHookDeletePolicy"
-        },
-        "images": {
-          "items": {
-            "anyOf": [
-              {
-                "additionalProperties": false,
-                "properties": {
-                  "pullPolicy": {
-                    "default": "IfNotPresent",
-                    "title": "pullPolicy",
-                    "type": "string"
-                  },
-                  "repository": {
-                    "default": "polarscloud/polars-on-premises-tests",
-                    "title": "repository",
-                    "type": "string"
-                  },
-                  "tag": {
-                    "default": "0.10.0",
-                    "title": "tag",
-                    "type": "string"
-                  }
-                },
-                "required": [],
-                "type": "object"
-              }
-            ],
-            "required": []
-          },
-          "title": "images",
-          "type": "array"
-        },
-        "pod": {
-          "additionalProperties": false,
-          "properties": {
-            "affinity": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.Affinity",
-              "description": "If specified, the pod's scheduling constraints",
-              "required": []
-            },
-            "automountServiceAccountToken": {
-              "default": true,
-              "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.",
-              "title": "automountServiceAccountToken",
-              "type": "boolean"
-            },
-            "distContainer": {
-              "additionalProperties": false,
-              "properties": {
-                "resources": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                  "required": []
-                },
-                "securityContext": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
-                  "required": []
-                }
-              },
-              "required": [],
-              "title": "distContainer",
-              "type": "object"
-            },
-            "dnsConfig": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodDNSConfig",
-              "description": "Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy.",
-              "required": []
-            },
-            "dnsPolicy": {
-              "default": "",
-              "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
-              "title": "dnsPolicy",
-              "type": "string"
-            },
-            "hostAliases": {
-              "description": "HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
-                "required": []
-              },
-              "title": "hostAliases",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "ip"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "ip",
-              "x-kubernetes-patch-strategy": "merge"
-            },
-            "hostNetwork": {
-              "default": false,
-              "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
-              "title": "hostNetwork",
-              "type": "boolean"
-            },
-            "nodeSelector": {
-              "additionalProperties": {
-                "type": "string"
-              },
-              "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
-              "required": [],
-              "title": "nodeSelector",
-              "type": "object",
-              "x-kubernetes-map-type": "atomic"
-            },
-            "podSecurityContext": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
-              "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
-              "required": []
-            },
-            "priorityClassName": {
-              "default": "",
-              "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
-              "title": "priorityClassName",
-              "type": "string"
-            },
-            "runtimeClassName": {
-              "default": "",
-              "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
-              "title": "runtimeClassName",
-              "type": "string"
-            },
-            "runtimeContainer": {
-              "additionalProperties": false,
-              "properties": {
-                "env": {
-                  "description": "List of environment variables to set in the container. Cannot be updated.",
-                  "items": {
-                    "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                    "required": []
-                  },
-                  "title": "env",
-                  "type": "array",
-                  "x-kubernetes-list-map-keys": [
-                    "name"
-                  ],
-                  "x-kubernetes-list-type": "map",
-                  "x-kubernetes-patch-merge-key": "name",
-                  "x-kubernetes-patch-strategy": "merge"
-                },
-                "lifecycleHooks": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.Lifecycle",
-                  "description": "Actions that the management system should take in response to container lifecycle events. Cannot be updated.",
-                  "required": []
-                },
-                "resources": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                  "required": []
-                },
-                "securityContext": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
-                  "required": []
-                },
-                "volumeMounts": {
-                  "description": "Pod volumes to mount into the container's filesystem. Cannot be updated.",
-                  "items": {
-                    "$ref": "#/definitions/io.k8s.api.core.v1.VolumeMount",
-                    "required": []
-                  },
-                  "title": "volumeMounts",
-                  "type": "array",
-                  "x-kubernetes-list-map-keys": [
-                    "mountPath"
-                  ],
-                  "x-kubernetes-list-type": "map",
-                  "x-kubernetes-patch-merge-key": "mountPath",
-                  "x-kubernetes-patch-strategy": "merge"
-                }
-              },
-              "required": [],
-              "title": "runtimeContainer",
-              "type": "object"
-            },
-            "schedulerName": {
-              "default": "",
-              "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
-              "title": "schedulerName",
-              "type": "string"
-            },
-            "tolerations": {
-              "description": "If specified, the pod's tolerations.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
-                "required": []
-              },
-              "title": "tolerations",
-              "type": "array",
-              "x-kubernetes-list-type": "atomic"
-            },
-            "topologySpreadConstraints": {
-              "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-                "required": []
-              },
-              "title": "topologySpreadConstraints",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "topologyKey",
-                "whenUnsatisfiable"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "topologyKey",
-              "x-kubernetes-patch-strategy": "merge"
-            },
-            "volumes": {
-              "description": "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.Volume",
-                "required": []
-              },
-              "title": "volumes",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "name"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "name",
-              "x-kubernetes-patch-strategy": "merge,retainKeys"
-            }
-          },
-          "required": [],
-          "title": "pod",
-          "type": "object"
-        },
-        "serviceAccount": {
-          "additionalProperties": false,
-          "properties": {
-            "automount": {
-              "default": "true",
-              "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
-              "required": [],
-              "title": "automount"
-            },
-            "create": {
-              "default": "false",
-              "description": "Whether to create a service account.",
-              "required": [],
-              "title": "create"
-            },
-            "name": {
-              "default": "",
-              "description": "The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to \"default\" if not set.",
-              "required": [],
-              "title": "name"
-            }
-          },
-          "required": [],
-          "title": "serviceAccount",
-          "type": "object"
-        }
-      },
-      "required": [],
-      "title": "tests",
-      "type": "object"
-    },
-    "worker": {
-      "additionalProperties": false,
-      "properties": {
-        "deployment": {
-          "additionalProperties": false,
-          "properties": {
-            "affinity": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.Affinity",
-              "description": "If specified, the pod's scheduling constraints",
-              "required": []
-            },
-            "automountServiceAccountToken": {
-              "default": true,
-              "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.",
-              "title": "automountServiceAccountToken",
-              "type": "boolean"
-            },
-            "distContainer": {
-              "additionalProperties": false,
-              "properties": {
-                "resources": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                  "required": []
-                },
-                "securityContext": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
-                  "required": []
-                }
-              },
-              "required": [],
-              "title": "distContainer",
-              "type": "object"
-            },
-            "dnsConfig": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodDNSConfig",
-              "description": "Specifies the DNS parameters of a pod. Parameters specified here will be merged to the generated DNS configuration based on DNSPolicy.",
-              "required": []
-            },
-            "dnsPolicy": {
-              "default": "",
-              "description": "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.",
-              "title": "dnsPolicy",
-              "type": "string"
-            },
-            "hostAliases": {
-              "description": "HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if specified.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.HostAlias",
-                "required": []
-              },
-              "title": "hostAliases",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "ip"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "ip",
-              "x-kubernetes-patch-strategy": "merge"
-            },
-            "hostNetwork": {
-              "default": false,
-              "description": "Host networking requested for this pod. Use the host's network namespace. When using HostNetwork you should specify ports so the scheduler is aware. When `hostNetwork` is true, specified `hostPort` fields in port definitions must match `containerPort`, and unspecified `hostPort` fields in port definitions are defaulted to match `containerPort`. Default to false.",
-              "title": "hostNetwork",
-              "type": "boolean"
-            },
-            "nodeSelector": {
-              "additionalProperties": {
-                "type": "string"
-              },
-              "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/",
-              "required": [],
-              "title": "nodeSelector",
-              "type": "object",
-              "x-kubernetes-map-type": "atomic"
-            },
-            "podAnnotations": {
-              "additionalProperties": true,
-              "description": "Additional annotations to add to the scheduler pod.",
-              "required": [],
-              "title": "podAnnotations"
-            },
-            "podLabels": {
-              "additionalProperties": true,
-              "description": "Additional labels to add to the scheduler pod.",
-              "required": [],
-              "title": "podLabels"
-            },
-            "podSecurityContext": {
-              "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
-              "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
-              "required": []
-            },
-            "priorityClassName": {
-              "default": "",
-              "description": "If specified, indicates the pod's priority. \"system-node-critical\" and \"system-cluster-critical\" are two special keywords which indicate the highest priorities with the former being the highest priority. Any other name must be defined by creating a PriorityClass object with that name. If not specified, the pod priority will be default or zero if there is no default.",
-              "title": "priorityClassName",
-              "type": "string"
-            },
-            "replicaCount": {
-              "default": "2",
-              "description": "Number of polars worker replicas.",
-              "required": [],
-              "title": "replicaCount"
-            },
-            "revisionHistoryLimit": {
-              "default": 10,
-              "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 10.",
-              "title": "revisionHistoryLimit",
-              "type": "integer"
-            },
-            "runtimeClassName": {
-              "default": "",
-              "description": "RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class",
-              "title": "runtimeClassName",
-              "type": "string"
-            },
-            "runtimeContainer": {
-              "additionalProperties": false,
-              "properties": {
-                "env": {
-                  "description": "List of environment variables to set in the container. Cannot be updated.",
-                  "items": {
-                    "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar",
-                    "required": []
-                  },
-                  "title": "env",
-                  "type": "array",
-                  "x-kubernetes-list-map-keys": [
-                    "name"
-                  ],
-                  "x-kubernetes-list-type": "map",
-                  "x-kubernetes-patch-merge-key": "name",
-                  "x-kubernetes-patch-strategy": "merge"
-                },
-                "lifecycleHooks": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.Lifecycle",
-                  "description": "Actions that the management system should take in response to container lifecycle events. Cannot be updated.",
-                  "required": []
-                },
-                "readinessProbe": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.Probe",
-                  "description": "Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes",
-                  "required": []
-                },
-                "resources": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                  "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                  "required": []
-                },
-                "securityContext": {
-                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "description": "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
-                  "required": []
-                },
-                "volumeMounts": {
-                  "description": "Pod volumes to mount into the container's filesystem. Cannot be updated.",
-                  "items": {
-                    "$ref": "#/definitions/io.k8s.api.core.v1.VolumeMount",
-                    "required": []
-                  },
-                  "title": "volumeMounts",
-                  "type": "array",
-                  "x-kubernetes-list-map-keys": [
-                    "mountPath"
-                  ],
-                  "x-kubernetes-list-type": "map",
-                  "x-kubernetes-patch-merge-key": "mountPath",
-                  "x-kubernetes-patch-strategy": "merge"
-                }
-              },
-              "required": [],
-              "title": "runtimeContainer",
-              "type": "object"
-            },
-            "schedulerName": {
-              "default": "",
-              "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.",
-              "title": "schedulerName",
-              "type": "string"
-            },
-            "tolerations": {
-              "description": "If specified, the pod's tolerations.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.Toleration",
-                "required": []
-              },
-              "title": "tolerations",
-              "type": "array",
-              "x-kubernetes-list-type": "atomic"
-            },
-            "topologySpreadConstraints": {
-              "description": "TopologySpreadConstraints describes how a group of pods ought to spread across topology domains. Scheduler will schedule pods in a way which abides by the constraints. All topologySpreadConstraints are ANDed.",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-                "required": []
-              },
-              "title": "topologySpreadConstraints",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "topologyKey",
-                "whenUnsatisfiable"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "topologyKey",
-              "x-kubernetes-patch-strategy": "merge"
-            },
-            "volumes": {
-              "description": "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes",
-              "items": {
-                "$ref": "#/definitions/io.k8s.api.core.v1.Volume",
-                "required": []
-              },
-              "title": "volumes",
-              "type": "array",
-              "x-kubernetes-list-map-keys": [
-                "name"
-              ],
-              "x-kubernetes-list-type": "map",
-              "x-kubernetes-patch-merge-key": "name",
-              "x-kubernetes-patch-strategy": "merge,retainKeys"
-            }
-          },
-          "required": [],
-          "title": "deployment",
-          "type": "object"
-        },
-        "extras": {
-          "additionalProperties": false,
-          "properties": {
-            "hdfs": {
-              "additionalProperties": false,
-              "properties": {
-                "enabled": {
-                  "default": "false",
-                  "description": "Whether to enable support for HDFS",
-                  "required": [],
-                  "title": "enabled"
-                }
-              },
-              "required": [],
-              "title": "hdfs",
-              "type": "object"
-            },
-            "pyiceberg": {
-              "additionalProperties": false,
-              "properties": {
-                "enabled": {
-                  "default": "false",
-                  "description": "Whether to enable support for pyiceberg. For metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements.",
-                  "required": [],
-                  "title": "enabled"
-                }
-              },
-              "required": [],
-              "title": "pyiceberg",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "extras",
-          "type": "object"
-        },
-        "serviceAccount": {
-          "additionalProperties": false,
-          "properties": {
-            "automount": {
-              "default": "true",
-              "description": "AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.",
-              "required": [],
-              "title": "automount"
-            },
-            "create": {
-              "default": "false",
-              "description": "Whether to create a service account.",
-              "required": [],
-              "title": "create"
-            },
-            "name": {
-              "default": "",
-              "description": "The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to \"default\" if not set.",
-              "required": [],
-              "title": "name"
-            }
-          },
-          "required": [],
-          "title": "serviceAccount",
-          "type": "object"
-        }
-      },
-      "required": [],
-      "title": "worker",
-      "type": "object"
-    },
-    "workerHeartbeatIntervalSecs": {
-      "default": "5",
-      "description": "Heartbeat interval between polars workers and the scheduler in seconds.",
-      "required": [],
-      "title": "workerHeartbeatIntervalSecs"
+      "title": "tolerations",
+      "type": "array",
+      "x-kubernetes-list-type": "atomic"
     }
   },
-  "required": [
-    "acceptEula"
-  ],
+  "required": [],
   "type": "object"
 }

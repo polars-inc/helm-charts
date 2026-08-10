@@ -83,6 +83,12 @@ license:
     # -- the property on the secret containing your license key
     secretProperty: ""
 
+  licenseServer:
+    # -- Enable connecting to offline Polars license server.
+    enabled: false
+    # -- URI of the license server.
+    uri: "https://license-server.polars.svc.cluster.local:50051"
+
 # @schema
 # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/imagePullSecrets
 # @schema
@@ -464,6 +470,14 @@ lineage:
       endpoint: "http://marquez.default.svc.cluster.local:5000"
 
 worker:
+  extras:
+    hdfs:
+      # -- Whether to enable support for HDFS
+      enabled: false
+    pyiceberg:
+      # -- Whether to enable support for pyiceberg. For metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements.
+      enabled: false
+
   serviceAccount:
     # -- Whether to create a service account.
     create: false

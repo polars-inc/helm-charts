@@ -1,23 +1,21 @@
 apiVersion: v2
-name: polars
-description: Distributed query execution engine for Polars
+name: license-server
+description: Polars License Server
 
 type: application
 
-version: 2.3.1
-appVersion: 0.7.1
+version: 0.1.0
+appVersion: "0.1.0"
 deprecated: false
 
 dependencies: []
 
-home: https://pola.rs
+home: https://cloud.pola.rs
 sources:
-  - https://github.com/pola-rs/polars
   - https://github.com/polars-inc/helm-charts
 keywords:
   - polars
   - distributed-computing
-  - query-engine
 annotations:
   category: Analytics
 
