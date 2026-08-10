@@ -316,10 +316,6 @@ spec:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
-{{- if include "polars.isOnPremEnterpriseLicense" . }}
-            - name: license
-              mountPath: /mnt/license/
-{{- end }}
 {{- if include "polars.isRuntimeComposed" .}}
   {{- if .Values.runtime.composed.requirements }}
             - name: requirements-txt
@@ -386,14 +382,6 @@ spec:
         - name: checkpoint-data
           persistentVolumeClaim:
             claimName: {{ include "polars.checkpointDataPvcName" . }}
-{{- end }}
-{{- if include "polars.isOnPremEnterpriseLicense" . }}
-        - name: license
-          secret:
-            secretName: {{ required ".Values.license.onPremEnterprise.secretName is required" .Values.license.onPremEnterprise.secretName | quote }}
-            items:
-              - key: {{ required ".Values.license.onPremEnterprise.secretProperty is required" .Values.license.onPremEnterprise.secretProperty | quote }}
-                path: license.json
 {{- end }}
 {{- if include "polars.isRuntimeComposed" .}}
   {{- if .Values.runtime.composed.requirements }}
