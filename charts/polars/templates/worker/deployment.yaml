@@ -279,7 +279,7 @@ spec:
               value: /app/checkpoint_data/checkpoint_data
 {{- end }}
 {{- if .Values.worker.extras.hdfs.enabled }}
-            - name: PC_CUBLET__worker__extras__pyiceberg__enabled
+            - name: PC_CUBLET__worker__extras__hdfs__enabled
               value: "true"
 {{- end }}
 {{- if .Values.worker.extras.pyiceberg.enabled }}
