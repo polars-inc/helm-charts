@@ -5,6 +5,28 @@ entries:
       category: Analytics
     apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-08-10T07:59:47.168693776Z"
+    description: Polars License Server
+    digest: 4e4eca71b6a0a97edaa9aa53c9598396bbad625219e4a8ad2018cec6990b2a64
+    home: https://cloud.pola.rs
+    keywords:
+    - polars
+    - distributed-computing
+    maintainers:
+    - email: developers@polars.tech
+      name: Polars
+      url: https://github.com/polars-inc
+    name: license-server
+    sources:
+    - https://github.com/polars-inc/helm-charts
+    type: application
+    urls:
+    - https://github.com/polars-inc/helm-charts/releases/download/license-server-0.1.1/license-server-0.1.1.tgz
+    version: 0.1.1
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-08-10T07:40:42.422205406Z"
     description: Polars License Server
     digest: bff780e2a939635e982b0c2d77dcbff39ed8e04e92f52993511ae6f2b801b1e1
@@ -766,4 +788,4 @@ entries:
     urls:
     - https://github.com/polars-inc/helm-charts/releases/download/polars-k8s-operator-0.1.0-alpha.1/polars-k8s-operator-0.1.0-alpha.1.tgz
     version: 0.1.0-alpha.1
-generated: "2026-08-10T07:40:42.661278811Z"
+generated: "2026-08-10T07:59:47.168769387Z"
