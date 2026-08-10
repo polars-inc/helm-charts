@@ -24,7 +24,7 @@ license:
   content: ""
 
 tlsBundle:
-  # -- Name of the Secret holding the TLS bundle (PEM: cert + key + CA)
+  # -- Name of the Secret holding the TLS bundle (PEM: server certificate chain + private key)
   secretName: license-server-tls-bundle
   # -- Key within the TLS bundle Secret
   key: bundle.pem
@@ -80,7 +80,7 @@ serviceMonitor:
 serviceAccount:
   # -- Create a dedicated ServiceAccount
   create: true
-  # -- ServiceAccount name. Defaults to `name` when empty.
+  # -- ServiceAccount name. Defaults to the full resource name when empty.
   name: ""
   # @schema
   # additionalProperties: true
@@ -115,12 +115,12 @@ securityContext:
 # @schema
 # additionalProperties: true
 # @schema
-# -- Common annotations for all resources
+# -- Annotations to add to the server pod
 podAnnotations: {}
 # @schema
 # additionalProperties: true
 # @schema
-# -- Common labels for all resources
+# -- Labels to add to the server pod
 podLabels: {}
 # @schema
 # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector

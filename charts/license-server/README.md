@@ -1,6 +1,6 @@
 # Polars License Server
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 Polars License Server
 
@@ -17,7 +17,7 @@ it.
 - A default StorageClass, or set `report.storageClass`
 - Two credentials from Polars ([request here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo)):
   - a **license file** (JSON)
-  - a **TLS bundle** (PEM: server cert + key) used to serve HTTPS
+  - a **TLS bundle** (PEM: server certificate chain + private key) used to serve HTTPS
 
 ## Install
 
@@ -25,7 +25,8 @@ Provide the license and TLS bundle inline with `--set-file`. The chart creates
 the backing Secrets from these values:
 
 ```console
-$ helm upgrade --install license-server . \
+$ helm repo add polars-inc https://polars-inc.github.io/helm-charts
+$ helm upgrade --install license-server polars-inc/license-server \
     --namespace polars --create-namespace \
     --set-file license.content=license.json \
     --set-file tlsBundle.content=bundle.pem
@@ -41,7 +42,7 @@ $ kubectl -n polars create secret generic license-server-license \
     --from-file=license.json=license.json
 $ kubectl -n polars create secret generic license-server-tls-bundle \
     --from-file=bundle.pem=bundle.pem
-$ helm upgrade --install license-server . --namespace polars
+$ helm upgrade --install license-server polars-inc/license-server --namespace polars
 ```
 
 ## Connecting a Polars cluster
@@ -105,7 +106,7 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 | license.key | string | `"license.json"` | Key within the license Secret |
 | license.mountPath | string | `"/config/license-server-license.json"` | Path the license file is mounted at inside the container |
 | license.content | string | `""` | Inline license JSON. When set, the chart creates the license Secret; leave empty to reference a pre-existing Secret (`license.secretName`). Prefer `--set-file` over committing this. |
-| tlsBundle.secretName | string | `"license-server-tls-bundle"` | Name of the Secret holding the TLS bundle (PEM: cert + key + CA) |
+| tlsBundle.secretName | string | `"license-server-tls-bundle"` | Name of the Secret holding the TLS bundle (PEM: server certificate chain + private key) |
 | tlsBundle.key | string | `"bundle.pem"` | Key within the TLS bundle Secret |
 | tlsBundle.mountPath | string | `"/config/license-server-bundle.pem"` | Path the TLS bundle is mounted at inside the container |
 | tlsBundle.content | string | `""` | Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this. |
@@ -123,13 +124,13 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 | serviceMonitor.enabled | bool | `false` | Create a ServiceMonitor for the Prometheus Operator |
 | serviceMonitor.interval | string | `"5m"` | Scrape interval |
 | serviceAccount.create | bool | `true` | Create a dedicated ServiceAccount |
-| serviceAccount.name | string | `""` | ServiceAccount name. Defaults to `name` when empty. |
+| serviceAccount.name | string | `""` | ServiceAccount name. Defaults to the full resource name when empty. |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
 | serviceAccount.automount | bool | `false` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |
 | podSecurityContext | object | `{"fsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | SecurityContext holds pod-level security attributes and common container settings. |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}` | SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
-| podAnnotations | object | `{}` | Common annotations for all resources |
-| podLabels | object | `{}` | Common labels for all resources |
+| podAnnotations | object | `{}` | Annotations to add to the server pod |
+| podLabels | object | `{}` | Labels to add to the server pod |
 | nodeSelector | object | `{}` | NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ |
 | tolerations | list | `[]` | If specified, the pod's tolerations. |
 | affinity | object | `{}` | If specified, the pod's scheduling constraints |
