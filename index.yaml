@@ -1,6 +1,53 @@
 apiVersion: v1
 entries:
+  license-server:
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-08-10T07:40:42.422205406Z"
+    description: Polars License Server
+    digest: bff780e2a939635e982b0c2d77dcbff39ed8e04e92f52993511ae6f2b801b1e1
+    home: https://cloud.pola.rs
+    keywords:
+    - polars
+    - distributed-computing
+    maintainers:
+    - email: developers@polars.tech
+      name: Polars
+      url: https://github.com/polars-inc
+    name: license-server
+    sources:
+    - https://github.com/polars-inc/helm-charts
+    type: application
+    urls:
+    - https://github.com/polars-inc/helm-charts/releases/download/license-server-0.1.0/license-server-0.1.0.tgz
+    version: 0.1.0
   polars:
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 0.7.1
+    created: "2026-08-10T07:40:42.661035035Z"
+    description: Distributed query execution engine for Polars
+    digest: 7cbd5e78095ce7ddccf529fa6257af51aaef85e191cc831698098d1d520737aa
+    home: https://pola.rs
+    keywords:
+    - polars
+    - distributed-computing
+    - query-engine
+    maintainers:
+    - email: developers@polars.tech
+      name: Polars
+      url: https://github.com/polars-inc
+    name: polars
+    sources:
+    - https://github.com/pola-rs/polars
+    - https://github.com/polars-inc/helm-charts
+    type: application
+    urls:
+    - https://github.com/polars-inc/helm-charts/releases/download/polars-2.3.1/polars-2.3.1.tgz
+    version: 2.3.1
   - annotations:
       category: Analytics
     apiVersion: v2
@@ -719,4 +766,4 @@ entries:
     urls:
     - https://github.com/polars-inc/helm-charts/releases/download/polars-k8s-operator-0.1.0-alpha.1/polars-k8s-operator-0.1.0-alpha.1.tgz
     version: 0.1.0-alpha.1
-generated: "2026-08-04T09:27:07.254478836Z"
+generated: "2026-08-10T07:40:42.661278811Z"
