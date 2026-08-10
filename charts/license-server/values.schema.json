@@ -22758,13 +22758,13 @@
     },
     "podAnnotations": {
       "additionalProperties": true,
-      "description": "Common annotations for all resources",
+      "description": "Annotations to add to the server pod",
       "required": [],
       "title": "podAnnotations"
     },
     "podLabels": {
       "additionalProperties": true,
-      "description": "Common labels for all resources",
+      "description": "Labels to add to the server pod",
       "required": [],
       "title": "podLabels"
     },
@@ -22853,7 +22853,7 @@
         },
         "name": {
           "default": "",
-          "description": "ServiceAccount name. Defaults to `name` when empty.",
+          "description": "ServiceAccount name. Defaults to the full resource name when empty.",
           "required": [],
           "title": "name"
         }
@@ -22905,7 +22905,7 @@
         },
         "secretName": {
           "default": "license-server-tls-bundle",
-          "description": "Name of the Secret holding the TLS bundle (PEM: cert + key + CA)",
+          "description": "Name of the Secret holding the TLS bundle (PEM: server certificate chain + private key)",
           "required": [],
           "title": "secretName"
         }
