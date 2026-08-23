@@ -421,17 +421,36 @@ JWKS issuer claim: explicit value or derived from the enabled Dex dependency's i
 {{- end -}}
 
 {{/*
-JWKS audience claim: explicit value or, when Dex is enabled, the chart's default Dex static client
-ID. Deliberately a literal rather than read from dex.config.staticClients: a list is not a stable
-key, since admins may reorder it or add their own entries ahead of it. Anyone who renames or
-removes the default `polars` static client must set `auth.jwks.audience` explicitly.
+JWKS audience claim: explicit value or, when Dex is enabled, whatever polars.authJwksClientId
+resolves to (Dex does not support requesting an arbitrary `aud` claim).
 */}}
 {{- define "polars.authJwksAudience" -}}
   {{- if .Values.auth.jwks.audience -}}
     {{- .Values.auth.jwks.audience -}}
   {{- else if .Values.dex.enabled -}}
-    polars
+    {{- include "polars.authJwksClientId" . -}}
   {{- end -}}
+{{- end -}}
+
+{{/*
+OAuth2 client id for pc.ClusterContext's login flow: explicit value or, when Dex is enabled,
+the chart's default Dex static client ID. Same reasoning as polars.authJwksAudience above:
+deliberately a literal rather than read from dex.config.staticClients.
+*/}}
+{{- define "polars.authJwksClientId" -}}
+  {{- if .Values.auth.jwks.clientId -}}
+    {{- .Values.auth.jwks.clientId -}}
+  {{- else if .Values.dex.enabled -}}
+    PolarsOnPrem
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Extra OAuth2 scope(s) for pc.ClusterContext's login flow, added on top of the default scope. No
+Dex-derived default: unlike audience/clientId, there's no scope Dex itself requires.
+*/}}
+{{- define "polars.authJwksAdditionalScope" -}}
+  {{- .Values.auth.jwks.additionalScope -}}
 {{- end -}}
 
 {{/*

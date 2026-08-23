@@ -22833,11 +22833,29 @@
         "jwks": {
           "additionalProperties": false,
           "properties": {
+            "additionalScope": {
+              "default": "",
+              "description": "Extra OAuth2 scope(s) `pc.ClusterContext` should request on top of the default `email openid profile`, space-separated if more than one (e.g. `\"groups offline_access\"`), for instance if your OIDC provider (like Dex) only issues a refresh token when `offline_access` is explicitly requested.",
+              "required": [],
+              "title": "additionalScope"
+            },
             "audience": {
               "default": "",
               "description": "Expected `aud` (audience) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `polars`. If you rename or remove that static client in the Dex config, or a single Dex instance ever fronts more than one cluster, set this explicitly to match the audience your OIDC client (`ClusterContext`) requests.",
               "required": [],
               "title": "audience"
+            },
+            "clientId": {
+              "default": "",
+              "description": "OAuth2 client id `pc.ClusterContext` should present when it needs to log in against this OIDC provider (via device authorization). Not secret: this must be a public/native client (no client secret) registered with your OIDC provider. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `PolarsOnPrem` (matching the default Dex static client below).",
+              "required": [],
+              "title": "clientId"
+            },
+            "discoveryUrl": {
+              "default": "",
+              "description": "Complete OIDC discovery document URL if it is not served at the conventional `{auth.jwks.issuer}/.well-known/openid-configuration` path. Leave empty to use that conventional path.",
+              "required": [],
+              "title": "discoveryUrl"
             },
             "enabled": {
               "default": "false",
@@ -23065,11 +23083,11 @@
     },
     "dex": {
       "additionalProperties": true,
-      "description": "Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks` above validates natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `polars` static client below. Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key.",
+      "description": "Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks` above validates natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `PolarsOnPrem` static client below. Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key.",
       "properties": {
         "config": {
           "additionalProperties": true,
-          "description": "Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable both from inside the cluster (for the compute plane to fetch signing keys, unless `auth.jwks.url` is set explicitly) and from wherever `pc.ClusterContext` users run their login flow. The default `staticClients` entry (id `polars`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client.",
+          "description": "Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable both from inside the cluster (for the compute plane to fetch signing keys, unless `auth.jwks.url` is set explicitly) and from wherever `pc.ClusterContext` users run their login flow. The default `staticClients` entry (id `PolarsOnPrem`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client.",
           "properties": {
             "connectors": {
               "items": {
@@ -23084,35 +23102,13 @@
               "type": "string"
             },
             "staticClients": {
+              "description": " items:   additionalProperties: true @schema",
               "items": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "id": {
-                        "default": "polars",
-                        "title": "id",
-                        "type": "string"
-                      },
-                      "name": {
-                        "default": "Polars ClusterContext",
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "public": {
-                        "default": true,
-                        "title": "public",
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  }
-                ],
+                "additionalProperties": true,
                 "required": []
               },
-              "title": "staticClients",
-              "type": "array"
+              "required": [],
+              "title": "staticClients"
             },
             "storage": {
               "additionalProperties": false,

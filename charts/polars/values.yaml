@@ -187,11 +187,11 @@ anonymousResults:
     # @schema
     # -- Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html
     options: []
-#      - name: aws_access_key_id
-#        valueFrom:
-#          secretKeyRef:
-#            name: my-s3-secret
-#            key: accessKeyId
+  #      - name: aws_access_key_id
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-s3-secret
+  #            key: accessKeyId
   # -- Configure using quick-start temporary storage server
   temporaryStorage:
     # -- Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.
@@ -214,11 +214,11 @@ anonymousResults:
     # @schema
     # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
     options: []
-#      - name: account_name
-#        valueFrom:
-#          secretKeyRef:
-#            name: my-account-name-secret
-#            key: account_name
+  #      - name: account_name
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-account-name-secret
+  #            key: account_name
 
   # -- Configure Google Cloud Storage as anonymous results location.
   gcs:
@@ -234,11 +234,11 @@ anonymousResults:
     # @schema
     # -- Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html
     options: []
-#      - name: project
-#        valueFrom:
-#          secretKeyRef:
-#            name: my-project
-#            key: project-name
+  #      - name: project
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-project
+  #            key: project-name
 
   # -- Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself using scheduler.deployment.volumes and scheduler.deployment.runtimeContainer.volumeMounts. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
   sharedFilesystem:
@@ -305,11 +305,11 @@ shuffleData:
     # @schema
     # -- Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html
     options: []
-#      - name: aws_access_key_id
-#        valueFrom:
-#          secretKeyRef:
-#            name: my-s3-secret
-#            key: accessKeyId
+  #      - name: aws_access_key_id
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-s3-secret
+  #            key: accessKeyId
 
   # -- Configure Azure Blob Storage as shuffle data location.
   abs:
@@ -322,12 +322,12 @@ shuffleData:
     #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
     # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
-    options: [ ]
-#      - name: account_name
-#        valueFrom:
-#          secretKeyRef:
-#            name: my-account-name-secret
-#            key: account_name
+    options: []
+  #      - name: account_name
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-account-name-secret
+  #            key: account_name
 
   # -- Configure Google Cloud Storage as shuffle data location.
   gcs:
@@ -340,12 +340,12 @@ shuffleData:
     #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
     # -- Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html
-    options: [ ]
-#      - name: project
-#        valueFrom:
-#          secretKeyRef:
-#            name: my-project
-#            key: project-name
+    options: []
+  #      - name: project
+  #        valueFrom:
+  #          secretKeyRef:
+  #            name: my-project
+  #            key: project-name
 
   # -- Configure a shared filesystem path for shuffle data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts.
   sharedFilesystem:
@@ -402,7 +402,7 @@ checkpointData:
     #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
     # -- Storage options for the Azure Blob Storage location. These correspond to Object Store's `AzureConfigKey`. More info: https://docs.rs/object_store/latest/object_store/azure/enum.AzureConfigKey.html
-    options: [ ]
+    options: []
   #      - name: account_name
   #        valueFrom:
   #          secretKeyRef:
@@ -420,7 +420,7 @@ checkpointData:
     #   $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
     # -- Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html
-    options: [ ]
+    options: []
   #      - name: project
   #        valueFrom:
   #          secretKeyRef:
@@ -542,7 +542,7 @@ worker:
     # @schema
     # @ignore
     # -- SecurityContext holds pod-level security attributes and common container settings.
-    podSecurityContext: { }
+    podSecurityContext: {}
     #  fsGroup: 2000
     #  runAsUser: 1000
     #  runAsNonRoot: true
@@ -560,7 +560,7 @@ worker:
       # @schema
       # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      securityContext: { }
+      securityContext: {}
       #  capabilities:
       #    drop:
       #    - ALL
@@ -574,8 +574,8 @@ worker:
       resources:
         requests:
           ephemeral-storage: 10Gi
-      #    cpu: 500m
-      #    memory: 512Mi
+        #    cpu: 500m
+        #    memory: 512Mi
         limits: {}
       #    cpu: 1000m
       #    memory: 1Gi
@@ -586,7 +586,7 @@ worker:
       # @schema
       # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      securityContext: { }
+      securityContext: {}
       #  capabilities:
       #    drop:
       #    - ALL
@@ -630,8 +630,8 @@ worker:
       resources:
         requests:
           ephemeral-storage: 10Gi
-      #    cpu: 500m
-      #    memory: 512Mi
+        #    cpu: 500m
+        #    memory: 512Mi
         limits: {}
       #    cpu: 1000m
       #    memory: 1Gi
@@ -673,7 +673,7 @@ worker:
     # @schema
     # @ignore
     # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-    nodeSelector: { }
+    nodeSelector: {}
     #  kubernetes.io/e2e-az-name: e2e-az1
 
     # @schema
@@ -681,7 +681,7 @@ worker:
     # @schema
     # @ignore
     # -- If specified, the pod's scheduling constraints
-    affinity: { }
+    affinity: {}
     #  nodeAffinity:
     #    requiredDuringSchedulingIgnoredDuringExecution:
     #      nodeSelectorTerms:
@@ -696,7 +696,7 @@ worker:
     # @schema
     # @ignore
     # -- If specified, the pod's tolerations.
-    tolerations: [ ]
+    tolerations: []
     # - key: "key"
     #   operator: "Equal"
     #   value: "value"
@@ -827,7 +827,7 @@ scheduler:
     # @schema
     # @ignore
     # -- SecurityContext holds pod-level security attributes and common container settings.
-    podSecurityContext: { }
+    podSecurityContext: {}
     #  fsGroup: 2000
     #  runAsUser: 1000
     #  runAsNonRoot: true
@@ -846,7 +846,7 @@ scheduler:
       # @schema
       # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      securityContext: { }
+      securityContext: {}
       #  capabilities:
       #    drop:
       #    - ALL
@@ -860,8 +860,8 @@ scheduler:
       resources:
         requests:
           ephemeral-storage: 10Gi
-      #    cpu: 500m
-      #    memory: 512Mi
+        #    cpu: 500m
+        #    memory: 512Mi
         limits: {}
       #    cpu: 1000m
       #    memory: 1Gi
@@ -872,7 +872,7 @@ scheduler:
       # @schema
       # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      securityContext: { }
+      securityContext: {}
       #  capabilities:
       #    drop:
       #    - ALL
@@ -916,8 +916,8 @@ scheduler:
       resources:
         requests:
           ephemeral-storage: 10Gi
-      #    cpu: 500m
-      #    memory: 512Mi
+        #    cpu: 500m
+        #    memory: 512Mi
         limits: {}
       #    cpu: 1000m
       #    memory: 1Gi
@@ -959,7 +959,7 @@ scheduler:
     # @schema
     # @ignore
     # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-    nodeSelector: { }
+    nodeSelector: {}
     #  kubernetes.io/e2e-az-name: e2e-az1
 
     # @schema
@@ -967,7 +967,7 @@ scheduler:
     # @schema
     # @ignore
     # -- If specified, the pod's scheduling constraints
-    affinity: { }
+    affinity: {}
     #  nodeAffinity:
     #    requiredDuringSchedulingIgnoredDuringExecution:
     #      nodeSelectorTerms:
@@ -982,7 +982,7 @@ scheduler:
     # @schema
     # @ignore
     # -- If specified, the pod's tolerations.
-    tolerations: [ ]
+    tolerations: []
     # - key: "key"
     #   operator: "Equal"
     #   value: "value"
@@ -1017,8 +1017,17 @@ auth:
     # -- Expected `iss` (issuer) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true and `dex.config.issuer` is set, in which case it defaults to `dex.config.issuer`.
     issuer: ""
 
+    # -- Complete OIDC discovery document URL if it is not served at the conventional `{auth.jwks.issuer}/.well-known/openid-configuration` path. Leave empty to use that conventional path.
+    discoveryUrl: ""
+
     # -- Expected `aud` (audience) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `polars`. If you rename or remove that static client in the Dex config, or a single Dex instance ever fronts more than one cluster, set this explicitly to match the audience your OIDC client (`ClusterContext`) requests.
     audience: ""
+
+    # -- OAuth2 client id `pc.ClusterContext` should present when it needs to log in against this OIDC provider (via device authorization). Not secret: this must be a public/native client (no client secret) registered with your OIDC provider. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `PolarsOnPrem` (matching the default Dex static client below).
+    clientId: ""
+
+    # -- Extra OAuth2 scope(s) `pc.ClusterContext` should request on top of the default `email openid profile`, space-separated if more than one (e.g. `"groups offline_access"`), for instance if your OIDC provider (like Dex) only issues a refresh token when `offline_access` is explicitly requested.
+    additionalScope: ""
 
     # -- Name of a claim that must be present on the token with a matching value (see `auth.jwks.requiredClaimValue`), checked case-sensitively either as an exact match (string claim) or as membership (array claim, like in `groups`). Leave empty (default) to not enforce any additional claim beyond the standard `aud`/`iss`/`exp` checks.
     requiredClaim: ""
@@ -1029,7 +1038,7 @@ auth:
 # @schema
 # additionalProperties: true
 # @schema
-# -- Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks` above validates natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `polars` static client below. Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key.
+# -- Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks` above validates natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `PolarsOnPrem` static client below. Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key.
 dex:
   # -- Enable the Dex dependency. See https://github.com/dexidp/helm-charts/tree/master/charts/dex for the full set of values available under `dex.*` beyond `dex.config` (image, resources, ingress, persistence, ...).
   enabled: false
@@ -1040,15 +1049,19 @@ dex:
   # @schema
   # additionalProperties: true
   # @schema
-  # -- Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable both from inside the cluster (for the compute plane to fetch signing keys, unless `auth.jwks.url` is set explicitly) and from wherever `pc.ClusterContext` users run their login flow. The default `staticClients` entry (id `polars`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client.
+  # -- Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable both from inside the cluster (for the compute plane to fetch signing keys, unless `auth.jwks.url` is set explicitly) and from wherever `pc.ClusterContext` users run their login flow. The default `staticClients` entry (id `PolarsOnPrem`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client.
   config:
     issuer: ""
     storage:
       type: sqlite3
       config:
         file: /var/dex/dex.db
+    # @schema
+    # items:
+    #   additionalProperties: true
+    # @schema
     staticClients:
-      - id: polars
+      - id: PolarsOnPrem
         name: "Polars ClusterContext"
         public: true
     connectors: []
@@ -1110,7 +1123,7 @@ tests:
     # @schema
     # @ignore
     # -- SecurityContext holds pod-level security attributes and common container settings.
-    podSecurityContext: { }
+    podSecurityContext: {}
     #  fsGroup: 2000
     #  runAsUser: 1000
     #  runAsNonRoot: true
@@ -1128,7 +1141,7 @@ tests:
       # @schema
       # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      securityContext: { }
+      securityContext: {}
       #  capabilities:
       #    drop:
       #    - ALL
@@ -1142,8 +1155,8 @@ tests:
       resources:
         requests:
           ephemeral-storage: 10Gi
-      #    cpu: 500m
-      #    memory: 512Mi
+        #    cpu: 500m
+        #    memory: 512Mi
         limits: {}
       #    cpu: 1000m
       #    memory: 1Gi
@@ -1154,7 +1167,7 @@ tests:
       # @schema
       # @ignore
       # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      securityContext: { }
+      securityContext: {}
       #  capabilities:
       #    drop:
       #    - ALL
@@ -1184,8 +1197,8 @@ tests:
       resources:
         requests:
           ephemeral-storage: 10Gi
-      #    cpu: 500m
-      #    memory: 512Mi
+        #    cpu: 500m
+        #    memory: 512Mi
         limits: {}
       #    cpu: 1000m
       #    memory: 1Gi
@@ -1227,7 +1240,7 @@ tests:
     # @schema
     # @ignore
     # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-    nodeSelector: { }
+    nodeSelector: {}
     #  kubernetes.io/e2e-az-name: e2e-az1
 
     # @schema
@@ -1235,7 +1248,7 @@ tests:
     # @schema
     # @ignore
     # -- If specified, the pod's scheduling constraints
-    affinity: { }
+    affinity: {}
     #  nodeAffinity:
     #    requiredDuringSchedulingIgnoredDuringExecution:
     #      nodeSelectorTerms:
@@ -1250,7 +1263,7 @@ tests:
     # @schema
     # @ignore
     # -- If specified, the pod's tolerations.
-    tolerations: [ ]
+    tolerations: []
     # - key: "key"
     #   operator: "Equal"
     #   value: "value"
@@ -1288,7 +1301,7 @@ temporaryStorage:
       # additionalProperties: true
       # @schema
       # -- Additional annotations on the service object. Used by some controllers to setup TLS termination or load balancers.
-      annotations: { }
+      annotations: {}
 
   deployment:
     # @schema
@@ -1438,8 +1451,8 @@ temporaryStorage:
       resources:
         requests:
           ephemeral-storage: 10Gi
-      #    cpu: 250m
-      #    memory: 256Mi
+        #    cpu: 250m
+        #    memory: 256Mi
         limits: {}
       #    cpu: 500m
       #    memory: 512Mi

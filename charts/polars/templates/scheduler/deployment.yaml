@@ -207,6 +207,22 @@ spec:
               value: {{ include "polars.authJwksIssuer" . | quote }}
             - name: PC_CUBLET__observatory__rest_api__service__auth__jwks__audience
               value: {{ include "polars.authJwksAudience" . | quote }}
+            - name: PC_CUBLET__scheduler__client_service__auth__jwks__client_id
+              value: {{ include "polars.authJwksClientId" . | quote }}
+            - name: PC_CUBLET__observatory__rest_api__service__auth__jwks__client_id
+              value: {{ include "polars.authJwksClientId" . | quote }}
+  {{- if .Values.auth.jwks.discoveryUrl }}
+            - name: PC_CUBLET__scheduler__client_service__auth__jwks__discovery_url
+              value: {{ .Values.auth.jwks.discoveryUrl | quote }}
+            - name: PC_CUBLET__observatory__rest_api__service__auth__jwks__discovery_url
+              value: {{ .Values.auth.jwks.discoveryUrl | quote }}
+  {{- end }}
+  {{- if .Values.auth.jwks.additionalScope }}
+            - name: PC_CUBLET__scheduler__client_service__auth__jwks__additional_scope
+              value: {{ include "polars.authJwksAdditionalScope" . | quote }}
+            - name: PC_CUBLET__observatory__rest_api__service__auth__jwks__additional_scope
+              value: {{ include "polars.authJwksAdditionalScope" . | quote }}
+  {{- end }}
   {{- if .Values.auth.jwks.requiredClaim }}
             - name: PC_CUBLET__scheduler__client_service__auth__jwks__required_claim
               value: {{ .Values.auth.jwks.requiredClaim | quote }}
