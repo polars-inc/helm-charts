@@ -421,42 +421,25 @@ JWKS issuer claim: explicit value or derived from the enabled Dex dependency's i
 {{- end -}}
 
 {{/*
-JWKS audience claim: explicit value or, when Dex is enabled, whatever polars.authJwksClientId
-resolves to (Dex does not support requesting an arbitrary `aud` claim).
+JWKS audience claim: explicit value or, when Dex is enabled, the chart's default Dex static
+client ID (Dex does not support requesting an arbitrary `aud` claim, so its tokens carry the
+client id as audience).
 */}}
 {{- define "polars.authJwksAudience" -}}
   {{- if .Values.auth.jwks.audience -}}
     {{- .Values.auth.jwks.audience -}}
-  {{- else if .Values.dex.enabled -}}
-    {{- include "polars.authJwksClientId" . -}}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-OAuth2 client id for pc.ClusterContext's login flow: explicit value or, when Dex is enabled,
-the chart's default Dex static client ID. Same reasoning as polars.authJwksAudience above:
-deliberately a literal rather than read from dex.config.staticClients.
-*/}}
-{{- define "polars.authJwksClientId" -}}
-  {{- if .Values.auth.jwks.clientId -}}
-    {{- .Values.auth.jwks.clientId -}}
   {{- else if .Values.dex.enabled -}}
     PolarsOnPrem
   {{- end -}}
 {{- end -}}
 
 {{/*
-Extra OAuth2 scope(s) for pc.ClusterContext's login flow, added on top of the default scope. No
-Dex-derived default: unlike audience/clientId, there's no scope Dex itself requires.
-*/}}
-{{- define "polars.authJwksAdditionalScope" -}}
-  {{- .Values.auth.jwks.additionalScope -}}
-{{- end -}}
-
-{{/*
 Validates JWKS auth config.
 */}}
 {{- define "polars.validateAuthJwks" -}}
+  {{- if and .Values.auth.jwks.enabled .Values.auth.oidc.enabled -}}
+    {{- fail "Auth error: .Values.auth.jwks.enabled and .Values.auth.oidc.enabled are mutually exclusive" -}}
+  {{- end -}}
   {{- if .Values.auth.jwks.enabled -}}
     {{- if not (include "polars.authJwksUrl" .) -}}
       {{- fail "Auth error: .Values.auth.jwks.url is required when .Values.auth.jwks.enabled is true (or set dex.enabled and dex.config.issuer to derive it automatically)" -}}
@@ -464,6 +447,9 @@ Validates JWKS auth config.
     {{- if not (include "polars.authJwksIssuer" .) -}}
       {{- fail "Auth error: .Values.auth.jwks.issuer is required when .Values.auth.jwks.enabled is true (or set dex.enabled and dex.config.issuer to derive it automatically)" -}}
     {{- end -}}
+  {{- end -}}
+  {{- if and .Values.auth.jwks.requiredClaimValues (not .Values.auth.jwks.requiredClaim) -}}
+    {{- fail "Auth error: .Values.auth.jwks.requiredClaim is required when .Values.auth.jwks.requiredClaimValues is set" -}}
   {{- end -}}
 {{- end -}}
 
@@ -473,4 +459,76 @@ Whether JWKS auth is enabled.
 {{- define "polars.isAuthJwksEnabled" -}}
   {{- include "polars.validateAuthJwks" . -}}
   {{- if .Values.auth.jwks.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+OIDC discovery document URL: explicit value or derived from the enabled Dex dependency's issuer.
+*/}}
+{{- define "polars.authOidcDiscoveryUrl" -}}
+  {{- if .Values.auth.oidc.discoveryUrl -}}
+    {{- .Values.auth.oidc.discoveryUrl -}}
+  {{- else if and .Values.dex.enabled .Values.dex.config.issuer -}}
+    {{- printf "%s/.well-known/openid-configuration" (.Values.dex.config.issuer | trimSuffix "/") -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+OAuth2 client id the compute plane presents on pc.ClusterContext's behalf: explicit value or,
+when Dex is enabled, the chart's default Dex static client ID. Deliberately a literal rather
+than read from dex.config.staticClients, same reasoning as polars.authJwksAudience above.
+*/}}
+{{- define "polars.authOidcClientId" -}}
+  {{- if .Values.auth.oidc.clientId -}}
+    {{- .Values.auth.oidc.clientId -}}
+  {{- else if .Values.dex.enabled -}}
+    PolarsOnPrem
+  {{- end -}}
+{{- end -}}
+
+{{/*
+OIDC audience claim: explicit value or, when Dex is enabled, the chart's default Dex static
+client ID (same reasoning as polars.authJwksAudience above).
+*/}}
+{{- define "polars.authOidcAudience" -}}
+  {{- if .Values.auth.oidc.audience -}}
+    {{- .Values.auth.oidc.audience -}}
+  {{- else if .Values.dex.enabled -}}
+    PolarsOnPrem
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Extra OAuth2 scope(s) for the compute-plane-mediated login flow, added on top of the default
+scope. No Dex-derived default: unlike audience/clientId, there's no scope Dex itself requires.
+*/}}
+{{- define "polars.authOidcScope" -}}
+  {{- .Values.auth.oidc.scope -}}
+{{- end -}}
+
+{{/*
+Validates OIDC auth config.
+*/}}
+{{- define "polars.validateAuthOidc" -}}
+  {{- if and .Values.auth.oidc.enabled .Values.auth.jwks.enabled -}}
+    {{- fail "Auth error: .Values.auth.oidc.enabled and .Values.auth.jwks.enabled are mutually exclusive" -}}
+  {{- end -}}
+  {{- if .Values.auth.oidc.enabled -}}
+    {{- if not (include "polars.authOidcDiscoveryUrl" .) -}}
+      {{- fail "Auth error: .Values.auth.oidc.discoveryUrl is required when .Values.auth.oidc.enabled is true (or set dex.enabled and dex.config.issuer to derive it automatically)" -}}
+    {{- end -}}
+    {{- if not (include "polars.authOidcClientId" .) -}}
+      {{- fail "Auth error: .Values.auth.oidc.clientId is required when .Values.auth.oidc.enabled is true (or set dex.enabled to derive it automatically)" -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and .Values.auth.oidc.requiredClaimValues (not .Values.auth.oidc.requiredClaim) -}}
+    {{- fail "Auth error: .Values.auth.oidc.requiredClaim is required when .Values.auth.oidc.requiredClaimValues is set" -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Whether OIDC auth is enabled.
+*/}}
+{{- define "polars.isAuthOidcEnabled" -}}
+  {{- include "polars.validateAuthOidc" . -}}
+  {{- if .Values.auth.oidc.enabled -}}true{{- end -}}
 {{- end -}}

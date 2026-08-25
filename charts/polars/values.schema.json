@@ -22828,34 +22828,17 @@
     },
     "auth": {
       "additionalProperties": false,
-      "description": "Require the scheduler and observatory REST API to validate an OIDC JWT bearer token (via JWKS) before serving a request. This is native to the compute plane (no proxy involved): both endpoints run in the same pod as the `scheduler` container and are validated by the same code path. Pair this with `dex` below, or with any other OIDC provider that can issue tokens for your own identity backend.",
+      "description": "Configure how the scheduler and observatory REST API authenticate incoming requests. This is native to the compute plane (no proxy involved): both endpoints run in the same pod as the `scheduler` container and are validated by the same code path. `auth.jwks` and `auth.oidc` are mutually exclusive; pair either with `dex` below, or with any other OIDC provider that can issue tokens for your own identity backend.",
       "properties": {
         "jwks": {
           "additionalProperties": false,
+          "description": "Validate an OIDC JWT bearer token (via JWKS) before serving a request. Use this when callers already obtain their own access token out of band (there is no compute-plane-mediated login in this mode); to instead have `pc.ClusterContext` log in on its own, use `auth.oidc` below, which also validates incoming tokens the same way.",
           "properties": {
-            "additionalScope": {
-              "default": "",
-              "description": "Extra OAuth2 scope(s) `pc.ClusterContext` should request on top of the default `email openid profile`, space-separated if more than one (e.g. `\"groups offline_access\"`), for instance if your OIDC provider (like Dex) only issues a refresh token when `offline_access` is explicitly requested.",
-              "required": [],
-              "title": "additionalScope"
-            },
             "audience": {
               "default": "",
-              "description": "Expected `aud` (audience) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `polars`. If you rename or remove that static client in the Dex config, or a single Dex instance ever fronts more than one cluster, set this explicitly to match the audience your OIDC client (`ClusterContext`) requests.",
+              "description": "Expected `aud` (audience) claim on incoming tokens. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `PolarsOnPrem` (matching the default Dex static client below). If you rename or remove that static client in the Dex config, or a single Dex instance ever fronts more than one cluster, set this explicitly.",
               "required": [],
               "title": "audience"
-            },
-            "clientId": {
-              "default": "",
-              "description": "OAuth2 client id `pc.ClusterContext` should present when it needs to log in against this OIDC provider (via device authorization). Not secret: this must be a public/native client (no client secret) registered with your OIDC provider. Required when `auth.jwks.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `PolarsOnPrem` (matching the default Dex static client below).",
-              "required": [],
-              "title": "clientId"
-            },
-            "discoveryUrl": {
-              "default": "",
-              "description": "Complete OIDC discovery document URL if it is not served at the conventional `{auth.jwks.issuer}/.well-known/openid-configuration` path. Leave empty to use that conventional path.",
-              "required": [],
-              "title": "discoveryUrl"
             },
             "enabled": {
               "default": "false",
@@ -22871,15 +22854,15 @@
             },
             "requiredClaim": {
               "default": "",
-              "description": "Name of a claim that must be present on the token with a matching value (see `auth.jwks.requiredClaimValue`), checked case-sensitively either as an exact match (string claim) or as membership (array claim, like in `groups`). Leave empty (default) to not enforce any additional claim beyond the standard `aud`/`iss`/`exp` checks.",
+              "description": "Name of an additional claim that must be present on the token, checked case-sensitively. Leave empty (default) to rely solely on the standard `aud`/`iss`/`exp` checks above. Useful when a single, shared identity provider issues tokens for more than one cluster and `aud` alone isn't enough to scope a token to this one. If `auth.jwks.requiredClaimValues` is left empty, the claim just needs to be present, regardless of its value.",
               "required": [],
               "title": "requiredClaim"
             },
-            "requiredClaimValue": {
+            "requiredClaimValues": {
               "default": "",
-              "description": "Value `auth.jwks.requiredClaim` must equal (or for an array claim, contain). For example, `requiredClaim: \"groups\"` with `requiredClaimValue: \"data-team\"` only allows tokens carrying `data-team` in their `groups` claim.",
+              "description": "Value `auth.jwks.requiredClaim` must equal (or, for an array claim, contain). Leave empty to only check that `auth.jwks.requiredClaim` is present, regardless of its value. Only meaningful when `auth.jwks.requiredClaim` is set.",
               "required": [],
-              "title": "requiredClaimValue"
+              "title": "requiredClaimValues"
             },
             "url": {
               "default": "",
@@ -22889,8 +22872,63 @@
             }
           },
           "required": [],
-          "title": "jwks",
-          "type": "object"
+          "title": "jwks"
+        },
+        "oidc": {
+          "additionalProperties": false,
+          "description": "Have the compute plane itself act as the OIDC client on `pc.ClusterContext`'s behalf: it performs an OAuth2 device authorization grant against your identity provider, and the CLI just polls the compute plane for the outcome, never talking to the identity provider directly. This also validates incoming bearer tokens, the same way `auth.jwks` does, so the two are mutually exclusive.",
+          "properties": {
+            "audience": {
+              "default": "",
+              "description": "Expected `aud` (audience) claim on incoming tokens. Required when `auth.oidc.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `PolarsOnPrem`. If you rename or remove that static client in the Dex config, or a single Dex instance ever fronts more than one cluster, set this explicitly.",
+              "required": [],
+              "title": "audience"
+            },
+            "clientId": {
+              "default": "",
+              "description": "OAuth2 client id the compute plane presents to the identity provider on `pc.ClusterContext`'s behalf. Required when `auth.oidc.enabled` is true, unless `dex.enabled` is true, in which case it defaults to `PolarsOnPrem` (matching the default Dex static client below).",
+              "required": [],
+              "title": "clientId"
+            },
+            "clientSecret": {
+              "default": "",
+              "description": "OAuth2 client secret, only needed if your identity provider requires a confidential client. Leave empty for a public client, like the default Dex `PolarsOnPrem` static client below.",
+              "required": [],
+              "title": "clientSecret"
+            },
+            "discoveryUrl": {
+              "default": "",
+              "description": "Complete OIDC discovery document URL (its `/.well-known/openid-configuration` path). Required when `auth.oidc.enabled` is true, unless `dex.enabled` is true and `dex.config.issuer` is set, in which case it defaults to `{dex.config.issuer}/.well-known/openid-configuration`.",
+              "required": [],
+              "title": "discoveryUrl"
+            },
+            "enabled": {
+              "default": "false",
+              "description": "Enable OIDC login and JWT validation on the scheduler and observatory REST API.",
+              "required": [],
+              "title": "enabled"
+            },
+            "requiredClaim": {
+              "default": "",
+              "description": "Name of an additional claim that must be present on the token, checked case-sensitively. Leave empty (default) to rely solely on the standard `aud`/`iss`/`exp` checks above (that Dex's static client `PolarsOnPrem` is dedicated to, for instance, already scopes tokens to this cluster). Useful when a single, shared identity provider fronts more than one cluster. If `auth.oidc.requiredClaimValues` is left empty, the claim just needs to be present, regardless of its value.",
+              "required": [],
+              "title": "requiredClaim"
+            },
+            "requiredClaimValues": {
+              "default": "",
+              "description": "Value `auth.oidc.requiredClaim` must equal (or, for an array claim, contain). Leave empty to only check that `auth.oidc.requiredClaim` is present, regardless of its value. Only meaningful when `auth.oidc.requiredClaim` is set.",
+              "required": [],
+              "title": "requiredClaimValues"
+            },
+            "scope": {
+              "default": "",
+              "description": "Extra OAuth2 scope(s) requested on top of the default `email openid profile`, space-separated if more than one (e.g. `\"groups offline_access\"`), for instance if your OIDC provider (like Dex) only issues a refresh token when `offline_access` is explicitly requested.",
+              "required": [],
+              "title": "scope"
+            }
+          },
+          "required": [],
+          "title": "oidc"
         }
       },
       "required": [],
@@ -23083,11 +23121,11 @@
     },
     "dex": {
       "additionalProperties": true,
-      "description": "Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks` above validates natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `PolarsOnPrem` static client below. Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key.",
+      "description": "Deploy Dex (https://dexidp.io) as an OpenID Connect provider. Dex does not authenticate users itself: it federates your own identity backend (LDAP, SAML, GitHub, an upstream OIDC provider, static users, ...) via `dex.config.connectors`, and issues standard OIDC tokens that `auth.jwks`/`auth.oidc` above validate natively. Only `pc.ClusterContext` (script/CLI usage) is expected to authenticate, via the `PolarsOnPrem` static client below (used directly by the compute plane when `auth.oidc` is enabled, or by whatever obtained the token out of band when only `auth.jwks` is enabled). Only `enabled`, `fullnameOverride` and `config` are documented here, but every other value accepted by the `dex` subchart (image, resources, ingress, persistence, ...) can also be set under this key.",
       "properties": {
         "config": {
           "additionalProperties": true,
-          "description": "Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable both from inside the cluster (for the compute plane to fetch signing keys, unless `auth.jwks.url` is set explicitly) and from wherever `pc.ClusterContext` users run their login flow. The default `staticClients` entry (id `PolarsOnPrem`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client.",
+          "description": "Dex application configuration, passed through verbatim to the `dex` subchart. See https://dexidp.io/docs/ for the full schema. `issuer` must be reachable from inside the cluster, for the compute plane to fetch signing keys (unless `auth.jwks.url`/`auth.oidc.discoveryUrl` is set explicitly) and, when `auth.oidc` is enabled, to perform the device-flow login on the CLI's behalf; `pc.ClusterContext` users themselves never need direct network access to it. The default `staticClients` entry (id `PolarsOnPrem`) is required for `pc.ClusterContext`'s built-in login flow to work without extra configuration; only replace it if you are overriding that client.",
           "properties": {
             "connectors": {
               "items": {
