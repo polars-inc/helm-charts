@@ -282,18 +282,17 @@ spec:
             - name: PC_CUBLET__scheduler__anonymous_result_location__local__path
               value: {{ .Values.anonymousResults.sharedFilesystem.path | quote }}
 {{ end }}
-{{- if .Values.requireFreeWorkers.enabled }}
+{{- with include "polars.workersPerQuery.default" . }}
+            - name: PC_CUBLET__scheduler__default_workers_per_query
+              value: {{ . | quote }}
+{{- end }}
+{{- with include "polars.workersPerQuery.max" . }}
+            - name: PC_CUBLET__scheduler__max_workers_per_query
+              value: {{ . | quote }}
+{{- end }}
+{{- if not (include "polars.isAutoscalingEnabled" .) }}
             - name: PC_CUBLET__scheduler__n_workers
-  {{- if kindIs "string" .Values.requireFreeWorkers.count }}
-    {{- fail ".Values.requireFreeWorkers.count must be an integer" }}
-  {{- else if kindIs "invalid" .Values.requireFreeWorkers.count }}
               value: {{ .Values.worker.deployment.replicaCount | quote }}
-  {{- else }}
-    {{- if lt (.Values.requireFreeWorkers.count | int) 0 }}
-      {{- fail ".Values.requireFreeWorkers.count must be greater than or equal to 0" }}
-    {{- end }}
-              value: {{ .Values.requireFreeWorkers.count | quote }}
-  {{- end }}
 {{- end }}
             - name: PC_CUBLET__scheduler__deny_anonymous_users
               value: {{ .Values.denyAnonymousUsers | quote }}
@@ -308,6 +307,18 @@ spec:
               value: "true"
             - name: PC_CUBLET__lineage__transport__http__endpoint
               value: {{ .Values.lineage.transport.http.endpoint | quote }}
+{{- end }}
+{{- if include "polars.isAutoscalingEnabled" . }}
+            - name: PC_CUBLET__scaling__k8s_deployment__name
+              value: {{ include "polars.worker.fullname" . | quote }}
+            - name: PC_CUBLET__scaling__k8s_deployment__namespace
+              value: {{ .Release.Namespace | quote }}
+            - name: PC_CUBLET__scaling__k8s_deployment__min_replicas
+              value: {{ .Values.scaling.minReplicas | quote }}
+  {{- with include "polars.scaling.maxReplicas" . }}
+            - name: PC_CUBLET__scaling__k8s_deployment__max_replicas
+              value: {{ . | quote }}
+  {{- end }}
 {{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}

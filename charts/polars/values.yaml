@@ -259,15 +259,48 @@ allowLocalScans: false
 # -- Enabling this option ensures that all queries must be sent with a set username.
 denyAnonymousUsers: false
 
-# -- When scheduling the query, wait for a certain amount of workers to be free before starting execution.
+# @schema
+# type: [object, "null"]
+# additionalProperties: true
+# @schema
+# @ignore
+# -- Removed in chart 3.0.0; replaced by workersPerQuery. Present only so that a values file still setting it gets a migration error instead of a bare schema rejection.
 requireFreeWorkers:
-  enabled: true
+
+# -- How many workers each query gets.
+workersPerQuery:
+  # @schema
+  # type: [integer, "null"]
+  # minimum: 1
+  # @schema
+  # -- Number of workers a query uses when it does not request a count itself. This is also the number of workers the query is planned for, and the capacity requested from the autoscaler. Defaults to the worker replica count of this release for a fixed-size cluster; must be set when `scaling.enabled` is true.
+  default:
+  # @schema
+  # type: [integer, "null"]
+  # minimum: 1
+  # @schema
+  # -- Upper bound on the number of workers a single query may use. A query asking for more is capped at this value with a warning. Leave unset for no explicit cap; an autoscaled pool is still bounded by `scaling.maxReplicas`.
+  max:
+
+# -- Autoscale the worker pool between a minimum and maximum size, based on the summed worker demand of running queries. The scheduler scales this release's worker Deployment through its scale subresource. When disabled, the cluster is a fixed size (worker.deployment.replicaCount) and must be scaled externally if needed.
+scaling:
+  # -- Enable autoscaling of the worker pool.
+  enabled: false
+  # @schema
+  # type: integer
+  # minimum: 0
+  # @schema
+  # -- Minimum number of worker replicas to scale down to.
+  minReplicas: 0
   # @schema
   # type: [integer, "null"]
   # minimum: 0
   # @schema
-  # -- The number of workers to wait for. By default, takes the configured worker replica count from the current release.
-  count:
+  # -- Maximum number of worker replicas to scale up to. Leave unset for unbounded.
+  maxReplicas:
+  rbac:
+    # -- Create the Role and RoleBinding that grant the scheduler access to the worker Deployment's scale subresource. Set to false to provision equivalent RBAC yourself.
+    create: true
 
 # -- Ephemeral storage for shuffle data.
 shuffleData:

@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.2](https://img.shields.io/badge/AppVersion-0.8.2-informational?style=flat-square)
+![Version: 3.0.0](https://img.shields.io/badge/Version-3.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.3](https://img.shields.io/badge/AppVersion-0.8.3-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -596,6 +596,21 @@ The dashboard for Polars On-Prem can be accessed at `http://localhost:3001`, and
 
 Polars On-Prem uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
 
+## Scaling
+
+The worker pool can be scaled while the cluster is running, instead of holding a fixed number of workers. When enabled, the scheduler scales the worker deployment through its scale subresource, based on the worker demand of the queries that are running. See [Autoscaling](https://docs.cloud.pola.rs/polars-on-premises/integrations/autoscaling/) for how queries ask for workers on an autoscaled cluster.
+
+```yaml
+scaling:
+  enabled: true
+  minReplicas: 0
+  maxReplicas: 8
+```
+
+The chart creates a Role and RoleBinding granting the scheduler access to the worker deployment's scale subresource. Set `scaling.rbac.create` to `false` to provision equivalent RBAC yourself.
+
+Because a Deployment gives the scheduler no way to choose which pod is removed, the pool is only scaled down while no query is running.
+
 ## Lineage
 
 OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
@@ -707,8 +722,14 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | allowLocalSinks | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |
 | allowLocalScans | bool | `false` | Disabling this option prevents the worker from reading from local disk. It is currently not possible to configure which scan locations are allowed. Users can alternatively configure scans that read from S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#reading-from-cloud-storage |
 | denyAnonymousUsers | bool | `false` | Enabling this option ensures that all queries must be sent with a set username. |
-| requireFreeWorkers | object | `{"count":null,"enabled":true}` | When scheduling the query, wait for a certain amount of workers to be free before starting execution. |
-| requireFreeWorkers.count | string | `nil` | The number of workers to wait for. By default, takes the configured worker replica count from the current release. |
+| workersPerQuery | object | `{"default":null,"max":null}` | How many workers each query gets. |
+| workersPerQuery.default | string | `nil` | Number of workers a query uses when it does not request a count itself. This is also the number of workers the query is planned for, and the capacity requested from the autoscaler. Defaults to the worker replica count of this release for a fixed-size cluster; must be set when `scaling.enabled` is true. |
+| workersPerQuery.max | string | `nil` | Upper bound on the number of workers a single query may use. A query asking for more is capped at this value with a warning. Leave unset for no explicit cap; an autoscaled pool is still bounded by `scaling.maxReplicas`. |
+| scaling | object | `{"enabled":false,"maxReplicas":null,"minReplicas":0,"rbac":{"create":true}}` | Autoscale the worker pool between a minimum and maximum size, based on the summed worker demand of running queries. The scheduler scales this release's worker Deployment through its scale subresource. When disabled, the cluster is a fixed size (worker.deployment.replicaCount) and must be scaled externally if needed. |
+| scaling.enabled | bool | `false` | Enable autoscaling of the worker pool. |
+| scaling.minReplicas | int | `0` | Minimum number of worker replicas to scale down to. |
+| scaling.maxReplicas | string | `nil` | Maximum number of worker replicas to scale up to. Leave unset for unbounded. |
+| scaling.rbac.create | bool | `true` | Create the Role and RoleBinding that grant the scheduler access to the worker Deployment's scale subresource. Set to false to provision equivalent RBAC yourself. |
 | shuffleData | object | `{"abs":{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[]},"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"},"gcs":{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[]},"s3":{"enabled":false,"endpoint":"s3://my-storage-location/path/to/dir","options":[]},"sharedFilesystem":{"enabled":false,"path":"/mnt/nfs/shuffle-data"},"sharedPersistentVolumeClaim":{"create":true,"enabled":false,"existingClaimName":"","size":"125Gi","storageClassName":""}}` | Ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for shuffle data. |
 | shuffleData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for shuffle data. |
