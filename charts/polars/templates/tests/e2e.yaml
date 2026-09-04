@@ -98,9 +98,9 @@ spec:
           value: "{{ include "polars.scheduler.fullname" $ }}.{{ $.Release.Namespace }}.svc.{{ include "polars.clusterDomain" $ }}"
         - name: PC_E2E_SINK
           value: {{ $E2E_SINK | quote }}
-  {{- if gt (int $.Values.worker.deployment.replicaCount) 1 }}
-        - name: "PC_E2E_DISTRIBUTED"
-          value: "1"
+  {{- with include "polars.tests.distributedWorkers" $ }}
+        - name: PC_E2E_WORKERS
+          value: {{ . | quote }}
   {{- end }}
   {{- with $.Values.tests.pod.runtimeContainer.env }}
         {{ toYaml . | nindent 8 }}
