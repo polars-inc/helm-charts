@@ -446,42 +446,45 @@ Reads .Values.scaling.enabled directly to avoid recursing through validation.
 */}}
 {{- define "polars.workersPerQuery.default" -}}
   {{- include "polars.validateWorkersPerQuery" . -}}
-  {{- if not (kindIs "invalid" .Values.workersPerQuery.default) }}{{ .Values.workersPerQuery.default }}
-  {{- else if not .Values.scaling.enabled }}{{ .Values.worker.deployment.replicaCount }}{{ end -}}
+  {{- if not (kindIs "invalid" .Values.workersPerQuery.default) -}}
+    {{- .Values.workersPerQuery.default -}}
+  {{- else if not .Values.scaling.enabled -}}
+    {{- .Values.worker.deployment.replicaCount -}}
   {{- end -}}
+{{- end -}}
 
-  {{/*
-  Upper bound on workers per query, as a string. Empty when unset.
-  */}}
-  {{- define "polars.workersPerQuery.max" -}}
-    {{- if not (kindIs "invalid" .Values.workersPerQuery.max) }}{{ .Values.workersPerQuery.max }}{{ end -}}
-  {{- end -}}
+{{/*
+Upper bound on workers per query, as a string. Empty when unset.
+*/}}
+{{- define "polars.workersPerQuery.max" -}}
+  {{- if not (kindIs "invalid" .Values.workersPerQuery.max) }}{{ .Values.workersPerQuery.max }}{{ end -}}
+{{- end -}}
 
-  {{/*
-  Fails when the removed .Values.requireFreeWorkers is still set, pointing at the
-  .Values.workersPerQuery migration.
-  */}}
-  {{- define "polars.validateWorkersPerQuery" -}}
-    {{- if not (kindIs "invalid" .Values.requireFreeWorkers) -}}
-      {{- fail "Removed value: .Values.requireFreeWorkers was replaced by .Values.workersPerQuery in chart 3.0.0. Migrate `requireFreeWorkers.count: N` to `workersPerQuery.default: N`, adding `workersPerQuery.max: N` to keep the previous per-query cap. For `requireFreeWorkers.enabled: false`, set `workersPerQuery.default` explicitly when `scaling.enabled` is true. Then delete `requireFreeWorkers` from your values." -}}
-    {{- end -}}
+{{/*
+Fails when the removed .Values.requireFreeWorkers is still set, pointing at the
+.Values.workersPerQuery migration.
+*/}}
+{{- define "polars.validateWorkersPerQuery" -}}
+  {{- if not (kindIs "invalid" .Values.requireFreeWorkers) -}}
+    {{- fail "Removed value: .Values.requireFreeWorkers was replaced by .Values.workersPerQuery in chart 3.0.0. Migrate `requireFreeWorkers.count: N` to `workersPerQuery.default: N`, adding `workersPerQuery.max: N` to keep the previous per-query cap. For `requireFreeWorkers.enabled: false`, set `workersPerQuery.default` explicitly when `scaling.enabled` is true. Then delete `requireFreeWorkers` from your values." -}}
   {{- end -}}
+{{- end -}}
 
-  {{/*
-  Workers the distributed e2e test may request, or empty when the deployment cannot
-  reach the two workers it needs to observe fan-out. The test pins this count so the
-  scheduler drives the pool to it; a ceiling of 0 below means unbounded.
-  */}}
-  {{- define "polars.tests.distributedWorkers" -}}
-    {{- $required := 2 -}}
-    {{- $ceiling := 0 -}}
-    {{- if include "polars.isAutoscalingEnabled" . -}}
-      {{- with include "polars.scaling.maxReplicas" . }}{{ $ceiling = . | int }}{{ end -}}
-    {{- else -}}
-      {{- $ceiling = .Values.worker.deployment.replicaCount | int -}}
-    {{- end -}}
-    {{- with include "polars.workersPerQuery.max" . -}}
-      {{- if or (eq $ceiling 0) (lt (. | int) $ceiling) }}{{ $ceiling = . | int }}{{ end -}}
-    {{- end -}}
-    {{- if or (eq $ceiling 0) (ge $ceiling $required) }}{{ $required }}{{ end -}}
+{{/*
+Workers the distributed e2e test may request, or empty when the deployment cannot
+reach the two workers it needs to observe fan-out. The test pins this count so the
+scheduler drives the pool to it; a ceiling of 0 below means unbounded.
+*/}}
+{{- define "polars.tests.distributedWorkers" -}}
+  {{- $required := 2 -}}
+  {{- $ceiling := 0 -}}
+  {{- if include "polars.isAutoscalingEnabled" . -}}
+    {{- with include "polars.scaling.maxReplicas" . }}{{ $ceiling = . | int }}{{ end -}}
+  {{- else -}}
+    {{- $ceiling = .Values.worker.deployment.replicaCount | int -}}
   {{- end -}}
+  {{- with include "polars.workersPerQuery.max" . -}}
+    {{- if or (eq $ceiling 0) (lt (. | int) $ceiling) }}{{ $ceiling = . | int }}{{ end -}}
+  {{- end -}}
+  {{- if or (eq $ceiling 0) (ge $ceiling $required) }}{{ $required }}{{ end -}}
+{{- end -}}
