@@ -5,7 +5,9 @@ metadata:
   labels:
     {{ include "polars.labels" . | nindent 4 }}
 spec:
+{{- if not (include "polars.isAutoscalingEnabled" .) }}
   replicas: {{ .Values.worker.deployment.replicaCount }}
+{{- end }}
   revisionHistoryLimit: {{ .Values.worker.deployment.revisionHistoryLimit }}
   selector:
     matchLabels:

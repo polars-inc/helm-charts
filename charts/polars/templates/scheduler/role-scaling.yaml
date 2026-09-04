@@ -1,0 +1,22 @@
+{{- if and (include "polars.isAutoscalingEnabled" .) .Values.scaling.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "polars.scaling.rbacName" . }}
+  labels:
+    {{ include "polars.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments/scale"]
+    resourceNames:
+      - {{ include "polars.worker.fullname" . | quote }}
+    verbs: ["patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames:
+      - {{ include "polars.worker.fullname" . | quote }}
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["list", "watch"]
+{{- end }}

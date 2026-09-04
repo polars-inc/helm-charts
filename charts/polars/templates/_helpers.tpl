@@ -397,3 +397,94 @@ Verify that we're using prebuilt runtime
   {{- include "polars.validateRuntime" . -}}
   {{- if .Values.runtime.prebuilt.enabled -}}true{{- end -}}
 {{- end }}
+
+{{/*
+Validates scaling config. Fails on:
+- maxReplicas set below minReplicas
+- workersPerQuery.default unset, which the scheduler rejects at startup
+*/}}
+{{- define "polars.validateScaling" -}}
+  {{- if .Values.scaling.enabled -}}
+    {{- $maxReplicas := include "polars.scaling.maxReplicas" . -}}
+    {{- if and $maxReplicas (lt ($maxReplicas | int) (.Values.scaling.minReplicas | int)) -}}
+      {{- fail "Scaling error: .Values.scaling.maxReplicas must be greater than or equal to .Values.scaling.minReplicas" -}}
+    {{- end -}}
+    {{- if kindIs "invalid" .Values.workersPerQuery.default -}}
+      {{- fail "Scaling error: .Values.workersPerQuery.default must be set when .Values.scaling.enabled is true, since it is the capacity each query requests from the autoscaler" -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Whether autoscaling of the worker Deployment is enabled
+*/}}
+{{- define "polars.isAutoscalingEnabled" -}}
+  {{- include "polars.validateScaling" . -}}
+  {{- if .Values.scaling.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+Maximum number of worker replicas for autoscaling, as a string.
+Empty when unset, which means unbounded.
+*/}}
+{{- define "polars.scaling.maxReplicas" -}}
+  {{- if not (kindIs "invalid" .Values.scaling.maxReplicas) }}{{ .Values.scaling.maxReplicas }}{{ end -}}
+{{- end -}}
+
+{{/*
+Name shared by the scaling Role and RoleBinding.
+*/}}
+{{- define "polars.scaling.rbacName" -}}
+  {{- printf "%s-scaling" (include "polars.scheduler.fullname" .) -}}
+{{- end -}}
+
+{{/*
+Workers a query uses when it requests no count, as a string. Falls back to the
+worker replica count for a fixed-size cluster; empty when autoscaling is enabled
+and no default is configured, which polars.validateScaling rejects.
+Reads .Values.scaling.enabled directly to avoid recursing through validation.
+*/}}
+{{- define "polars.workersPerQuery.default" -}}
+  {{- include "polars.validateWorkersPerQuery" . -}}
+  {{- if not (kindIs "invalid" .Values.workersPerQuery.default) -}}
+    {{- .Values.workersPerQuery.default -}}
+  {{- else if not .Values.scaling.enabled -}}
+    {{- .Values.worker.deployment.replicaCount -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Upper bound on workers per query, as a string. Empty when unset.
+*/}}
+{{- define "polars.workersPerQuery.max" -}}
+  {{- if not (kindIs "invalid" .Values.workersPerQuery.max) }}{{ .Values.workersPerQuery.max }}{{ end -}}
+{{- end -}}
+
+{{/*
+Fails when the removed .Values.requireFreeWorkers is still set, pointing at the
+.Values.workersPerQuery migration.
+*/}}
+{{- define "polars.validateWorkersPerQuery" -}}
+  {{- if not (kindIs "invalid" .Values.requireFreeWorkers) -}}
+    {{- fail "Removed value: .Values.requireFreeWorkers was replaced by .Values.workersPerQuery in chart 3.0.0. Migrate `requireFreeWorkers.count: N` to `workersPerQuery.default: N`, adding `workersPerQuery.max: N` to keep the previous per-query cap. For `requireFreeWorkers.enabled: false`, set `workersPerQuery.default` explicitly when `scaling.enabled` is true. Then delete `requireFreeWorkers` from your values." -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Workers the distributed e2e test may request, or empty when the deployment cannot
+reach the two workers it needs to observe fan-out. The test pins this count so the
+scheduler drives the pool to it; a ceiling of 0 below means unbounded.
+*/}}
+{{- define "polars.tests.distributedWorkers" -}}
+  {{- $required := 2 -}}
+  {{- $ceiling := 0 -}}
+  {{- if include "polars.isAutoscalingEnabled" . -}}
+    {{- with include "polars.scaling.maxReplicas" . }}{{ $ceiling = . | int }}{{ end -}}
+  {{- else -}}
+    {{- $ceiling = .Values.worker.deployment.replicaCount | int -}}
+  {{- end -}}
+  {{- with include "polars.workersPerQuery.max" . -}}
+    {{- if or (eq $ceiling 0) (lt (. | int) $ceiling) }}{{ $ceiling = . | int }}{{ end -}}
+  {{- end -}}
+  {{- if or (eq $ceiling 0) (ge $ceiling $required) }}{{ $required }}{{ end -}}
+{{- end -}}

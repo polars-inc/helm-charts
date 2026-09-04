@@ -600,6 +600,21 @@ The dashboard for Polars On-Prem can be accessed at `http://localhost:3001`, and
 
 Polars On-Prem uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
 
+## Scaling
+
+The worker pool can be scaled while the cluster is running, instead of holding a fixed number of workers. When enabled, the scheduler scales the worker deployment through its scale subresource, based on the worker demand of the queries that are running. See [Autoscaling](https://docs.cloud.pola.rs/polars-on-premises/integrations/autoscaling/) for how queries ask for workers on an autoscaled cluster.
+
+```yaml
+scaling:
+  enabled: true
+  minReplicas: 0
+  maxReplicas: 8
+```
+
+The chart creates a Role and RoleBinding granting the scheduler access to the worker deployment's scale subresource. Set `scaling.rbac.create` to `false` to provision equivalent RBAC yourself.
+
+Because a Deployment gives the scheduler no way to choose which pod is removed, the pool is only scaled down while no query is running.
+
 ## Lineage
 
 OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
