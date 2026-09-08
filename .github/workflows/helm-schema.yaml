@@ -15,14 +15,8 @@ jobs:
 
       - name: Install helm-schema
         run: |
-          helm plugin install https://github.com/dadav/helm-schema --verify=false
+          helm plugin install https://github.com/losisin/helm-values-schema-json --version v2.6.0 --verify=false
         shell: bash
-
-      - name: Cache APT Packages
-        uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # ratchet:awalsh128/cache-apt-pkgs-action@v1.6.0
-        with:
-          packages: jq moreutils
-          version: "1.0"
 
       - name: Run make schema
         run: |
