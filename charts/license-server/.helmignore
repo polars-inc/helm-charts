@@ -21,6 +21,7 @@
 .idea/
 *.tmproj
 .vscode/
-# Local license / TLS material — never package
-*.json
+# Local license / TLS material — never package (a blanket *.json would also
+# drop values.schema.json)
+license*.json
 *.pem
