@@ -44,11 +44,9 @@ $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set license.onPremEnterprise.enabled=true \
     --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
-    --set license.onPremEnterprise.secretProperty=license.json \
-    --set anonymousResults.temporaryStorage.enabled=true
+    --set license.onPremEnterprise.secretProperty=license.json
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
-$ kubectl port-forward svc/polars-temporary-storage 8333:8333
 ```
 
 </details>
@@ -63,8 +61,7 @@ To install the chart, ensure you have requested a Polars license server credenti
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set license.licenseServer.enabled=true \
-    --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051" \
-    --set anonymousResults.temporaryStorage.enabled=true
+    --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051"
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
 ```

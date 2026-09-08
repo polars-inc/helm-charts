@@ -42,11 +42,9 @@ $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set license.onPremEnterprise.enabled=true \
     --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
-    --set license.onPremEnterprise.secretProperty=license.json \
-    --set anonymousResults.temporaryStorage.enabled=true
+    --set license.onPremEnterprise.secretProperty=license.json
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
-$ kubectl port-forward svc/polars-temporary-storage 8333:8333
 ```
 
 </details>
@@ -61,8 +59,7 @@ To install the chart, ensure you have requested a Polars license server credenti
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set license.licenseServer.enabled=true \
-    --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051" \
-    --set anonymousResults.temporaryStorage.enabled=true
+    --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051"
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
 ```
@@ -704,7 +701,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | anonymousResults.s3.presignDuration | string | `"8h"` | The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S. |
 | anonymousResults.s3.options | list | `[]` | Storage options for the AWS S3 storage location. These correspond to Object Store's `AmazonS3ConfigKey`. More info: https://docs.rs/object_store/latest/object_store/aws/enum.AmazonS3ConfigKey.html |
 | anonymousResults.temporaryStorage | object | `{"enabled":false,"presignDuration":"8h","presignEndpointUrl":"http://localhost:8333"}` | Configure using quick-start temporary storage server |
-| anonymousResults.temporaryStorage.enabled | bool | `false` | Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment. |
+| anonymousResults.temporaryStorage.enabled | bool | `false` | This will be removed in version 4.0.0. use `.collect()` on a polars query instead or set up anonymous results using s3/abc/gcp/sharedfs. Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment. |
 | anonymousResults.temporaryStorage.presignDuration | string | `"8h"` | The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S. |
 | anonymousResults.abs | object | `{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[],"presignDuration":"8h"}` | Configure Azure Blob Storage as anonymous results location. |
 | anonymousResults.abs.enabled | bool | `false` | Enable Azure Blob Storage for anonymous results. |

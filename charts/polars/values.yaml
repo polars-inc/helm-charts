@@ -141,7 +141,10 @@ anonymousResults:
 #            key: accessKeyId
   # -- Configure using quick-start temporary storage server
   temporaryStorage:
-    # -- Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.
+    # @schema
+    # deprecated: true
+    # @schema
+    # -- This will be removed in version 4.0.0. use `.collect()` on a polars query instead or set up anonymous results using s3/abc/gcp/sharedfs. Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.
     enabled: false
     presignEndpointUrl: "http://localhost:8333"
     # -- The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S.

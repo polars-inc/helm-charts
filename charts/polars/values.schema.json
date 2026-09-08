@@ -119,7 +119,7 @@
                     "type": "object",
                     "properties": {
                         "enabled": {
-                            "description": "Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.",
+                            "description": "This will be removed in version 4.0.0. use `.collect()` on a polars query instead or set up anonymous results using s3/abc/gcp/sharedfs. Enable temporary S3 storage for anonymous results. This will deploy a seaweedfs mini deployment.",
                             "type": "boolean"
                         },
                         "presignDuration": {
