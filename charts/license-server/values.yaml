@@ -38,28 +38,24 @@ image:
   repository: "polarscloud/license-server"
   # -- Image tag. Defaults to the chart appVersion when left empty.
   tag: ""
-  # @schema
-  # $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/imagePullPolicy
-  # @schema
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/imagePullPolicy
   # -- Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
   pullPolicy: IfNotPresent
 
-# @schema
-# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/imagePullSecrets
-# @schema
+# @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/imagePullSecrets
 # -- ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
 imagePullSecrets: []
 
-# @schema
-# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
-# @schema
+# @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/resources
 # -- Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources:
+  # @schema hidden
   requests:
     # -- CPU request
     cpu: 100m
     # -- Memory request
     memory: 128Mi
+  # @schema hidden
   limits:
     # -- Memory limit (no CPU limit, to avoid throttling)
     memory: 128Mi
@@ -82,58 +78,49 @@ serviceAccount:
   create: true
   # -- ServiceAccount name. Defaults to the full resource name when empty.
   name: ""
-  # @schema
-  # additionalProperties: true
-  # @schema
+  # @schema additionalProperties: true
   # -- Annotations to add to the ServiceAccount
   annotations: {}
   # -- AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level.
   automount: false
 
-# @schema
-# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext
-# @schema
+# @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/securityContext
 # -- SecurityContext holds pod-level security attributes and common container settings.
 podSecurityContext:
+  # @schema hidden
   runAsNonRoot: true
+  # @schema hidden
   runAsUser: 1000
+  # @schema hidden
   fsGroup: 1000
+  # @schema hidden
   seccompProfile:
     type: RuntimeDefault
 
-# @schema
-# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
-# @schema
+# @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/securityContext
 # -- SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 securityContext:
+  # @schema hidden
   allowPrivilegeEscalation: false
+  # @schema hidden
   readOnlyRootFilesystem: true
+  # @schema hidden
   capabilities:
     drop:
       - ALL
 
-# @schema
-# additionalProperties: true
-# @schema
+# @schema additionalProperties: true
 # -- Annotations to add to the server pod
 podAnnotations: {}
-# @schema
-# additionalProperties: true
-# @schema
+# @schema additionalProperties: true
 # -- Labels to add to the server pod
 podLabels: {}
-# @schema
-# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector
-# @schema
+# @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/nodeSelector
 # -- NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 nodeSelector: {}
-# @schema
-# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/tolerations
-# @schema
+# @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/tolerations
 # -- If specified, the pod's tolerations.
 tolerations: []
-# @schema
-# $ref: ../../_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/affinity
-# @schema
+# @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSpec/properties/affinity
 # -- If specified, the pod's scheduling constraints
 affinity: {}
