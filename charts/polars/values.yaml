@@ -852,7 +852,7 @@ scheduler:
 tests:
   images:
     - repository: "polarscloud/polars-on-premises-tests"
-      tag: "0.11.0-1"
+      tag: "0.11.1"
       pullPolicy: IfNotPresent
 
   # -- Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies
