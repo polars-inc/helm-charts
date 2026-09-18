@@ -108,6 +108,10 @@ runtime:
 
     polarsExtras: "async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone"
 
+    imageVolume:
+      # -- Mount the Polars distribution image read-only as an OCI image volume instead of copying it into an emptyDir with an init container, which removes the copy and its writeback from pod startup. Only enable this where the cluster supports image volumes: Kubernetes 1.33 or later with a container runtime that implements them (containerd 2.1 or later, CRI-O 1.31 or later).
+      enabled: false
+
 telemetry:
   # -- Endpoint to send OTLP traces and metrics to.
   otlpEndpoint: ""
