@@ -54,7 +54,7 @@ spec:
       hostAliases:
         {{ toYaml . | nindent 8 }}
 {{- end }}
-{{- if include "polars.isRuntimeComposed" .}}
+{{- if and (include "polars.isRuntimeComposed" .) (not (include "polars.useImageVolume" .)) }}
       initContainers:
         - name: release
   {{- with .Values.worker.deployment.distContainer.securityContext }}
@@ -328,6 +328,10 @@ spec:
               mountPath: /tmp
             - name: release-data
               mountPath: /emptydir
+  {{- if include "polars.useImageVolume" . }}
+              subPath: opt
+              readOnly: true
+  {{- end }}
 {{- end }}
             - name: temporary-data
               mountPath: /app/temporary_data
@@ -397,7 +401,13 @@ spec:
         - name: tmp-data
           emptyDir: {}
         - name: release-data
+  {{- if include "polars.useImageVolume" . }}
+          image:
+            reference: "{{ .Values.runtime.composed.dist.repository }}:{{ .Values.runtime.composed.dist.tag | default .Chart.AppVersion }}"
+            pullPolicy: {{ .Values.runtime.composed.dist.pullPolicy }}
+  {{- else }}
           emptyDir: {}
+  {{- end }}
 {{- end }}
 {{- with .Values.worker.deployment.volumes }}
         {{ toYaml . | nindent 8 }}

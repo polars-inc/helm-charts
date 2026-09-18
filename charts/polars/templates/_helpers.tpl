@@ -367,7 +367,17 @@ Verify that .Values.runtime.composed.polarsExtras contains cloudpickle and retur
   {{- if not (contains "cloudpickle" .Values.runtime.composed.polarsExtras) -}}
     {{- fail ".Values.runtime.composed.polarsExtras must include cloudpickle" }}
   {{- end }}
-{{ .Values.runtime.composed.polarsExtras }}
+{{- .Values.runtime.composed.polarsExtras }}
+{{- end }}
+
+{{/*
+Whether the composed runtime mounts the distribution image read-only instead of
+copying it in with an init container.
+*/}}
+{{- define "polars.useImageVolume" -}}
+  {{- if include "polars.isRuntimeComposed" . -}}
+    {{- if ((.Values.runtime.composed).imageVolume).enabled -}}true{{- end -}}
+  {{- end -}}
 {{- end }}
 
 {{/*

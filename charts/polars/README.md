@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 3.0.2](https://img.shields.io/badge/Version-3.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.5](https://img.shields.io/badge/AppVersion-0.8.5-informational?style=flat-square)
+![Version: 3.0.3](https://img.shields.io/badge/Version-3.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.6](https://img.shields.io/badge/AppVersion-0.8.6-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -690,6 +690,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | runtime.composed.runtime.repository | string | `"python"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.runtime.tag | string | `"3.13.9-slim-bookworm"` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.runtime.pullPolicy | string | `""` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
+| runtime.composed.imageVolume.enabled | bool | `false` | Mount the Polars distribution image read-only as an OCI image volume instead of copying it into an emptyDir with an init container, which removes the copy and its writeback from pod startup. Only enable this where the cluster supports image volumes: Kubernetes 1.33 or later with a container runtime that implements them (containerd 2.1 or later, CRI-O 1.31 or later). |
 | telemetry.otlpEndpoint | string | `""` | Endpoint to send OTLP traces and metrics to. |
 | logLevel | string | `"info"` | One of "info", "debug", "trace". |
 | workerHeartbeatIntervalSecs | int | `5` | Heartbeat interval between polars workers and the scheduler in seconds. |

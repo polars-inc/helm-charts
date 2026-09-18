@@ -45,7 +45,7 @@ spec:
   hostAliases:
     {{ toYaml . | nindent 4 }}
   {{- end }}
-  {{- if eq $fail "" }}
+  {{- if and (eq $fail "") (not (include "polars.useImageVolume" $)) }}
   initContainers:
     - name: release
     {{- with $.Values.tests.pod.distContainer.securityContext }}
@@ -118,6 +118,10 @@ spec:
           mountPath: /tmp
         - name: release-data
           mountPath: /emptydir
+  {{- if include "polars.useImageVolume" $ }}
+          subPath: opt
+          readOnly: true
+  {{- end }}
   {{- with $.Values.tests.pod.runtimeContainer.volumeMounts }}
         {{ toYaml . | nindent 8 }}
   {{- end }}
@@ -131,7 +135,13 @@ spec:
     - name: tmp-data
       emptyDir: {}
     - name: release-data
+  {{- if include "polars.useImageVolume" $ }}
+      image:
+        reference: "{{ .repository }}:{{ .tag }}"
+        pullPolicy: {{ .pullPolicy }}
+  {{- else }}
       emptyDir: {}
+  {{- end }}
   {{- with $.Values.tests.pod.volumes }}
     {{ toYaml . | nindent 4 }}
   {{- end }}
