@@ -404,6 +404,8 @@ observatory:
     storageClassName: ""
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 1Gi
+    # -- Keep the created PVC (and so its data) when the release is uninstalled. More info: https://helm.sh/docs/howto/charts_tips_and_tricks/#tell-helm-not-to-uninstall-a-resource
+    retainOnUninstall: true
 
 lineage:
   # -- Enable support for lineage exporting to a specific endpoint

@@ -8,6 +8,10 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "polars.observatoryDataPvcName" . }}
+    {{- if .Values.observatory.persistentVolumeClaim.retainOnUninstall }}
+  annotations:
+    helm.sh/resource-policy: keep
+    {{- end }}
 spec:
   accessModes: [ "ReadWriteOnce" ]
   storageClassName: {{ .Values.observatory.persistentVolumeClaim.storageClassName }}
