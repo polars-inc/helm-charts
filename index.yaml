@@ -866,6 +866,21 @@ entries:
   - annotations:
       kubebuilder.io/generated-by: kubebuilder
     apiVersion: v2
+    appVersion: 0.1.0-alpha.9
+    created: "2026-10-06T14:04:51.786190955Z"
+    description: A Helm chart to distribute polars-k8s-operator
+    digest: 3268981b5660cec23e52cf8a299d50e2fa4e29b391a6cd7835d24c5d9d1f5191
+    keywords:
+    - kubernetes
+    - operator
+    name: polars-k8s-operator
+    type: application
+    urls:
+    - https://github.com/polars-inc/helm-charts/releases/download/polars-k8s-operator-0.1.0-alpha.9/polars-k8s-operator-0.1.0-alpha.9.tgz
+    version: 0.1.0-alpha.9
+  - annotations:
+      kubebuilder.io/generated-by: kubebuilder
+    apiVersion: v2
     appVersion: 0.1.0-alpha.8
     created: "2026-10-05T14:08:26.197327251Z"
     description: A Helm chart to distribute polars-k8s-operator
@@ -983,4 +998,4 @@ entries:
     urls:
     - https://github.com/polars-inc/helm-charts/releases/download/polars-k8s-operator-0.1.0-alpha.1/polars-k8s-operator-0.1.0-alpha.1.tgz
     version: 0.1.0-alpha.1
-generated: "2026-10-05T14:08:26.197406543Z"
+generated: "2026-10-06T14:04:51.786318626Z"
