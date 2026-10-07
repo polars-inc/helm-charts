@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 3.0.3](https://img.shields.io/badge/Version-3.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.6](https://img.shields.io/badge/AppVersion-0.8.6-informational?style=flat-square)
+![Version: 3.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.0](https://img.shields.io/badge/AppVersion-0.9.0-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -489,22 +489,22 @@ You can configure the chart to create a persistent volume claim by configuring t
 
 ```yaml
 observatory:
-  data:
-    persistentVolumeClaim:
-      enabled: true
-      storageClassName: "hostpath" # As configured in your k8s cluster
-      size: 1Gi
+  persistentVolumeClaim:
+    enabled: true
+    storageClassName: "hostpath" # As configured in your k8s cluster
+    size: 1Gi
 ```
+
+The created claim is annotated with `helm.sh/resource-policy: keep`, so it is not deleted on `helm uninstall` and the profiling data is picked up again when the chart is reinstalled under the same release name and namespace. Set `observatory.persistentVolumeClaim.retainOnUninstall` to `false` to have the claim removed with the release; whether the underlying volume is then deleted depends on the `reclaimPolicy` of its StorageClass.
 
 Or reuse an existing volume claim as shown below. Make sure the volume has the `ReadWriteOnce` access mode as the observatory requires exclusive access to the database file.
 
 ```yaml
 observatory:
-  data:
-    persistentVolumeClaim:
-      enabled: true
-      create: false
-      existingClaimName: "your-persistent-volume-claim"
+  persistentVolumeClaim:
+    enabled: true
+    create: false
+    existingClaimName: "your-persistent-volume-claim"
 ```
 
 ### Resource allocation and node selectors
@@ -788,6 +788,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | observatory.persistentVolumeClaim.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-observatory-data". |
 | observatory.persistentVolumeClaim.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
 | observatory.persistentVolumeClaim.size | string | `"1Gi"` | Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity |
+| observatory.persistentVolumeClaim.retainOnUninstall | bool | `true` | Keep the created PVC (and so its data) when the release is uninstalled. More info: https://helm.sh/docs/howto/charts_tips_and_tricks/#tell-helm-not-to-uninstall-a-resource |
 | lineage.enabled | bool | `false` | Enable support for lineage exporting to a specific endpoint |
 | lineage.transport.http.endpoint | string | `"http://marquez.default.svc.cluster.local:5000"` | Transport protocol to use for lineage export |
 | worker.extras.hdfs.enabled | bool | `false` | Whether to enable support for HDFS |

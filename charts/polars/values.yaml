@@ -404,6 +404,8 @@ observatory:
     storageClassName: ""
     # -- Size of the volume requested by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#capacity
     size: 1Gi
+    # -- Keep the created PVC (and so its data) when the release is uninstalled. More info: https://helm.sh/docs/howto/charts_tips_and_tricks/#tell-helm-not-to-uninstall-a-resource
+    retainOnUninstall: true
 
 lineage:
   # -- Enable support for lineage exporting to a specific endpoint
@@ -856,7 +858,7 @@ scheduler:
 tests:
   images:
     - repository: "polarscloud/polars-on-premises-tests"
-      tag: "0.11.1-1"
+      tag: "0.12.0"
       pullPolicy: IfNotPresent
 
   # -- Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies
