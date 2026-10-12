@@ -10753,6 +10753,13 @@ spec:
                               Annotations to add to the Service object. Used by some controllers
                               to set up TLS termination or load balancers.
                             type: object
+                          clusterIP:
+                            description: |-
+                              ClusterIP of the Service; "None" makes it headless, so clients dial the
+                              pods directly. Applied on creation only, as the field is immutable.
+                              More info:
+                              https://kubernetes.io/docs/concepts/services-networking/service/#headless-services
+                            type: string
                           publishNotReadyAddresses:
                             description: |-
                               PublishNotReadyAddresses publishes the addresses of the Service's pods
@@ -10779,6 +10786,13 @@ spec:
                               Annotations to add to the Service object. Used by some controllers
                               to set up TLS termination or load balancers.
                             type: object
+                          clusterIP:
+                            description: |-
+                              ClusterIP of the Service; "None" makes it headless, so clients dial the
+                              pods directly. Applied on creation only, as the field is immutable.
+                              More info:
+                              https://kubernetes.io/docs/concepts/services-networking/service/#headless-services
+                            type: string
                           publishNotReadyAddresses:
                             description: |-
                               PublishNotReadyAddresses publishes the addresses of the Service's pods
@@ -11007,6 +11021,13 @@ spec:
                               Annotations to add to the Service object. Used by some controllers
                               to set up TLS termination or load balancers.
                             type: object
+                          clusterIP:
+                            description: |-
+                              ClusterIP of the Service; "None" makes it headless, so clients dial the
+                              pods directly. Applied on creation only, as the field is immutable.
+                              More info:
+                              https://kubernetes.io/docs/concepts/services-networking/service/#headless-services
+                            type: string
                           publishNotReadyAddresses:
                             description: |-
                               PublishNotReadyAddresses publishes the addresses of the Service's pods
