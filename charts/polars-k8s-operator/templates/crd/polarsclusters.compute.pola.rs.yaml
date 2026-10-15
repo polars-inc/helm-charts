@@ -1206,6 +1206,14 @@ spec:
                 required:
                 - data
                 type: object
+              clusterDomain:
+                description: |-
+                  ClusterDomain is the Kubernetes cluster DNS domain, e.g. "cluster.local".
+                  When set, workers address the scheduler by its fully qualified name
+                  instead of the bare Service name.
+                maxLength: 253
+                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+                type: string
               clusterID:
                 description: |-
                   ClusterID uniquely identifies the Polars cluster in a multi-tenant
