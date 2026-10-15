@@ -378,7 +378,7 @@ checkpointData:
     # -- The filesystem path where checkpoint data will be stored. Must correspond to a mounted volume on a shared network filesystem.
     path: "/mnt/nfs/checkpoint-data"
 
-# -- Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance.
+# -- Ephemeral storage for temporary data used in polars, including out-of-core spill files (see `worker.outOfCore`). Recommended to use some host local SSD storage for better performance.
 temporaryData:
   # -- Configure ephemeral storage for temporary data.
   ephemeralVolumeClaim:
@@ -423,6 +423,23 @@ worker:
     pyiceberg:
       # -- Whether to enable support for pyiceberg. For metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements.
       enabled: false
+
+  # -- Out-of-core execution: when memory runs low, workers spill data to disk instead of running out of memory.
+  outOfCore:
+    # -- Directory for spill files. The default is on the `temporaryData` volume. Sets `POLARS_OOC_SPILL_DIR`.
+    spillDir: "/app/temporary_data/spill"
+    # @schema type: [number, 'null']; minimum: 0
+    # -- Start spilling when memory use exceeds this fraction of the container memory limit, or of the node memory without a limit. Leave unset for the Polars default (0.8). Sets `POLARS_OOC_MEMORY_BUDGET_FRACTION`.
+    memoryBudgetFraction:
+    # @schema type: [integer, 'null']; minimum: 1
+    # -- Start spilling when memory use exceeds this many MB (10^6 bytes). When both budgets are set, the lower one applies. Leave unset for no fixed cap. Sets `POLARS_OOC_MEMORY_BUDGET_MB`.
+    memoryBudgetMB:
+    # @schema type: [integer, 'null']; minimum: 1
+    # -- Abort a query when its spill files exceed this many MB (10^6 bytes). Leave unset for the Polars default (64000). Sets `POLARS_OOC_DISK_BUDGET_MB`.
+    diskBudgetMB:
+    # @schema type: [integer, 'null']; minimum: 1
+    # -- Abort a task when its memory use exceeds this many MB (10^6 bytes), so the worker reports an out-of-memory error instead of the kernel killing the whole pod. Leave unset for about 95% of the container memory limit, or of the node allocatable memory without a limit. Sets `POLARS_OOMKILL_THRESHOLD_MB`.
+    oomKillThresholdMB:
 
   serviceAccount:
     # -- Whether to create a service account.

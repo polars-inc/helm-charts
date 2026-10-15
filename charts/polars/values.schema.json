@@ -1237,7 +1237,7 @@
             "additionalProperties": false
         },
         "temporaryData": {
-            "description": "Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance.",
+            "description": "Ephemeral storage for temporary data used in polars, including out-of-core spill files (see `worker.outOfCore`). Recommended to use some host local SSD storage for better performance.",
             "type": "object",
             "properties": {
                 "ephemeralVolumeClaim": {
@@ -2113,6 +2113,49 @@
                                 }
                             },
                             "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "outOfCore": {
+                    "description": "Out-of-core execution: when memory runs low, workers spill data to disk instead of running out of memory.",
+                    "type": "object",
+                    "properties": {
+                        "diskBudgetMB": {
+                            "description": "Abort a query when its spill files exceed this many MB (10^6 bytes). Leave unset for the Polars default (64000). Sets `POLARS_OOC_DISK_BUDGET_MB`.",
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
+                        },
+                        "memoryBudgetFraction": {
+                            "description": "Start spilling when memory use exceeds this fraction of the container memory limit, or of the node memory without a limit. Leave unset for the Polars default (0.8). Sets `POLARS_OOC_MEMORY_BUDGET_FRACTION`.",
+                            "type": [
+                                "number",
+                                "null"
+                            ],
+                            "minimum": 0
+                        },
+                        "memoryBudgetMB": {
+                            "description": "Start spilling when memory use exceeds this many MB (10^6 bytes). When both budgets are set, the lower one applies. Leave unset for no fixed cap. Sets `POLARS_OOC_MEMORY_BUDGET_MB`.",
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
+                        },
+                        "oomKillThresholdMB": {
+                            "description": "Abort a task when its memory use exceeds this many MB (10^6 bytes), so the worker reports an out-of-memory error instead of the kernel killing the whole pod. Leave unset for about 95% of the container memory limit, or of the node allocatable memory without a limit. Sets `POLARS_OOMKILL_THRESHOLD_MB`.",
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
+                        },
+                        "spillDir": {
+                            "description": "Directory for spill files. The default is on the `temporaryData` volume. Sets `POLARS_OOC_SPILL_DIR`.",
+                            "type": "string"
                         }
                     },
                     "additionalProperties": false
