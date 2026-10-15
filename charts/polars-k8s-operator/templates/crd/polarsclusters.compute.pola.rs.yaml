@@ -2192,6 +2192,23 @@ spec:
                         description: |-
                           Standard object's metadata.
                           More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          finalizers:
+                            items:
+                              type: string
+                            type: array
+                          labels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          name:
+                            type: string
+                          namespace:
+                            type: string
                         type: object
                       spec:
                         description: |-
@@ -9271,6 +9288,23 @@ spec:
                                             May contain labels and annotations that will be copied into the PVC
                                             when creating it. No other fields are allowed and will be rejected during
                                             validation.
+                                          properties:
+                                            annotations:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            finalizers:
+                                              items:
+                                                type: string
+                                              type: array
+                                            labels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
                                           type: object
                                         spec:
                                           description: |-
@@ -11439,6 +11473,23 @@ spec:
                         description: |-
                           Standard object's metadata.
                           More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          finalizers:
+                            items:
+                              type: string
+                            type: array
+                          labels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          name:
+                            type: string
+                          namespace:
+                            type: string
                         type: object
                       spec:
                         description: |-
@@ -18518,6 +18569,23 @@ spec:
                                             May contain labels and annotations that will be copied into the PVC
                                             when creating it. No other fields are allowed and will be rejected during
                                             validation.
+                                          properties:
+                                            annotations:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            finalizers:
+                                              items:
+                                                type: string
+                                              type: array
+                                            labels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
                                           type: object
                                         spec:
                                           description: |-
