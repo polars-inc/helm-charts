@@ -1,6 +1,6 @@
 # Polars on-premises: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 3.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.0](https://img.shields.io/badge/AppVersion-0.9.0-informational?style=flat-square)
+![Version: 3.1.1](https://img.shields.io/badge/Version-3.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.1](https://img.shields.io/badge/AppVersion-0.9.1-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -471,7 +471,7 @@ worker:
 
 #### Temporary data
 
-Polars itself uses some temporary storage location in the streaming engine and in some cases when downloading remote files. For most queries this is a relatively small volume and is not performance sensitive. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
+Polars itself uses some temporary storage location in the streaming engine, for [out-of-core](#out-of-core) spill files, and in some cases when downloading remote files. Without spilling this is a relatively small volume; queries that spill can write a lot to it, so fast local storage helps. By default, the persistent volume for this is disabled, and an `emptyDir` volume is used instead. However, to prevent the host from running out of disk space during large queries, it is recommended to enable a persistent volume for this purpose. The feature below will add a [Generic Ephemeral Volume](https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/) to each of the pods.
 
 ```yaml
 temporaryData:
@@ -479,6 +479,20 @@ temporaryData:
     enabled: true
     storageClassName: "hostpath" # As configured in your k8s cluster
     size: 125Gi
+```
+
+#### Out-of-core
+
+When memory runs low, workers spill data to disk instead of running out of memory. Spill files go to the temporary data volume, so size it for the data your largest queries spill. Spilling starts at 80% of the container memory limit, or of the node memory when no limit is set.
+
+To keep an out-of-memory error from killing the whole worker pod (on cgroup v2 the kernel kills every process in the container), a worker aborts a task once its memory use exceeds `oomKillThresholdMB`. The default is about 95% of the container memory limit, or of the node allocatable memory when no limit is set. The query then fails with an out-of-memory error, and the worker stays up.
+
+```yaml
+worker:
+  outOfCore:
+    memoryBudgetFraction: 0.7 # Spill earlier than the default 0.8
+    diskBudgetMB: 200000 # Abort a query that spills more than this (default 64000)
+    oomKillThresholdMB: 30000 # Override the ~95% default
 ```
 
 #### Observatory data
@@ -777,7 +791,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | checkpointData.sharedFilesystem | object | `{"enabled":false,"path":"/mnt/nfs/checkpoint-data"}` | Configure a shared filesystem path for checkpoint data (e.g. an NFS or CSI driver mount). Intended for shared network filesystems where all workers access the same path. You must mount the volume yourself using worker.deployment.volumes and worker.deployment.runtimeContainer.volumeMounts. |
 | checkpointData.sharedFilesystem.enabled | bool | `false` | Enable shared filesystem for checkpoint data. |
 | checkpointData.sharedFilesystem.path | string | `"/mnt/nfs/checkpoint-data"` | The filesystem path where checkpoint data will be stored. Must correspond to a mounted volume on a shared network filesystem. |
-| temporaryData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}}` | Ephemeral storage for temporary data used in polars (e.g. polars streaming data). Recommended to use some host local SSD storage for better performance. |
+| temporaryData | object | `{"ephemeralVolumeClaim":{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}}` | Ephemeral storage for temporary data used in polars, including out-of-core spill files (see `worker.outOfCore`). Recommended to use some host local SSD storage for better performance. |
 | temporaryData.ephemeralVolumeClaim | object | `{"enabled":false,"size":"125Gi","storageClassName":"hostpath"}` | Configure ephemeral storage for temporary data. |
 | temporaryData.ephemeralVolumeClaim.enabled | bool | `false` | Enable ephemeral volume claim for temporary data. |
 | temporaryData.ephemeralVolumeClaim.storageClassName | string | `"hostpath"` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
@@ -793,6 +807,12 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | lineage.transport.http.endpoint | string | `"http://marquez.default.svc.cluster.local:5000"` | Transport protocol to use for lineage export |
 | worker.extras.hdfs.enabled | bool | `false` | Whether to enable support for HDFS |
 | worker.extras.pyiceberg.enabled | bool | `false` | Whether to enable support for pyiceberg. For metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements. |
+| worker.outOfCore | object | `{"diskBudgetMB":null,"memoryBudgetFraction":null,"memoryBudgetMB":null,"oomKillThresholdMB":null,"spillDir":"/app/temporary_data/spill"}` | Out-of-core execution: when memory runs low, workers spill data to disk instead of running out of memory. |
+| worker.outOfCore.spillDir | string | `"/app/temporary_data/spill"` | Directory for spill files. The default is on the `temporaryData` volume. Sets `POLARS_OOC_SPILL_DIR`. |
+| worker.outOfCore.memoryBudgetFraction | string | `nil` | Start spilling when memory use exceeds this fraction of the container memory limit, or of the node memory without a limit. Leave unset for the Polars default (0.8). Sets `POLARS_OOC_MEMORY_BUDGET_FRACTION`. |
+| worker.outOfCore.memoryBudgetMB | string | `nil` | Start spilling when memory use exceeds this many MB (10^6 bytes). When both budgets are set, the lower one applies. Leave unset for no fixed cap. Sets `POLARS_OOC_MEMORY_BUDGET_MB`. |
+| worker.outOfCore.diskBudgetMB | string | `nil` | Abort a query when its spill files exceed this many MB (10^6 bytes). Leave unset for the Polars default (64000). Sets `POLARS_OOC_DISK_BUDGET_MB`. |
+| worker.outOfCore.oomKillThresholdMB | string | `nil` | Abort a task when its memory use exceeds this many MB (10^6 bytes), so the worker reports an out-of-memory error instead of the kernel killing the whole pod. Leave unset for about 95% of the container memory limit, or of the node allocatable memory without a limit. Sets `POLARS_OOMKILL_THRESHOLD_MB`. |
 | worker.serviceAccount.create | bool | `false` | Whether to create a service account. |
 | worker.serviceAccount.name | string | `""` | The name of the service account to bind the leader election role binding to when create is false. Ignored if create is true. Defaults to "default" if not set. |
 | worker.serviceAccount.automount | bool | `true` | AutomountServiceAccountToken indicates whether pods running as this service account should have an API token automatically mounted. Can be overridden at the pod level. |

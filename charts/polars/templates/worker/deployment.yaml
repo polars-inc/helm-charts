@@ -294,6 +294,30 @@ spec:
               value: "full"
             - name: POLARS_TEMP_DIR
               value: /app/temporary_data/temporary_data
+            - name: POLARS_OOC_SPILL_DIR
+              value: {{ .Values.worker.outOfCore.spillDir | quote }}
+{{- with .Values.worker.outOfCore.memoryBudgetFraction }}
+            - name: POLARS_OOC_MEMORY_BUDGET_FRACTION
+              value: {{ . | quote }}
+{{- end }}
+{{- with .Values.worker.outOfCore.memoryBudgetMB }}
+            - name: POLARS_OOC_MEMORY_BUDGET_MB
+              value: {{ . | int64 | quote }}
+{{- end }}
+{{- with .Values.worker.outOfCore.diskBudgetMB }}
+            - name: POLARS_OOC_DISK_BUDGET_MB
+              value: {{ . | int64 | quote }}
+{{- end }}
+            - name: POLARS_OOMKILL_THRESHOLD_MB
+{{- with .Values.worker.outOfCore.oomKillThresholdMB }}
+              value: {{ . | int64 | quote }}
+{{- else }}
+              # Polars reads MB as 10^6 bytes, so the limit counted in MiB lands at ~95% of the limit.
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+{{- end }}
 {{- if .Values.acceptEula }}
             - name: POLARS_EULA_ACCEPTED
               value: "yes"
