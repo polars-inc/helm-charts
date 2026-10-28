@@ -37,11 +37,11 @@
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.temporaryStorage.fullname" . }} 8333:8333
 {{- end }}
 
-Use Polars on-premises with Python:
+Use Polars Nanook compute with Python:
   ```python
   import os
   import polars as pl
-  import polars_cloud as pc
+  import polars_nanook as pn
 
   # Directly connect to the cluster
   {{ include "polars.notes.clusterContext" . }}

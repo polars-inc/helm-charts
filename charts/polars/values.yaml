@@ -35,7 +35,7 @@ license:
       enabled: false
       # -- Create the PVC resource. Set to false if you want to use an existing PVC.
       create: true
-      # -- Override the PVC name. Defaults to "{{ fullname }}-polars-license-certificate".
+      # -- Override the PVC name. Defaults to "{{ fullname }}-on-prem-license-certificate".
       existingClaimName: ""
       # -- storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
       storageClassName: ""

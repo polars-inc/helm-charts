@@ -4,10 +4,10 @@
 
 Polars License Server
 
-**Homepage:** <https://cloud.pola.rs>
+**Homepage:** <https://pola.rs/nanook>
 
-Validates Polars licenses inside your own network, for clusters that don't have
-access to the Polars cloud. Run one instance and point your Polars deployments at
+Validates Polars Nanook compute licenses inside your own network, for clusters that don't have
+access to the internet. Run one instance and point your Polars deployments at
 it.
 
 ## Prerequisites
