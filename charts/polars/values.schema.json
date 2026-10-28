@@ -377,7 +377,7 @@
                                     "type": "boolean"
                                 },
                                 "existingClaimName": {
-                                    "description": "Override the PVC name. Defaults to \"{{ fullname }}-polars-license-certificate\".",
+                                    "description": "Override the PVC name. Defaults to \"{{ fullname }}-on-prem-license-certificate\".",
                                     "type": "string"
                                 },
                                 "storageClassName": {

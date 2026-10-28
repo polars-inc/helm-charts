@@ -207,13 +207,13 @@ Setting `license=null` removes the license check from the helm chart (still enfo
 
     {{- if $hasOnPrem -}}
       {{- if not .Values.license.onPrem.clientId -}}
-        {{- fail "License error: .Values.license.onPrem.clientId is required when using Polars On-Prem license" -}}
+        {{- fail "License error: .Values.license.onPrem.clientId is required when using a service account" -}}
       {{- end -}}
       {{- if not .Values.license.onPrem.clientSecret -}}
-        {{- fail "License error: .Values.license.onPrem.clientSecret is required when using Polars On-Prem license" -}}
+        {{- fail "License error: .Values.license.onPrem.clientSecret is required when using a service account" -}}
       {{- end -}}
       {{- if not .Values.license.onPrem.workspaceId -}}
-        {{- fail "License error: .Values.license.onPrem.workspaceId is required when using Polars On-Prem license" -}}
+        {{- fail "License error: .Values.license.onPrem.workspaceId is required when using a service account" -}}
       {{- end -}}
     {{- end -}}
 
@@ -222,10 +222,10 @@ Setting `license=null` removes the license check from the helm chart (still enfo
         {{ fail "EULA not accepted. Please refer to the EULA as forwarded by Polars together with your license." }}
       {{- end }}
       {{- if not .Values.license.onPremEnterprise.secretName -}}
-        {{- fail "License error: .Values.license.onPremEnterprise.secretName is required when using Polars On-Prem Enterprise license" -}}
+        {{- fail "License error: .Values.license.onPremEnterprise.secretName is required when using an Enterprise license" -}}
       {{- end -}}
       {{- if not .Values.license.onPremEnterprise.secretProperty -}}
-        {{- fail "License error: .Values.license.onPremEnterprise.secretProperty is required when using Polars On-Prem Enterprise license" -}}
+        {{- fail "License error: .Values.license.onPremEnterprise.secretProperty is required when using an Enterprise license" -}}
       {{- end -}}
     {{- end -}}
 
@@ -357,7 +357,7 @@ Python observatory URI expression
 Python ClusterContext line for NOTES.txt
 */}}
 {{- define "polars.notes.clusterContext" -}}
-ctx = pc.ClusterContext(uri={{ include "polars.notes.schedulerUri" . }}, observatory=pc.ClientOptions(uri={{ include "polars.notes.observatoryUri" . }}))
+ctx = pn.ClusterContext(uri={{ include "polars.notes.schedulerUri" . }}, observatory=pn.ClientOptions(uri={{ include "polars.notes.observatoryUri" . }}))
 {{- end }}
 
 {{/*
