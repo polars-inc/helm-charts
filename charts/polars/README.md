@@ -14,7 +14,7 @@ Get started right away with Polars Nanook compute.
 
 <summary>Service account</summary>
 
-To install the chart, ensure you have signed up at [nanook.pola.rs](https://nanook.pola.rs/api/redirects/register) and created a workspace. The portal's onboarding will provide you with a workspace ID, a client ID, and a client secret. For the purpose of this quick start, we deploy Seaweed as an anonymous results destination. This allows you to run queries without specifying a results destination. To configure a different anonymous results destination, see [Anonymous results data](#Anonymous-results-data)
+To install the chart, ensure you have signed up at [nanook.pola.rs](https://nanook.pola.rs/api/redirects/register) and created a workspace. The portal's onboarding will provide you with a workspace ID, a client ID, and a client secret.
 
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
@@ -34,12 +34,13 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 
 <summary>Enterprise license (offline)</summary>
 
-To install the chart, ensure you have requested an Enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) and the license file exists at `./license.json`.
+To install the chart, ensure you have requested an Enterprise license by [contacting us](https://pola.rs/contact/) and the license file exists at `./license.json`. Setting `acceptEula=true` accepts the EULA that comes with your license.
 
 ```console
 $ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
+    --set acceptEula=true \
     --set license.onPremEnterprise.enabled=true \
     --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
     --set license.onPremEnterprise.secretProperty=license.json
@@ -53,11 +54,12 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 
 <summary>Polars License Server (offline)</summary>
 
-To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
+To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [contacting us](https://pola.rs/contact/). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
 
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
+    --set acceptEula=true \
     --set license.licenseServer.enabled=true \
     --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051"
 $ kubectl port-forward svc/polars-scheduler 5051:5051
@@ -90,10 +92,10 @@ result = (
         pl.col("a").max().over("b").alias("c"),
     )
     .remote(ctx)
-    .execute()
+    .collect()
 )
 
-print(result.head)
+print(result)
 EOF
 ```
 
@@ -136,7 +138,7 @@ runtime:
     enabled: true
 
     dist:
-      repository: "polarscloud/polars-on-premises"
+      repository: "polarsinc/polars-nanook-compute"
       tag: ""
       pullPolicy: "IfNotPresent"
 
@@ -192,7 +194,7 @@ ENV POLARS_EXTRAS="async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pan
 SHELL ["/bin/bash", "-c"]
 RUN --mount=from=ghcr.io/astral-sh/uv:0.9.8,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
-    --mount=from=polarscloud/polars-on-premises:20251203,source=/opt/whl/polars-1.35.2-py3-none-any.whl,target=/opt/polars-1.35.2-py3-none-any.whl \
+    --mount=from=polarsinc/polars-nanook-compute:20251203,source=/opt/whl/polars-1.35.2-py3-none-any.whl,target=/opt/polars-1.35.2-py3-none-any.whl \
     --mount=type=bind,source=./requirements.txt,target=/opt/requirements.txt \
     # install polars with extras from wheel overriding to prevent installation of runtimes as those are already included in pc-cublet \
     echo -e "\
@@ -206,7 +208,7 @@ polars-runtime-compat; sys_platform == 'never'\n" | \
   --system \
   --overrides=-
 
-COPY --from=polarscloud/polars-on-premises:20251203 /opt/bin/pc-cublet /opt/bin/pc-cublet
+COPY --from=polarsinc/polars-nanook-compute:20251203 /opt/bin/pc-cublet /opt/bin/pc-cublet
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
@@ -609,7 +611,7 @@ Polars Nanook compute uses OpenTelemetry as its telemetry framework. To receive 
 
 ## Scaling
 
-The worker pool can be scaled while the cluster is running, instead of holding a fixed number of workers. When enabled, the scheduler scales the worker deployment through its scale subresource, based on the worker demand of the queries that are running. See [Autoscaling](https://docs.nanook.pola.rs/features/autoscaling/) for how queries ask for workers on an autoscaled cluster.
+The worker pool can be scaled while the cluster is running, instead of holding a fixed number of workers. When enabled, the scheduler scales the worker deployment through its scale subresource, based on the worker demand of the queries that are running. See [Autoscaling](https://docs.nanook.pola.rs/run/scale-out/#autoscaling) for how queries ask for workers on an autoscaled cluster.
 
 ```yaml
 scaling:
@@ -624,7 +626,7 @@ Because a Deployment gives the scheduler no way to choose which pod is removed, 
 
 ## Lineage
 
-OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.nanook.pola.rs/features/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.nanook.pola.rs/run/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
 
 The cluster must be configured with a lineage transport endpoint, pointing at the collector. HTTP(S) is the only supported transport protocol. The following example points at an instance of Marquez deployed in the default namespace:
 
@@ -636,7 +638,7 @@ lineage:
       endpoint: "http://marquez.default.svc.cluster.local:5000"
 ```
 
-See [OpenLineage Integration](https://docs.nanook.pola.rs/features/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+See [OpenLineage Integration](https://docs.nanook.pola.rs/run/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
 
 ## HDFS
 
@@ -659,7 +661,7 @@ worker:
 
 In addition, for metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements.
 
-See [HDFS Integration](https://docs.nanook.pola.rs/features/hdfs/) for more information on how to write queries to read and write from HDFS.
+See [HDFS Integration](https://docs.nanook.pola.rs/run/hdfs/) for more information on how to write queries to read and write from HDFS.
 
 ## Maintainers
 
@@ -698,7 +700,7 @@ See [HDFS Integration](https://docs.nanook.pola.rs/features/hdfs/) for more info
 | runtime.prebuilt.runtime.repository | string | `"your-prebuilt-image"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.pullPolicy | string | `""` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
-| runtime.composed.dist.repository | string | `"polarscloud/polars-on-premises"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
+| runtime.composed.dist.repository | string | `"polarsinc/polars-nanook-compute"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.pullPolicy | string | `"IfNotPresent"` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | runtime.composed.runtime.repository | string | `"python"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |

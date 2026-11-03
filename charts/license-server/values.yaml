@@ -35,7 +35,7 @@ tlsBundle:
 
 image:
   # -- Image repository
-  repository: "polarscloud/license-server"
+  repository: "polarsinc/polars-nanook-license-server"
   # -- Image tag. Defaults to the chart appVersion when left empty.
   tag: ""
   # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/imagePullPolicy
