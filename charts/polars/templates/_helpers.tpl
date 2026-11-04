@@ -294,13 +294,6 @@ Create temporary storage fullname
 
 
 {{/*
-Whether anonymous results is enabled
-*/}}
-{{- define "polars.isAnonymousResultsEnabled" -}}
-  {{- if or .Values.anonymousResults.s3.enabled .Values.anonymousResults.temporaryStorage.enabled .Values.anonymousResults.abs.enabled .Values.anonymousResults.gcs.enabled -}}true{{- end -}}
-{{- end -}}
-
-{{/*
 Whether any remote shuffle is enabled
 */}}
 {{- define "polars.isRemoteShuffleEnabled" -}}
@@ -347,7 +340,7 @@ Python observatory URI expression
   {{- if contains "NodePort" .Values.scheduler.services.observatory.type -}}
 "http://"+os.environ["OBSERVATORY_NODE_IP"]+":"+os.environ["OBSERVATORY_NODE_PORT"]
   {{- else if contains "LoadBalancer" .Values.scheduler.services.observatory.type -}}
-"http://"+os.environ["OBSERVATORY_SERVICE_IP"]+":5051"
+"http://"+os.environ["OBSERVATORY_SERVICE_IP"]+":3001"
   {{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type -}}
 "http://127.0.0.1:3001"
   {{- end -}}

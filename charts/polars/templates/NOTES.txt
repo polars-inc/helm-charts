@@ -27,14 +27,10 @@
            You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "polars.observatory.fullname" . }}'
   ```bash
   export OBSERVATORY_SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "polars.observatory.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$OBSERVATORY_SERVICE_IP:5051
+  echo http://$OBSERVATORY_SERVICE_IP:3001
   ```
 {{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type }}
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.observatory.fullname" . }} 3001:3001
-{{- end }}
-{{- if .Values.anonymousResults.temporaryStorage.enabled }}
-3. Get the S3 storage URL:
-  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "polars.temporaryStorage.fullname" . }} 8333:8333
 {{- end }}
 
 Use Polars Nanook compute with Python:
@@ -57,12 +53,8 @@ Use Polars Nanook compute with Python:
     )
     .remote(ctx)
     .distributed()
-    {{- if not (include "polars.isAnonymousResultsEnabled" .) }}
-    .sink_parquet("s3://your-bucket/path/to/output")
-    {{- else }}
-    .execute()
-    {{- end }}
+    .collect()
   )
 
-  print(result.head)
+  print(result)
   ```
