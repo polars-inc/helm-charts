@@ -340,7 +340,7 @@ Python observatory URI expression
   {{- if contains "NodePort" .Values.scheduler.services.observatory.type -}}
 "http://"+os.environ["OBSERVATORY_NODE_IP"]+":"+os.environ["OBSERVATORY_NODE_PORT"]
   {{- else if contains "LoadBalancer" .Values.scheduler.services.observatory.type -}}
-"http://"+os.environ["OBSERVATORY_SERVICE_IP"]+":5051"
+"http://"+os.environ["OBSERVATORY_SERVICE_IP"]+":3001"
   {{- else if contains "ClusterIP" .Values.scheduler.services.observatory.type -}}
 "http://127.0.0.1:3001"
   {{- end -}}

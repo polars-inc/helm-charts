@@ -39,12 +39,12 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 To install the chart, ensure you have requested an Enterprise license by [contacting us](https://pola.rs/contact/) and the license file exists at `./license.json`. Setting `acceptEula=true` accepts the EULA that comes with your license.
 
 ```console
-$ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
+$ kubectl create secret generic polars-nanook-enterprise-license --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
     --set acceptEula=true \
     --set license.onPremEnterprise.enabled=true \
-    --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
+    --set license.onPremEnterprise.secretName=polars-nanook-enterprise-license \
     --set license.onPremEnterprise.secretProperty=license.json
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
