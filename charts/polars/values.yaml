@@ -875,7 +875,7 @@ scheduler:
 tests:
   images:
     - repository: "polarsinc/polars-nanook-compute-tests"
-      tag: "0.12.0"
+      tag: "0.13.0"
       pullPolicy: IfNotPresent
 
   # -- Helm hook delete policy: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies
