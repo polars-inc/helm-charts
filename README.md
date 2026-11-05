@@ -8,7 +8,7 @@
 
 ![Release Charts](https://github.com/polars-inc/helm-charts/actions/workflows/release.yaml/badge.svg?branch=main) [![Releases downloads](https://img.shields.io/github/downloads/polars-inc/helm-charts/total.svg)](https://github.com/polars-inc/helm-charts/releases) ![Docker Pulls](https://img.shields.io/docker/pulls/polarsinc/polars-nanook-compute)
 
-Interested in running Polars Nanook compute on your own infrastructure? [Sign up here](https://nanook.pola.rs/api/redirects/register) and get started for free. Select Kubernetes as your deployment target during onboarding.
+Interested in running Polars Nanook compute on your own infrastructure? [Sign up here](https://nanook.pola.rs/api/redirects/register) and get started for free. In the portal, open Integrations > Infrastructure and click Connect on the Kubernetes card.
 
 Looking for an air-gapped deployment? [Contact the team here](https://pola.rs/contact/) to discuss your setup.
 

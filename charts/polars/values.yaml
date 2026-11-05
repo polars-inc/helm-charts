@@ -10,14 +10,14 @@ podLabels: {}
 # -- Common annotations for all resources
 podAnnotations: {}
 
-# -- (uuid) Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set.
+# -- Identifier of the cluster, e.g. `prod-eu-1`. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set.
 clusterId: ""
 
 # -- Kubernetes cluster DNS domain (the suffix used in `<svc>.<ns>.svc.<domain>`). Override this if your cluster uses a non-default domain.
 clusterDomain: "cluster.local"
 
 # @schema required: true
-# -- To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.
+# -- To use this Helm Chart with an Enterprise license (offline), you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA.
 acceptEula: false
 
 license:
@@ -42,9 +42,9 @@ license:
 
   onPremEnterprise:
     enabled: false
-    # -- the name containing your polars license key
+    # -- Name of the Secret that holds the Enterprise license file.
     secretName: ""
-    # -- the property on the secret containing your license key
+    # -- Key in that Secret that holds the license file (e.g. license.json).
     secretProperty: ""
 
   licenseServer:
@@ -116,7 +116,7 @@ telemetry:
   # -- Endpoint to send OTLP traces and metrics to.
   otlpEndpoint: ""
 
-# -- One of "info", "debug", "trace".
+# -- One of "off", "error", "warn", "info", "debug", "trace".
 logLevel: "info"
 
 # -- Heartbeat interval between polars workers and the scheduler in seconds.
@@ -186,7 +186,7 @@ anonymousResults:
 #            name: my-project
 #            key: project-name
 
-  # -- Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself using scheduler.deployment.volumes and scheduler.deployment.runtimeContainer.volumeMounts. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
+  # -- Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself on both the workers (which write the results) and the scheduler (which deletes them), using worker.deployment.volumes / worker.deployment.runtimeContainer.volumeMounts and the scheduler.deployment equivalents. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client.
   sharedFilesystem:
     # -- Enable shared filesystem for anonymous results.
     enabled: false
