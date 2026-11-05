@@ -4,10 +4,10 @@
 
 Polars License Server
 
-**Homepage:** <https://cloud.pola.rs>
+**Homepage:** <https://pola.rs/nanook>
 
-Validates Polars licenses inside your own network, for clusters that don't have
-access to the Polars cloud. Run one instance and point your Polars deployments at
+Validates Polars Nanook compute licenses inside your own network, for clusters that don't have
+access to the internet. Run one instance and point your Polars deployments at
 it.
 
 ## Prerequisites
@@ -15,7 +15,7 @@ it.
 - Kubernetes 1.22+ (uses the `ReadWriteOncePod` PVC access mode)
 - Helm 3.x
 - A default StorageClass, or set `report.storageClass`
-- Two credentials from Polars ([request here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo)):
+- Two credentials from Polars ([request here](https://pola.rs/contact/)):
   - a **license file** (JSON)
   - a **TLS bundle** (PEM: server certificate chain + private key) used to serve HTTPS
 
@@ -110,7 +110,7 @@ If you run the Prometheus Operator, set `serviceMonitor.enabled=true` to scrape
 | tlsBundle.key | string | `"bundle.pem"` | Key within the TLS bundle Secret |
 | tlsBundle.mountPath | string | `"/config/license-server-bundle.pem"` | Path the TLS bundle is mounted at inside the container |
 | tlsBundle.content | string | `""` | Inline TLS bundle PEM. When set, the chart creates the TLS Secret; leave empty to reference a pre-existing Secret (`tlsBundle.secretName`). Prefer `--set-file` over committing this. |
-| image.repository | string | `"polarscloud/license-server"` | Image repository |
+| image.repository | string | `"polarsinc/polars-nanook-license-server"` | Image repository |
 | image.tag | string | `""` | Image tag. Defaults to the chart appVersion when left empty. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |

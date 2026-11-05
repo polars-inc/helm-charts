@@ -6,11 +6,11 @@
 
 # Polars Helm Charts
 
-![Release Charts](https://github.com/polars-inc/helm-charts/actions/workflows/release.yaml/badge.svg?branch=main) [![Releases downloads](https://img.shields.io/github/downloads/polars-inc/helm-charts/total.svg)](https://github.com/polars-inc/helm-charts/releases) ![Docker Pulls](https://img.shields.io/docker/pulls/polarscloud/polars-on-premises)
+![Release Charts](https://github.com/polars-inc/helm-charts/actions/workflows/release.yaml/badge.svg?branch=main) [![Releases downloads](https://img.shields.io/github/downloads/polars-inc/helm-charts/total.svg)](https://github.com/polars-inc/helm-charts/releases) ![Docker Pulls](https://img.shields.io/docker/pulls/polarsinc/polars-nanook-compute)
 
-Interested in running Polars on-premises? [Sign up here](https://cloud.pola.rs/api/redirects/register) and get started for free. Select Kubernetes as your deployment target during onboarding.
+Interested in running Polars Nanook compute on your own infrastructure? [Sign up here](https://nanook.pola.rs/api/redirects/register) and get started for free. In the portal, open Integrations > Infrastructure and click Connect on the Kubernetes card.
 
-Looking for an air-gapped deployment? [Contact the team here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) to discuss your setup.
+Looking for an air-gapped deployment? [Contact the team here](https://pola.rs/contact/) to discuss your setup.
 
 ## Usage
 

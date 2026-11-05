@@ -1,20 +1,20 @@
-# Polars on-premises: Extremely fast distributed Query Engine for DataFrames
+# Polars Nanook compute: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 3.1.1](https://img.shields.io/badge/Version-3.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.1](https://img.shields.io/badge/AppVersion-0.9.1-informational?style=flat-square)
+![Version: 3.2.0](https://img.shields.io/badge/Version-3.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.1](https://img.shields.io/badge/AppVersion-0.10.1-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
-**Homepage:** <https://pola.rs>
+**Homepage:** <https://pola.rs/nanook/>
 
 ## Quick Start
 
-Get started right away with Polars On-Prem.
+Get started right away with Polars Nanook compute.
 
 <details open="true" name="quickstart">
 
-<summary>Polars On-Prem</summary>
+<summary>Service account</summary>
 
-To install the chart, ensure you have signed up online at [cloud.pola.rs](https://cloud.pola.rs) and created an on-premises workspace. The website's onboarding will provide you with a workspace ID, a client ID, and a client secret. For the purpose of this quick start, we deploy Seaweed as an anonymous results destination. This allows you to run queries without specifying a results destination. To configure a different anonymous results destination, see [Anonymous results data](#Anonymous-results-data)
+To install the chart, ensure you have signed up at [nanook.pola.rs](https://nanook.pola.rs/api/redirects/register) and created a workspace. In the portal, open Integrations > Infrastructure and click Connect on the Kubernetes card, or run `nanook service-account create --workspace-name <WORKSPACE> --name polars-kubernetes`. Either gives you a workspace ID, a client ID, and a client secret.
 
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
@@ -32,16 +32,17 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 
 <details name="quickstart">
 
-<summary>Polars On-Prem Enterprise (offline)</summary>
+<summary>Enterprise license (offline)</summary>
 
-To install the chart, ensure you have requested a Polars on-premises enterprise license by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo) and the license file exists at `./license.json`.
+To install the chart, ensure you have requested an Enterprise license by [contacting us](https://pola.rs/contact/) and the license file exists at `./license.json`. Setting `acceptEula=true` accepts the EULA that comes with your license.
 
 ```console
-$ kubectl create secret generic polars-on-prem-enterprise-license --from-file=license.json=license.json
+$ kubectl create secret generic polars-nanook-enterprise-license --from-file=license.json=license.json
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
+    --set acceptEula=true \
     --set license.onPremEnterprise.enabled=true \
-    --set license.onPremEnterprise.secretName=polars-on-prem-enterprise-license \
+    --set license.onPremEnterprise.secretName=polars-nanook-enterprise-license \
     --set license.onPremEnterprise.secretProperty=license.json
 $ kubectl port-forward svc/polars-scheduler 5051:5051
 $ kubectl port-forward svc/polars-observatory 3001:3001
@@ -51,13 +52,14 @@ $ kubectl port-forward svc/polars-observatory 3001:3001
 
 <details name="quickstart">
 
-<summary>Polars License Server (offline)</summary>
+<summary>License server (offline)</summary>
 
-To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [signing up here](https://w0lzyfh2w8o.typeform.com/to/f37L1SRx#form_name=enterprise&form_origin=helm-charts-repo). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
+To install the chart, ensure you have requested a Polars license server credential bundle (license file + TLS bundle) by [contacting us](https://pola.rs/contact/). Deploy the [`license-server`](../license-server) chart once per cluster (see its README), then point Polars at it:
 
 ```console
 $ helm repo add polars-inc https://polars-inc.github.io/helm-charts
 $ helm upgrade --install polars polars-inc/polars \
+    --set acceptEula=true \
     --set license.licenseServer.enabled=true \
     --set license.licenseServer.uri="https://license-server.polars.svc.cluster.local:50051"
 $ kubectl port-forward svc/polars-scheduler 5051:5051
@@ -73,11 +75,11 @@ kubectl port-forward svc/polars-scheduler 5051:5051
 ```
 
 ```bash
-uv run --isolated --with polars,polars_cloud - << 'EOF'
+uv run --isolated --with polars,polars-nanook - << 'EOF'
 import polars as pl
-import polars_cloud as pc
+import polars_nanook as pn
 
-ctx = pc.ClusterContext(uri="http://localhost")
+ctx = pn.ClusterContext(uri="http://localhost")
 
 result = (
     pl.LazyFrame(
@@ -90,10 +92,10 @@ result = (
         pl.col("a").max().over("b").alias("c"),
     )
     .remote(ctx)
-    .execute()
+    .collect()
 )
 
-print(result.head)
+print(result)
 EOF
 ```
 
@@ -105,21 +107,21 @@ kubectl port-forward svc/polars-observatory 3001:3001
 
 The Observatory includes a **query profiler** that provides more insight into query execution:
 
-![Observatory stage graph](https://pola.rs/observatory-stage-graph.png)
+![Query profiler stage graph](https://raw.githubusercontent.com/pola-rs/polars-static/refs/heads/master/docs/query-profiler/stage-graph-node-details.png)
 
-> For a walkthrough of how to use the profiler to optimise queries, see the [User Guide](https://docs.cloud.pola.rs/polars-cloud/run/query-profile/) or the [Query Profiler blog post](https://pola.rs/posts/query-profiler-instance-optimization/).
+> For a walkthrough of how to use the profiler to optimise queries, see the [User Guide](https://docs.nanook.pola.rs/run/query-profile/) or the [Query Profiler blog post](https://pola.rs/posts/query-profiler-instance-optimization/).
 
 ### Helm Tests
 
-You can instead also run the provided helm tests by running `helm test polars`. The chart contains a default list of images in `.Values.tests.images` that correspond to the supported polars-cloud client versions. The tests currently always run using the runtime image specified in `.Values.runtime.composed.runtime` since the client and compute cluster need to run the same version.
+You can instead also run the provided helm tests by running `helm test polars`. The chart contains a default list of images in `.Values.tests.images` that correspond to the supported polars-nanook client versions. The tests currently always run using the runtime image specified in `.Values.runtime.composed.runtime` since the client and compute cluster need to run the same version.
 
 ## Configuration
 
-Running Polars On-Prem in a production environment requires some configuration. The most important aspects are described below.
+Running Polars Nanook compute in a production environment requires some configuration. The most important aspects are described below.
 
 ### Runtime
 
-Polars On-Prem consists of a single scheduler and multiple workers. Both components are contained in a single binary. While the scheduler can run without any system-level dependencies, the worker node needs the following:
+Polars Nanook compute consists of a single scheduler and multiple workers. Both components are contained in a single binary. While the scheduler can run without any system-level dependencies, the worker node needs the following:
 
 * Python runtime (e.g. any version)
 * Polars (i.e. pip wheel)
@@ -136,7 +138,7 @@ runtime:
     enabled: true
 
     dist:
-      repository: "polarscloud/polars-on-premises"
+      repository: "polarsinc/polars-nanook-compute"
       tag: ""
       pullPolicy: "IfNotPresent"
 
@@ -147,12 +149,12 @@ runtime:
 
     requirements: |
       boto3==1.40.70
-      urllib==2.5.0
+      urllib3==2.5.0
 
     polarsExtras: "async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone"
 ```
 
-Behind the scenes, this mechanism copies the Polars On-Prem binary, wheel, uv, and a setup script from an init-container to the pod's main container. On startup of the main container, the setup script uses uv to install the polars wheel with the additional specified packages before starting the worker.
+Behind the scenes, this mechanism copies the Polars Nanook compute binary, wheel, uv, and a setup script from an init-container to the pod's main container. On startup of the main container, the setup script uses uv to install the polars wheel with the additional specified packages before starting the worker.
 
 If you prefer self-building a Docker image, you can instead configure the chart to use your image:
 
@@ -188,25 +190,25 @@ RUN apt-get update \
 # install polars with specific features enabled for these packages
 ENV POLARS_EXTRAS="async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pandas,pyarrow,pydantic,timezone"
 
-# enale bash so we can write multiline strings
+# enable bash so we can write multiline strings
 SHELL ["/bin/bash", "-c"]
 RUN --mount=from=ghcr.io/astral-sh/uv:0.9.8,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
-    --mount=from=polarscloud/polars-on-premises:20251203,source=/opt/whl/polars-1.35.2-py3-none-any.whl,target=/opt/polars-1.35.2-py3-none-any.whl \
+    --mount=from=polarsinc/polars-nanook-compute:0.10.1,source=/opt/whl/polars-2.1.0-py3-none-any.whl,target=/opt/polars-2.1.0-py3-none-any.whl \
     --mount=type=bind,source=./requirements.txt,target=/opt/requirements.txt \
     # install polars with extras from wheel overriding to prevent installation of runtimes as those are already included in pc-cublet \
     echo -e "\
-polars[$POLARS_EXTRAS] @ file:///opt/polars-1.35.2-py3-none-any.whl\n\
+polars[$POLARS_EXTRAS] @ file:///opt/polars-2.1.0-py3-none-any.whl\n\
 polars-runtime-32; sys_platform == 'never'\n\
 polars-runtime-64; sys_platform == 'never'\n\
 polars-runtime-compat; sys_platform == 'never'\n" | \
   uv pip install \
   -r requirements.txt \
-  "polars[$POLARS_EXTRAS] @ file:///opt/polars-1.35.2-py3-none-any.whl" \
+  "polars[$POLARS_EXTRAS] @ file:///opt/polars-2.1.0-py3-none-any.whl" \
   --system \
   --overrides=-
 
-COPY --from=polarscloud/polars-on-premises:20251203 /opt/bin/pc-cublet /opt/bin/pc-cublet
+COPY --from=polarsinc/polars-nanook-compute:0.10.1 /opt/bin/pc-cublet /opt/bin/pc-cublet
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
@@ -229,7 +231,7 @@ shuffleData:
     size: 125Gi
 ```
 
-You can also configure to shuffle to AWS S3, Google Cloud Storage, or Azure Blob Storage instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.cloud.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+You can also configure to shuffle to AWS S3, Google Cloud Storage, or Azure Blob Storage instead of local disk. This is currently experimental. It may reduce shuffle performance compared to an ephemeral volume using a local SSD. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 shuffleData:
@@ -284,7 +286,7 @@ shuffleData:
 
 #### Anonymous results data
 
-For remote polars queries without a specific output sink, Polars Cloud can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks are can be backed by S3-compatible storage, Azure Blob Storage, and Google Cloud Storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.cloud.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+For remote polars queries without a specific output sink, Polars Nanook compute can automatically add persistent sink. We call these sinks "anonymous results" sinks. Infrastructure-wise, these sinks can be backed by S3-compatible storage, Azure Blob Storage, and Google Cloud Storage, which should be accessible from all worker nodes and the python client. The data written to this location is not automatically deleted, so you need to configure a retention policy for this data yourself. You may configure the credentials as shown below. The key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 Note that Anonymous Users and Anonymous Results are different. Anonymous Users refer to queries that are submitted without a username, while Anonymous Results refer to queries without an explicit output sink.
 
@@ -345,7 +347,7 @@ checkpoint:
   period: "5m"
 ```
 
-The credentials are configured the same way as shuffle data — the key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.cloud.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
+The credentials are configured the same way as shuffle data — the key names correspond to the [`storage_options` parameter in `scan_parquet`](https://docs.pola.rs/api/python/stable/reference/api/polars.scan_parquet.html) (e.g. `aws_access_key_id`, `aws_secret_access_key`, `account_name`, `project`). Note that you can use any other cloud provider that supports the S3 API, such as MinIO or DigitalOcean Spaces.
 
 ```yaml
 checkpointData:
@@ -435,6 +437,19 @@ anonymousResults:
     enabled: true
     path: "/mnt/nfs/anonymous-results"
 
+# Workers write the results and the scheduler deletes them, so mount the volume on both.
+worker:
+  deployment:
+    volumes:
+      - name: nfs-results
+        nfs:
+          server: nfs-server.example.com
+          path: /exports/anonymous-results
+    runtimeContainer:
+      volumeMounts:
+        - name: nfs-results
+          mountPath: /mnt/nfs/anonymous-results
+
 scheduler:
   deployment:
     volumes:
@@ -523,7 +538,7 @@ observatory:
 
 ### Resource allocation and node selectors
 
-Most of the time, it is a good idea to run Polars On-Prem on dedicated nodes, with only one worker pod per node.
+Most of the time, it is a good idea to run Polars Nanook compute on dedicated nodes, with only one worker pod per node.
 
 First, figure out the available resources on your nodes. This is usually lower than the actual node resources, as Kubernetes reserves some resources for system daemons. For example, if you have a cluster of 3 `m4.xlarge` nodes (4 vCPUs, 16GiB memory), you may have 3770m CPU and 14.31GiB memory available.
 
@@ -543,7 +558,7 @@ worker:
           memory: 14.31GiB
 ```
 
-If your cluster has other workloads running on it, we still recommend running Polars On-Prem on dedicated nodes, and using node selectors and taints/tolerations to ensure that only Polars On-Prem pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
+If your cluster has other workloads running on it, we still recommend running Polars Nanook compute on dedicated nodes, and using node selectors and taints/tolerations to ensure that only Polars Nanook compute pods are scheduled on those nodes. For example, you can add a node selector, toleration, and affinity rules like this:
 
 ```yaml
 worker:
@@ -569,16 +584,16 @@ worker:
 
 A compute cluster can be fully occupied running a query, preventing new queries from being scheduled. To avoid this, you can deploy this chart multiple times in the same cluster, reserving the resources between the different deployments.
 
-The observatory service stores host metrics and preallocates a number of bytes for host metrics. This is configurable using the `observatory.maxMetricsBytesTotal` value. For every node in the cluster, the observatory service needs around 50 bytes of storage. So if you have 3 nodes, and you want to store an hour of host metrics, you need to set `observatory.maxMetricsBytesTotal` to 3 * 50 * 3600 = 540000.
+The observatory service stores host metrics and preallocates a number of bytes for host metrics. This is configurable using the `observatory.maxMetricsBytesTotal` value. The observatory needs about 50 bytes per second per node, and divides the buffer over the node count plus one. So if you have 3 nodes, and you want to store an hour of host metrics, you need to set `observatory.maxMetricsBytesTotal` to (3 + 1) * 50 * 3600 = 720000.
 
 ### Anonymous Users
 
-By default, queries can be anonymously submitted to the scheduler. In the dashboard, queries submitted anonymously are shown as `Anonymous User` in the query list. To attach a username to a query, you can use the `POLARS_CLOUD_USER_NAME` environment variable or the
-`pc.Config.set_user_name()` method.
+By default, queries can be anonymously submitted to the scheduler. In the dashboard, queries submitted anonymously are shown as `Anonymous User` in the query list. To attach a username to a query, you can use the `NANOOK_USER_NAME` environment variable or the
+`pn.Config.set_user_name()` method.
 
 ```python
-import polars_cloud as pc
-pc.Config.set_user_name("user@example.com")
+import polars_nanook as pn
+pn.Config.set_user_name("user@example.com")
 ```
 
 To deny all queries that don't have any username attached, you can set the `denyAnonymousUsers` value to `true`.
@@ -589,9 +604,9 @@ Note that Anonymous Users and Anonymous Results are different. Anonymous Users r
 
 The dashboard shows host metrics for each worker node. These metrics are exported by default and can be disabled by setting `disableHostMetrics: true`.
 
-### Exposing Polars on-premise
+### Exposing the scheduler
 
-To use Polars On-Prem from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, you must set `insecure=True` in the `ClusterContext`.
+To use Polars Nanook compute from the Python client, the scheduler endpoint must be reachable from the client. By default, the chart creates a `ClusterIP` service for the scheduler, which is only reachable from within the cluster. To expose the scheduler outside the cluster, you can change the `scheduler.services.scheduler.type` value to `LoadBalancer` or `NodePort`. We recommend using the `LoadBalancer` type and configuring TLS such that the connection to the cluster is encrypted. If you decide to use an insecure connection, give the `ClusterContext` an `http://` URI. For a certificate signed by a private CA, pass `tls_options=pn.TLSOptions(ca_cert=...)`.
 
 When the python client can't reach the scheduler, it will fail with a connection timeout like this:
 
@@ -601,21 +616,24 @@ tcp connect error
 Hint: you may need to restart the query if this error persists
 ```
 
-The dashboard for Polars On-Prem can be accessed at `http://localhost:3001`, and can be exposed outside the cluster by changing the `scheduler.services.observatory.type` value to `LoadBalancer` or `NodePort`.
+The dashboard for Polars Nanook compute can be accessed at `http://localhost:3001`, and can be exposed outside the cluster by changing the `scheduler.services.observatory.type` value to `LoadBalancer` or `NodePort`.
 
 ## Telemetry
 
-Polars On-Prem uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
+Polars Nanook compute uses OpenTelemetry as its telemetry framework. To receive OTLP metrics and traces, configure `telemetry.otlpEndpoint` to point to your OTLP collector. Logs are written to stdout in JSON format. For the compute plane, the log level can be configured using the `logLevel` value (see values section below).
 
 ## Scaling
 
-The worker pool can be scaled while the cluster is running, instead of holding a fixed number of workers. When enabled, the scheduler scales the worker deployment through its scale subresource, based on the worker demand of the queries that are running. See [Autoscaling](https://docs.cloud.pola.rs/polars-on-premises/integrations/autoscaling/) for how queries ask for workers on an autoscaled cluster.
+The worker pool can be scaled while the cluster is running, instead of holding a fixed number of workers. When enabled, the scheduler scales the worker deployment through its scale subresource, based on the worker demand of the queries that are running. See [Autoscaling](https://docs.nanook.pola.rs/run/scale-out/#autoscaling) for how queries ask for workers on an autoscaled cluster.
 
 ```yaml
 scaling:
   enabled: true
   minReplicas: 0
   maxReplicas: 8
+
+workersPerQuery:
+  default: 2
 ```
 
 The chart creates a Role and RoleBinding granting the scheduler access to the worker deployment's scale subresource. Set `scaling.rbac.create` to `false` to provision equivalent RBAC yourself.
@@ -624,7 +642,7 @@ Because a Deployment gives the scheduler no way to choose which pod is removed, 
 
 ## Lineage
 
-OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+OpenLineage is an open platform for collection and analysis of data lineage. See [openlineage.io](https://openlineage.io) for more information. See [OpenLineage Integration](https://docs.nanook.pola.rs/run/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
 
 The cluster must be configured with a lineage transport endpoint, pointing at the collector. HTTP(S) is the only supported transport protocol. The following example points at an instance of Marquez deployed in the default namespace:
 
@@ -636,11 +654,11 @@ lineage:
       endpoint: "http://marquez.default.svc.cluster.local:5000"
 ```
 
-See [OpenLineage Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
+See [OpenLineage Integration](https://docs.nanook.pola.rs/run/openlineage/) for more information on how to annotate Polars queries and inspecting them in an OpenLineage collector.
 
 ## HDFS
 
-Polars on-premises provides experimental support for using HDFS (Hadoop Distributed Filesystem) as a storage back-end, from a polars cluster. Accessing HDFS directly from the client is not included. This functionality is considered unstable.
+Polars Nanook compute provides experimental support for using HDFS (Hadoop Distributed Filesystem) as a storage back-end, from a polars cluster. Accessing HDFS directly from the client is not included. This functionality is considered unstable.
 
 Polars HDFS support provides pure-Rust access to the data, no JVM required on the cluster. When Iceberg is used, HDFS support also provides Rust-based native access to the metadata.
 
@@ -659,7 +677,9 @@ worker:
 
 In addition, for metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements.
 
-See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integrations/hdfs/) for more information on how to write queries to read and write from HDFS.
+Mount the Hadoop configuration directory into the workers with `worker.deployment.volumes` and `worker.deployment.runtimeContainer.volumeMounts`, and set `HADOOP_CONF_DIR` to the mount path in `worker.deployment.runtimeContainer.env`. For Kerberos, the worker image must contain `libgssapi-krb5-2`; the composed runtime only installs Python packages.
+
+See [HDFS Integration](https://docs.nanook.pola.rs/run/hdfs/) for more information on how to write queries to read and write from HDFS.
 
 ## Maintainers
 
@@ -680,15 +700,15 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | fullnameOverride | string | `""` | Override the full name of the chart |
 | podLabels | object | `{}` | Common labels for all resources |
 | podAnnotations | object | `{}` | Common annotations for all resources |
-| clusterId | uuid | `""` | Unique identifier for the Polars cluster. Must be a valid UUID. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
+| clusterId | string | `""` | Identifier of the cluster, e.g. `prod-eu-1`. This ID is used to identify the cluster in a multi-tenant environment. Defaults to "helm namespace/helm release name" if not set. |
 | clusterDomain | string | `"cluster.local"` | Kubernetes cluster DNS domain (the suffix used in `<svc>.<ns>.svc.<domain>`). Override this if your cluster uses a non-default domain. |
-| acceptEula | bool | `false` | To use this Helm Chart with an On Prem Enterprise License, you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
+| acceptEula | bool | `false` | To use this Helm Chart with an Enterprise license (offline), you must accept the EULA. If you don't accept the EULA, this chart creates a single deployment that prints the EULA. |
 | license.onPrem.licenseData.enabled | bool | `false` | Enable persistent volume claim for the license data. |
 | license.onPrem.licenseData.create | bool | `true` | Create the PVC resource. Set to false if you want to use an existing PVC. |
-| license.onPrem.licenseData.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-polars-license-certificate". |
+| license.onPrem.licenseData.existingClaimName | string | `""` | Override the PVC name. Defaults to "{{ fullname }}-on-prem-license-certificate". |
 | license.onPrem.licenseData.storageClassName | string | `""` | storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 |
-| license.onPremEnterprise.secretName | string | `""` | the name containing your polars license key |
-| license.onPremEnterprise.secretProperty | string | `""` | the property on the secret containing your license key |
+| license.onPremEnterprise.secretName | string | `""` | Name of the Secret that holds the Enterprise license file. |
+| license.onPremEnterprise.secretProperty | string | `""` | Key in that Secret that holds the license file (e.g. license.json). |
 | license.licenseServer.enabled | bool | `false` | Enable connecting to offline Polars license server. |
 | license.licenseServer.uri | string | `"https://license-server.polars.svc.cluster.local:50051"` | URI of the license server. |
 | imagePullSecrets | list | `[]` | ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod |
@@ -698,7 +718,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | runtime.prebuilt.runtime.repository | string | `"your-prebuilt-image"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.prebuilt.runtime.pullPolicy | string | `""` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
-| runtime.composed.dist.repository | string | `"polarscloud/polars-on-premises"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
+| runtime.composed.dist.repository | string | `"polarsinc/polars-nanook-compute"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.tag | string | `""` | Container image tag. More info: https://kubernetes.io/docs/concepts/containers/images |
 | runtime.composed.dist.pullPolicy | string | `"IfNotPresent"` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | runtime.composed.runtime.repository | string | `"python"` | Container image name. More info: https://kubernetes.io/docs/concepts/containers/images |
@@ -706,7 +726,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | runtime.composed.runtime.pullPolicy | string | `""` | Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images |
 | runtime.composed.imageVolume.enabled | bool | `false` | Mount the Polars distribution image read-only as an OCI image volume instead of copying it into an emptyDir with an init container, which removes the copy and its writeback from pod startup. Only enable this where the cluster supports image volumes: Kubernetes 1.33 or later with a container runtime that implements them (containerd 2.1 or later, CRI-O 1.31 or later). |
 | telemetry.otlpEndpoint | string | `""` | Endpoint to send OTLP traces and metrics to. |
-| logLevel | string | `"info"` | One of "info", "debug", "trace". |
+| logLevel | string | `"info"` | One of "off", "error", "warn", "info", "debug", "trace". |
 | workerHeartbeatIntervalSecs | int | `5` | Heartbeat interval between polars workers and the scheduler in seconds. |
 | disableHostMetrics | bool | `false` | Disable host metrics collection for the dashboard |
 | anonymousResults | object | `{"abs":{"enabled":false,"endpoint":"az://my-storage-location/path/to/dir","options":[],"presignDuration":"8h"},"gcs":{"enabled":false,"endpoint":"gs://my-storage-location/path/to/dir","options":[],"presignDuration":"8h"},"s3":{"enabled":false,"endpoint":"s3://my-bucket/path/to/dir","options":[],"presignDuration":"8h"},"sharedFilesystem":{"enabled":false,"path":"/mnt/nfs/anonymous-results"},"temporaryStorage":{"enabled":false,"presignDuration":"8h","presignEndpointUrl":"http://localhost:8333"}}` | Ephemeral storage for queries that don't specify a result location. Recommended to use S3 storage for persistence of results, but a volume claim may also be used. The compute plane does not automatically clean up anonymous results. |
@@ -728,7 +748,7 @@ See [HDFS Integration](https://docs.cloud.pola.rs/polars-on-premises/integration
 | anonymousResults.gcs.endpoint | string | `"gs://my-storage-location/path/to/dir"` | The entire Google Cloud Storage URI. If this storage location requires authentication, make sure to provide the credentials in the options field. |
 | anonymousResults.gcs.presignDuration | string | `"8h"` | The duration for which anonymous results should be presigned for. Either an ISO 8601 duration format or a jiff friendly duration format (see https://docs.rs/jiff/0.2.18/jiff/fmt/friendly/). e.g., 5 secs. e.g., PT5S. |
 | anonymousResults.gcs.options | list | `[]` | Storage options for the Google Cloud Storage location. These correspond to Object Store's `GoogleConfigKey`. More info: https://docs.rs/object_store/latest/object_store/gcp/enum.GoogleConfigKey.html |
-| anonymousResults.sharedFilesystem | object | `{"enabled":false,"path":"/mnt/nfs/anonymous-results"}` | Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself using scheduler.deployment.volumes and scheduler.deployment.runtimeContainer.volumeMounts. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client. |
+| anonymousResults.sharedFilesystem | object | `{"enabled":false,"path":"/mnt/nfs/anonymous-results"}` | Configure a shared filesystem path for anonymous results (e.g. an NFS or CSI driver mount). You must mount the volume yourself on both the workers (which write the results) and the scheduler (which deletes them), using worker.deployment.volumes / worker.deployment.runtimeContainer.volumeMounts and the scheduler.deployment equivalents. The path must match the location mounted on the client, since the cluster returns the exact written paths back to the client. |
 | anonymousResults.sharedFilesystem.enabled | bool | `false` | Enable shared filesystem for anonymous results. |
 | anonymousResults.sharedFilesystem.path | string | `"/mnt/nfs/anonymous-results"` | The filesystem path where anonymous results will be stored. Must correspond to a mounted volume and match the path mounted on the client. |
 | allowLocalSinks | bool | `true` | Disabling this option prevents the worker from writing to local disk. It is currently not possible to configure which sink locations are allowed. Users can alternatively configure sinks that write to S3. More info: https://docs.pola.rs/user-guide/io/cloud-storage/#writing-to-cloud-storage |

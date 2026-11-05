@@ -137,50 +137,50 @@ spec:
             - name: OTLP_ENDPOINT
               value: {{ .Values.telemetry.otlpEndpoint | quote }}
 {{- end }}
-            - name: PC_CUBLET__static_leader__leader_instance_id
+            - name: NANOOK__static_leader__leader_instance_id
               value: "{{ include "polars.worker.fullname" . }}-0"
-            - name: PC_CUBLET__static_leader__scheduler_service__public_addr__hostname
+            - name: NANOOK__static_leader__scheduler_service__public_addr__hostname
               value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.{{ include "polars.clusterDomain" . }}"
-            - name: PC_CUBLET__static_leader__scheduler_service__public_addr__port
+            - name: NANOOK__static_leader__scheduler_service__public_addr__port
               value: "5050"
-            - name: PC_CUBLET__static_leader__observatory_service__public_addr__hostname
+            - name: NANOOK__static_leader__observatory_service__public_addr__hostname
               value: "{{ include "polars.scheduler-internal.fullname" . }}.{{ .Release.Namespace }}.svc.{{ include "polars.clusterDomain" . }}"
-            - name: PC_CUBLET__static_leader__observatory_service__public_addr__port
+            - name: NANOOK__static_leader__observatory_service__public_addr__port
               value: "5049"
-            - name: PC_CUBLET__cluster_id
+            - name: NANOOK__cluster_id
               value: {{ include "polars.clusterId" . | quote }}
-            - name: PC_CUBLET__instance_id
+            - name: NANOOK__instance_id
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
-            - name: PC_CUBLET__monitoring__enabled
+            - name: NANOOK__monitoring__enabled
               value: "true"
 {{- if .Values.disableHostMetrics}}
-            - name: PC_CUBLET__monitoring__host_metrics__enabled
+            - name: NANOOK__monitoring__host_metrics__enabled
               value: "false"
 {{- end }}
-            - name: PC_CUBLET__worker__enabled
+            - name: NANOOK__worker__enabled
               value: "true"
-            - name: PC_CUBLET__worker__task_service__public_addr__ip
+            - name: NANOOK__worker__task_service__public_addr__ip
               valueFrom:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
-            - name: PC_CUBLET__worker__shuffle_service__public_addr__ip
+            - name: NANOOK__worker__shuffle_service__public_addr__ip
               valueFrom:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
-            - name: PC_CUBLET__worker__heartbeat_period
+            - name: NANOOK__worker__heartbeat_period
               value: "{{ .Values.workerHeartbeatIntervalSecs }}s"
 {{- if .Values.shuffleData.s3.enabled }}
-            - name: PC_CUBLET__worker__shuffle_location__s3__url
+            - name: NANOOK__worker__shuffle_location__s3__url
               value: {{ .Values.shuffleData.s3.endpoint | quote }}
   {{- range .Values.shuffleData.s3.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.shuffleData.s3.options Please use .Values.shuffleData.s3.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__worker__shuffle_location__s3__{{ .name | required "missing .Values.shuffleData.s3.options[x].name" }}
+            - name: NANOOK__worker__shuffle_location__s3__{{ .name | required "missing .Values.shuffleData.s3.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -189,13 +189,13 @@ spec:
     {{- end }}
   {{- end }}
 {{- else if .Values.shuffleData.abs.enabled }}
-            - name: PC_CUBLET__worker__shuffle_location__abs__url
+            - name: NANOOK__worker__shuffle_location__abs__url
               value: {{ .Values.shuffleData.abs.endpoint | quote }}
   {{- range .Values.shuffleData.abs.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.shuffleData.abs.options Please use .Values.shuffleData.abs.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__worker__shuffle_location__abs__{{ .name | required "missing .Values.shuffleData.abs.options[x].name" }}
+            - name: NANOOK__worker__shuffle_location__abs__{{ .name | required "missing .Values.shuffleData.abs.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -204,13 +204,13 @@ spec:
     {{- end }}
   {{- end }}
 {{- else if .Values.shuffleData.gcs.enabled }}
-            - name: PC_CUBLET__worker__shuffle_location__gcs__url
+            - name: NANOOK__worker__shuffle_location__gcs__url
               value: {{ .Values.shuffleData.gcs.endpoint | quote }}
   {{- range .Values.shuffleData.gcs.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.shuffleData.gcs.options Please use .Values.shuffleData.gcs.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__worker__shuffle_location__gcs__{{ .name | required "missing .Values.shuffleData.gcs.options[x].name" }}
+            - name: NANOOK__worker__shuffle_location__gcs__{{ .name | required "missing .Values.shuffleData.gcs.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -219,23 +219,23 @@ spec:
     {{- end }}
   {{- end }}
 {{- else if .Values.shuffleData.sharedFilesystem.enabled }}
-            - name: PC_CUBLET__worker__shuffle_location__shared_filesystem__path
+            - name: NANOOK__worker__shuffle_location__shared_filesystem__path
               value: {{ .Values.shuffleData.sharedFilesystem.path | quote }}
 {{- else if .Values.shuffleData.sharedPersistentVolumeClaim.enabled }}
-            - name: PC_CUBLET__worker__shuffle_location__shared_filesystem__path
+            - name: NANOOK__worker__shuffle_location__shared_filesystem__path
               value: /app/shuffle_data/shuffle_data
 {{- else }}
-            - name: PC_CUBLET__worker__shuffle_location__local__path
+            - name: NANOOK__worker__shuffle_location__local__path
               value: /app/shuffle_data/shuffle_data
 {{- end }}
 {{- if .Values.checkpointData.s3.enabled }}
-            - name: PC_CUBLET__worker__checkpoint_location__s3__url
+            - name: NANOOK__worker__checkpoint_location__s3__url
               value: {{ .Values.checkpointData.s3.endpoint | quote }}
   {{- range .Values.checkpointData.s3.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.checkpointData.s3.options Please use .Values.checkpointData.s3.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__worker__checkpoint_location__s3__{{ .name | required "missing .Values.checkpointData.s3.options[x].name" }}
+            - name: NANOOK__worker__checkpoint_location__s3__{{ .name | required "missing .Values.checkpointData.s3.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -244,13 +244,13 @@ spec:
     {{- end }}
   {{- end }}
 {{- else if .Values.checkpointData.abs.enabled }}
-            - name: PC_CUBLET__worker__checkpoint_location__abs__url
+            - name: NANOOK__worker__checkpoint_location__abs__url
               value: {{ .Values.checkpointData.abs.endpoint | quote }}
   {{- range .Values.checkpointData.abs.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.checkpointData.abs.options Please use .Values.checkpointData.abs.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__worker__checkpoint_location__abs__{{ .name | required "missing .Values.checkpointData.abs.options[x].name" }}
+            - name: NANOOK__worker__checkpoint_location__abs__{{ .name | required "missing .Values.checkpointData.abs.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -259,13 +259,13 @@ spec:
     {{- end }}
   {{- end }}
 {{- else if .Values.checkpointData.gcs.enabled }}
-            - name: PC_CUBLET__worker__checkpoint_location__gcs__url
+            - name: NANOOK__worker__checkpoint_location__gcs__url
               value: {{ .Values.checkpointData.gcs.endpoint | quote }}
   {{- range .Values.checkpointData.gcs.options }}
     {{- if eq .name "url" }}
       {{ fail "Name 'url' found in .Values.checkpointData.gcs.options Please use .Values.checkpointData.gcs.endpoint instead" }}
     {{- end }}
-            - name: PC_CUBLET__worker__checkpoint_location__gcs__{{ .name | required "missing .Values.checkpointData.gcs.options[x].name" }}
+            - name: NANOOK__worker__checkpoint_location__gcs__{{ .name | required "missing .Values.checkpointData.gcs.options[x].name" }}
     {{- if .value }}
               value: {{ .value | quote }}
     {{- else if .valueFrom }}
@@ -274,18 +274,18 @@ spec:
     {{- end }}
   {{- end }}
 {{- else if .Values.checkpointData.sharedFilesystem.enabled }}
-            - name: PC_CUBLET__worker__checkpoint_location__shared_filesystem__path
+            - name: NANOOK__worker__checkpoint_location__shared_filesystem__path
               value: {{ .Values.checkpointData.sharedFilesystem.path | quote }}
 {{- else if .Values.checkpointData.sharedPersistentVolumeClaim.enabled }}
-            - name: PC_CUBLET__worker__checkpoint_location__shared_filesystem__path
+            - name: NANOOK__worker__checkpoint_location__shared_filesystem__path
               value: /app/checkpoint_data/checkpoint_data
 {{- end }}
 {{- if .Values.worker.extras.hdfs.enabled }}
-            - name: PC_CUBLET__worker__extras__hdfs__enabled
+            - name: NANOOK__worker__extras__hdfs__enabled
               value: "true"
 {{- end }}
 {{- if .Values.worker.extras.pyiceberg.enabled }}
-            - name: PC_CUBLET__worker__extras__pyiceberg__enabled
+            - name: NANOOK__worker__extras__pyiceberg__enabled
               value: "true"
 {{- end }}
             - name: PLC_LOG_LEVEL
@@ -323,7 +323,7 @@ spec:
               value: "yes"
 {{- end }}
 {{- with (((.Values.worker.deployment.runtimeContainer).resources).requests).cpu }}
-            - name: PC_CUBLET__cpu_reserved
+            - name: NANOOK__cpu_reserved
               value: {{ . | quote }}
 {{- end }}
             - name: OTEL_SERVICE_NAME

@@ -10,7 +10,7 @@ deprecated: false
 
 dependencies: []
 
-home: https://cloud.pola.rs
+home: https://pola.rs/nanook
 sources:
   - https://github.com/polars-inc/helm-charts
 keywords:
