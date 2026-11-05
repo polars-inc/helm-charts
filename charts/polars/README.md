@@ -4,7 +4,7 @@
 
 Distributed query execution engine for Polars
 
-**Homepage:** <https://pola.rs/nanook>
+**Homepage:** <https://pola.rs/nanook/>
 
 ## Quick Start
 
