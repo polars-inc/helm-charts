@@ -4,13 +4,13 @@ description: Distributed query execution engine for Polars
 
 type: application
 
-version: 3.1.1
-appVersion: 0.9.1
+version: 3.2.0
+appVersion: 0.10.1
 deprecated: false
 
 dependencies: []
 
-home: https://pola.rs
+home: https://pola.rs/nanook/
 sources:
   - https://github.com/pola-rs/polars
   - https://github.com/polars-inc/helm-charts
