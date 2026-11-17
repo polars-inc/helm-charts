@@ -1,6 +1,6 @@
 # Polars Nanook compute: Extremely fast distributed Query Engine for DataFrames
 
-![Version: 3.2.0](https://img.shields.io/badge/Version-3.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.1](https://img.shields.io/badge/AppVersion-0.10.1-informational?style=flat-square)
+![Version: 3.2.1](https://img.shields.io/badge/Version-3.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.2](https://img.shields.io/badge/AppVersion-0.10.2-informational?style=flat-square)
 
 Distributed query execution engine for Polars
 
@@ -194,7 +194,7 @@ ENV POLARS_EXTRAS="async,cloudpickle,database,deltalake,fsspec,iceberg,numpy,pan
 SHELL ["/bin/bash", "-c"]
 RUN --mount=from=ghcr.io/astral-sh/uv:0.9.8,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
-    --mount=from=polarsinc/polars-nanook-compute:0.10.1,source=/opt/whl/polars-2.1.0-py3-none-any.whl,target=/opt/polars-2.1.0-py3-none-any.whl \
+    --mount=from=polarsinc/polars-nanook-compute:0.10.2,source=/opt/whl/polars-2.1.0-py3-none-any.whl,target=/opt/polars-2.1.0-py3-none-any.whl \
     --mount=type=bind,source=./requirements.txt,target=/opt/requirements.txt \
     # install polars with extras from wheel overriding to prevent installation of runtimes as those are already included in pc-cublet \
     echo -e "\
@@ -208,7 +208,7 @@ polars-runtime-compat; sys_platform == 'never'\n" | \
   --system \
   --overrides=-
 
-COPY --from=polarsinc/polars-nanook-compute:0.10.1 /opt/bin/pc-cublet /opt/bin/pc-cublet
+COPY --from=polarsinc/polars-nanook-compute:0.10.2 /opt/bin/pc-cublet /opt/bin/pc-cublet
 
 CMD ["/opt/bin/pc-cublet", "service"]
 ```
