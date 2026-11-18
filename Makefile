@@ -19,7 +19,7 @@ CHARTS_DIR := charts
 HELM_SCHEMA ?= helm schema
 
 # Space separated, e.g. IGNORE_CHARTS := polars-k8s-operator license-server
-IGNORE_CHARTS := polars-k8s-operator
+IGNORE_CHARTS :=
 
 CHARTS := $(filter-out $(addprefix $(CHARTS_DIR)/,$(IGNORE_CHARTS)), \
 	$(patsubst %/,%,$(wildcard $(CHARTS_DIR)/*/)))
