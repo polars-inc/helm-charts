@@ -364,6 +364,18 @@ Verify that .Values.runtime.composed.polarsExtras contains cloudpickle and retur
 {{- end }}
 
 {{/*
+Python requirements that workers install in the composed runtime: runtime.composed.requirements,
+plus worker.gpu.requirements when GPUs are enabled. Empty when there are none.
+*/}}
+{{- define "polars.worker.requirements" -}}
+  {{- $requirements := list .Values.runtime.composed.requirements -}}
+  {{- if .Values.worker.gpu.enabled -}}
+    {{- $requirements = append $requirements .Values.worker.gpu.requirements -}}
+  {{- end -}}
+  {{- $requirements | compact | join "\n" -}}
+{{- end }}
+
+{{/*
 Whether the composed runtime mounts the distribution image read-only instead of
 copying it in with an init container.
 */}}

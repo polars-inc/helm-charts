@@ -685,6 +685,39 @@ Mount the Hadoop configuration directory into the workers with `worker.deploymen
 
 See [HDFS Integration](https://docs.nanook.pola.rs/run/hdfs/) for more information on how to write queries to read and write from HDFS.
 
+## GPUs
+
+Polars Nanook compute can run queries on NVIDIA GPUs with [cudf-polars](https://docs.rapids.ai/api/cudf/stable/cudf_polars/). GPU support is unstable. A query runs on the GPUs when it passes `engine="gpu"` to `.remote()`, see [Run queries on GPUs](https://docs.nanook.pola.rs/run/gpu/#run-a-gpu-query).
+
+The cluster needs the [NVIDIA device plugin](https://github.com/NVIDIA/k8s-device-plugin), which the [NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/) installs. Enable GPUs to have every worker request `worker.gpu.count` GPUs and install cudf-polars. Only the workers need GPUs; the scheduler can run on any node.
+
+```yaml
+worker:
+  gpu:
+    enabled: true
+    count: 1
+  deployment:
+    tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+```
+
+GPU nodes are often tainted to keep other pods off them. The toleration above matches the taint that many clusters use. Change it to the taint on your GPU nodes.
+
+The workers install the packages in `worker.gpu.requirements`. By default, that is cudf-polars for CUDA 13, which needs NVIDIA driver 580 or newer. It comes from the RAPIDS nightly index, which holds the cudf-polars 26.12 nightlies until 26.12 is released, and the release after that. For an older driver, install the CUDA 12 build instead:
+
+```yaml
+worker:
+  gpu:
+    requirements: |
+      --extra-index-url https://pypi.anaconda.org/rapidsai-wheels-nightly/simple
+      cudf-polars-cu12>=26.12.0a0,<26.13
+      nvidia-ml-py>=12
+```
+
+cudf-polars needs Python 3.12 or later, which the default `runtime.composed.runtime` image has. Each worker installs cudf-polars and its CUDA libraries when it starts, which takes a while. The prebuilt runtime ignores `worker.gpu.requirements`: install these packages in its image instead, which also makes workers start faster.
+
 
 {{ template "chart.maintainersSection" . }}
 

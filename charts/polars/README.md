@@ -681,6 +681,39 @@ Mount the Hadoop configuration directory into the workers with `worker.deploymen
 
 See [HDFS Integration](https://docs.nanook.pola.rs/run/hdfs/) for more information on how to write queries to read and write from HDFS.
 
+## GPUs
+
+Polars Nanook compute can run queries on NVIDIA GPUs with [cudf-polars](https://docs.rapids.ai/api/cudf/stable/cudf_polars/). GPU support is unstable. A query runs on the GPUs when it passes `engine="gpu"` to `.remote()`, see [Run queries on GPUs](https://docs.nanook.pola.rs/run/gpu/#run-a-gpu-query).
+
+The cluster needs the [NVIDIA device plugin](https://github.com/NVIDIA/k8s-device-plugin), which the [NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/) installs. Enable GPUs to have every worker request `worker.gpu.count` GPUs and install cudf-polars. Only the workers need GPUs; the scheduler can run on any node.
+
+```yaml
+worker:
+  gpu:
+    enabled: true
+    count: 1
+  deployment:
+    tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+```
+
+GPU nodes are often tainted to keep other pods off them. The toleration above matches the taint that many clusters use. Change it to the taint on your GPU nodes.
+
+The workers install the packages in `worker.gpu.requirements`. By default, that is cudf-polars for CUDA 13, which needs NVIDIA driver 580 or newer. It comes from the RAPIDS nightly index, which holds the cudf-polars 26.12 nightlies until 26.12 is released, and the release after that. For an older driver, install the CUDA 12 build instead:
+
+```yaml
+worker:
+  gpu:
+    requirements: |
+      --extra-index-url https://pypi.anaconda.org/rapidsai-wheels-nightly/simple
+      cudf-polars-cu12>=26.12.0a0,<26.13
+      nvidia-ml-py>=12
+```
+
+cudf-polars needs Python 3.12 or later, which the default `runtime.composed.runtime` image has. Each worker installs cudf-polars and its CUDA libraries when it starts, which takes a while. The prebuilt runtime ignores `worker.gpu.requirements`: install these packages in its image instead, which also makes workers start faster.
+
 ## Maintainers
 
 | Name | Email | Url |
@@ -827,6 +860,11 @@ See [HDFS Integration](https://docs.nanook.pola.rs/run/hdfs/) for more informati
 | lineage.transport.http.endpoint | string | `"http://marquez.default.svc.cluster.local:5000"` | Transport protocol to use for lineage export |
 | worker.extras.hdfs.enabled | bool | `false` | Whether to enable support for HDFS |
 | worker.extras.pyiceberg.enabled | bool | `false` | Whether to enable support for pyiceberg. For metadata access, two python packages must be installed on the worker virtual environment, i.e. hdfs-native and pyiceberg. Use a prebuilt image or .Values.runtime.composed.requirements. |
+| worker.gpu | object | `{"count":1,"enabled":false,"requirements":"--extra-index-url https://pypi.anaconda.org/rapidsai-wheels-nightly/simple\ncudf-polars-cu13>=26.12.0a0,<26.13\nnvidia-ml-py>=12\n","resourceName":"nvidia.com/gpu"}` | Run queries on NVIDIA GPUs with cudf-polars. A query runs on the GPUs when it passes `engine="gpu"` to `.remote()`. GPU support is unstable. The cluster needs the NVIDIA device plugin, which the NVIDIA GPU Operator installs. |
+| worker.gpu.enabled | bool | `false` | Whether every worker requests GPUs and runs GPU queries. |
+| worker.gpu.count | int | `1` | Number of GPUs per worker. The worker runs one cudf-polars process per GPU. |
+| worker.gpu.resourceName | string | `"nvidia.com/gpu"` | Extended resource that the GPUs are requested as. Change it when the device plugin advertises GPUs under another name. |
+| worker.gpu.requirements | string | `"--extra-index-url https://pypi.anaconda.org/rapidsai-wheels-nightly/simple\ncudf-polars-cu13>=26.12.0a0,<26.13\nnvidia-ml-py>=12\n"` | Python requirements that the workers install in the composed runtime, in addition to `runtime.composed.requirements`. Install `cudf-polars-cu13` for NVIDIA driver 580 or newer, or `cudf-polars-cu12` for older drivers, never both. cudf-polars needs Python 3.12 or later. The RAPIDS nightly index holds the cudf-polars 26.12 nightlies, and the 26.12 releases once they are out. With the prebuilt runtime, install these in the image instead. |
 | worker.outOfCore | object | `{"diskBudgetMB":null,"memoryBudgetFraction":null,"memoryBudgetMB":null,"oomKillThresholdMB":null,"spillDir":"/app/temporary_data/spill"}` | Out-of-core execution: when memory runs low, workers spill data to disk instead of running out of memory. |
 | worker.outOfCore.spillDir | string | `"/app/temporary_data/spill"` | Directory for spill files. The default is on the `temporaryData` volume. Sets `POLARS_OOC_SPILL_DIR`. |
 | worker.outOfCore.memoryBudgetFraction | string | `nil` | Start spilling when memory use exceeds this fraction of the container memory limit, or of the node memory without a limit. Leave unset for the Polars default (0.8). Sets `POLARS_OOC_MEMORY_BUDGET_FRACTION`. |

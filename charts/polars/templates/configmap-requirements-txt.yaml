@@ -1,5 +1,6 @@
 {{- if .Values.runtime.composed.enabled }}
-  {{- if .Values.runtime.composed.requirements }}
+  {{- $workerRequirements := include "polars.worker.requirements" . }}
+  {{- if or .Values.runtime.composed.requirements $workerRequirements }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,6 +8,11 @@ metadata:
   labels:
     {{- include "polars.labels" . | nindent 4 }}
 data:
-  requirementsTxt: {{ .Values.runtime.composed.requirements | quote }}
+    {{- with .Values.runtime.composed.requirements }}
+  requirementsTxt: {{ . | quote }}
+    {{- end }}
+    {{- with $workerRequirements }}
+  workerRequirementsTxt: {{ . | quote }}
+    {{- end }}
   {{- end }}
 {{- end }}

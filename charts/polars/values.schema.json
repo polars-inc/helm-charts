@@ -2117,6 +2117,30 @@
                     },
                     "additionalProperties": false
                 },
+                "gpu": {
+                    "description": "Run queries on NVIDIA GPUs with cudf-polars. A query runs on the GPUs when it passes `engine=\"gpu\"` to `.remote()`. GPU support is unstable. The cluster needs the NVIDIA device plugin, which the NVIDIA GPU Operator installs.",
+                    "type": "object",
+                    "properties": {
+                        "count": {
+                            "description": "Number of GPUs per worker. The worker runs one cudf-polars process per GPU.",
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "enabled": {
+                            "description": "Whether every worker requests GPUs and runs GPU queries.",
+                            "type": "boolean"
+                        },
+                        "requirements": {
+                            "description": "Python requirements that the workers install in the composed runtime, in addition to `runtime.composed.requirements`. Install `cudf-polars-cu13` for NVIDIA driver 580 or newer, or `cudf-polars-cu12` for older drivers, never both. cudf-polars needs Python 3.12 or later. The RAPIDS nightly index holds the cudf-polars 26.12 nightlies, and the 26.12 releases once they are out. With the prebuilt runtime, install these in the image instead.",
+                            "type": "string"
+                        },
+                        "resourceName": {
+                            "description": "Extended resource that the GPUs are requested as. Change it when the device plugin advertises GPUs under another name.",
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "outOfCore": {
                     "description": "Out-of-core execution: when memory runs low, workers spill data to disk instead of running out of memory.",
                     "type": "object",

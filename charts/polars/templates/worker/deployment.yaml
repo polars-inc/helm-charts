@@ -126,7 +126,7 @@ spec:
               value: {{ include "polars.runtimeComposedExtras" . | quote }}
             - name: POLARS_WHL_DIR
               value: /emptydir/whl
-  {{- if .Values.runtime.composed.requirements }}
+  {{- if include "polars.worker.requirements" . }}
             - name: PYTHON_REQUIREMENTS
               value: /requirements.txt
   {{- end }}
@@ -288,6 +288,10 @@ spec:
             - name: NANOOK__worker__extras__pyiceberg__enabled
               value: "true"
 {{- end }}
+{{- if .Values.worker.gpu.enabled }}
+            - name: NANOOK__worker__extras__cudf_polars__enabled
+              value: "true"
+{{- end }}
             - name: PLC_LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
             - name: RUST_BACKTRACE
@@ -337,13 +341,19 @@ spec:
 {{- end }}
           # TODO: lifenessProbe
           # TODO: readinessProbe:
-{{- with .Values.worker.deployment.runtimeContainer.resources }}
+{{- $resources := deepCopy (.Values.worker.deployment.runtimeContainer.resources | default dict) }}
+{{- if .Values.worker.gpu.enabled }}
+  {{- $limits := $resources.limits | default dict }}
+  {{- $_ := set $limits .Values.worker.gpu.resourceName .Values.worker.gpu.count }}
+  {{- $_ := set $resources "limits" $limits }}
+{{- end }}
+{{- with $resources }}
           resources:
             {{ toYaml . | nindent 12 }}
 {{- end }}
           volumeMounts:
 {{- if include "polars.isRuntimeComposed" .}}
-  {{- if .Values.runtime.composed.requirements }}
+  {{- if include "polars.worker.requirements" . }}
             - name: requirements-txt
               mountPath: /requirements.txt
               subPath: requirements.txt
@@ -414,12 +424,12 @@ spec:
             claimName: {{ include "polars.checkpointDataPvcName" . }}
 {{- end }}
 {{- if include "polars.isRuntimeComposed" .}}
-  {{- if .Values.runtime.composed.requirements }}
+  {{- if include "polars.worker.requirements" . }}
         - name: requirements-txt
           configMap:
             name: {{ include "polars.fullname" . }}-requirements-txt
             items:
-              - key: requirementsTxt
+              - key: workerRequirementsTxt
                 path: requirements.txt
   {{- end }}
         - name: tmp-data
