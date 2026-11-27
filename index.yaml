@@ -960,6 +960,20 @@ entries:
     version: 0.0.6
   polars-k8s-operator:
   - apiVersion: v2
+    appVersion: 0.1.0-alpha.14
+    created: "2026-11-27T14:59:09.027085692Z"
+    description: Kubernetes operator for managing Polars Clusters
+    digest: 2205c90a3380a2d905e82b1d7c430c232f4c81ecc8ddce8863132a0897f5cfd9
+    keywords:
+    - kubernetes
+    - operator
+    - polars
+    name: polars-k8s-operator
+    type: application
+    urls:
+    - https://github.com/polars-inc/helm-charts/releases/download/polars-k8s-operator-0.1.0-alpha.14/polars-k8s-operator-0.1.0-alpha.14.tgz
+    version: 0.1.0-alpha.14
+  - apiVersion: v2
     appVersion: 0.1.0-alpha.13
     created: "2026-11-26T14:41:42.653278695Z"
     description: Kubernetes operator for managing Polars Clusters
@@ -1153,4 +1167,4 @@ entries:
     urls:
     - https://github.com/polars-inc/helm-charts/releases/download/polars-k8s-operator-0.1.0-alpha.1/polars-k8s-operator-0.1.0-alpha.1.tgz
     version: 0.1.0-alpha.1
-generated: "2026-11-26T14:41:42.653382883Z"
+generated: "2026-11-27T14:59:09.027312127Z"
